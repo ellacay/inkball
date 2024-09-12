@@ -15,6 +15,7 @@ import java.io.*;
 import java.util.*;
 
 public class App extends PApplet {
+    public static char[][] board;
 
     public static final int CELLSIZE = 32; //8;
     public static final int CELLHEIGHT = 32;
@@ -54,6 +55,7 @@ public class App extends PApplet {
 	@Override
     public void setup() {
         frameRate(FPS);
+        board = Config.setBoardArray();
 		//See PApplet javadoc:
 		//loadJSONObject(configPath)
 		// the image is loaded from relative path: "src/main/resources/inkball/..."
@@ -101,8 +103,65 @@ public class App extends PApplet {
     /**
      * Draw all elements in the game by current frame.
      */
-	@Override
+	// @Override
     public void draw() {
+
+        background(255);  // Clear the screen with a white background
+
+        if (board != null) {
+            for (char[] row : board) {
+                System.out.println(java.util.Arrays.toString(row));
+            }
+        }
+        int cellSize = 32;  // Size of each cell in the grid
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                char cell = board[y][x];
+                float xPos = x * cellSize;
+                float yPos = y * cellSize;
+
+                // Draw different shapes/colors based on the character
+                switch (cell) {
+                    case 'X':
+                        fill(0); 
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case 'B':
+                        fill(200); 
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case 'H':
+                        fill(262);  
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case 'S':
+                        fill(0, 255, 0);  
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case '1':
+                        fill(255, 0, 255);  
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case '2':
+                        fill(255, 4, 255); 
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    case '3':
+                        fill(255, 200, 255);  
+                        rect(xPos, yPos, cellSize, cellSize); 
+                        break;
+                    case '4':
+                        fill(255, 100, 255);  
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                    default:
+                        fill(255, 0, 0);  
+                        rect(xPos, yPos, cellSize, cellSize);  
+                        break;
+                }
+                
+            }
+        }
         
 
         //----------------------------------
@@ -125,14 +184,10 @@ public class App extends PApplet {
     public static void main(String[] args) {
         PApplet.main("inkball.App");
        
-        Config.setBoardArray();
+        
       
 
-        if (Config.board != null) {
-            for (char[] row : Config.board) {
-                System.out.println(java.util.Arrays.toString(row));
-            }
-        }
+       
         
 
 

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Config {
 
-    public static char[][] board;
+    
     public String layout;
     public int time;
     public int spawnInterval;
@@ -42,7 +42,7 @@ public class Config {
         return new String[]{""};
     }
 
-    public static void setBoardArray() {
+    public static char[][] setBoardArray() {
         File file = new File("level1.txt");
 
 
@@ -66,7 +66,7 @@ public class Config {
             e.printStackTrace();
         }
 
-        board = new char[rows][cols];
+        char[][] board = new char[rows][cols];
 
         for (int i = 0; i < rows; i++) {
             String line = lines.get(i);
@@ -74,6 +74,7 @@ public class Config {
                 board[i][j] = line.charAt(j);
             }
         }
+        return board;
     }
 
     public static void main(String[] args) {
