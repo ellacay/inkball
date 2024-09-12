@@ -15,6 +15,25 @@ import java.io.*;
 import java.util.*;
 
 public class App extends PApplet {
+    private PImage ball0;
+    private PImage ball1;
+    private PImage ball2;
+    private PImage ball3;
+    private PImage ball4;
+    private PImage entryPoint;
+    private PImage hole0;
+    private PImage hole1;
+    private PImage hole2;
+    private PImage hole3;
+    private PImage hole4;
+    private PImage inkballSpritesheet;
+    private PImage tile;
+    private PImage wall0;
+    private PImage wall1;
+    private PImage wall2;
+    private PImage wall3;
+    private PImage wall4;
+
     public static char[][] board;
 
     public static final int CELLSIZE = 32; //8;
@@ -55,7 +74,13 @@ public class App extends PApplet {
 	@Override
     public void setup() {
         frameRate(FPS);
-        board = Config.setBoardArray();
+        loadImages();
+        board = Config.setBoardArray(); // Ensure this returns a valid char[][]
+
+        if (board == null) {
+            System.err.println("Failed to load board configuration.");
+            exit(); // Exit if board is not properly initialized
+        }
 		//See PApplet javadoc:
 		//loadJSONObject(configPath)
 		// the image is loaded from relative path: "src/main/resources/inkball/..."
@@ -100,85 +125,152 @@ public class App extends PApplet {
 		
     }
 
-    /**
-     * Draw all elements in the game by current frame.
-     */
-	// @Override
-    public void draw() {
+    public void loadImages(){
+        ball0 = loadImage("src/main/resources/inkball/ball0.png");
+        ball1 = loadImage("src/main/resources/inkball/ball1.png");
+        ball2 = loadImage("src/main/resources/inkball/ball2.png");
+        ball3 = loadImage("src/main/resources/inkball/ball3.png");
+        ball4 = loadImage("src/main/resources/inkball/ball0.png");
+        entryPoint = loadImage("src/main/resources/inkball/entrypoint.png");
+        hole0 = loadImage("src/main/resources/inkball/hole0.png");
+        hole1 = loadImage("src/main/resources/inkball/hole1.png");
+        hole2 = loadImage("src/main/resources/inkball/hole2.png");
+        hole3 = loadImage("src/main/resources/inkball/hole3.png");
+        hole4 = loadImage("src/main/resources/inkball/hole4.png");
+        inkballSpritesheet = loadImage("src/main/resources/inkball/inkball_spritesheet.png");
+        tile = loadImage("src/main/resources/inkball/tile.png");
+        wall0 = loadImage("src/main/resources/inkball/wall0.png");
+        wall1 = loadImage("src/main/resources/inkball/wall1.png");
+        wall2 = loadImage("src/main/resources/inkball/wall2.png");
+        wall3 = loadImage("src/main/resources/inkball/wall3.png");
+        wall4 = loadImage("src/main/resources/inkball/wall4.png");
+      
+    }
 
-        background(255);  // Clear the screen with a white background
+ 
+	@Override
+    public void draw() {
+        background(255);
 
         if (board != null) {
-            for (char[] row : board) {
-                System.out.println(java.util.Arrays.toString(row));
-            }
-        }
-        int cellSize = 32;  // Size of each cell in the grid
-        for (int y = 0; y < board.length; y++) {
-            for (int x = 0; x < board[y].length; x++) {
-                char cell = board[y][x];
-                float xPos = x * cellSize;
-                float yPos = y * cellSize;
+            int cellSize = 32; 
 
-                // Draw different shapes/colors based on the character
-                switch (cell) {
-                    case 'X':
-                        fill(0); 
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case 'B':
-                        fill(200); 
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case 'H':
-                        fill(262);  
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case 'S':
-                        fill(0, 255, 0);  
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case '1':
-                        fill(255, 0, 255);  
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case '2':
-                        fill(255, 4, 255); 
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    case '3':
-                        fill(255, 200, 255);  
-                        rect(xPos, yPos, cellSize, cellSize); 
-                        break;
-                    case '4':
-                        fill(255, 100, 255);  
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
-                    default:
-                        fill(255, 0, 0);  
-                        rect(xPos, yPos, cellSize, cellSize);  
-                        break;
+            for (int y = 0; y < board.length; y++) {
+                for (int x = 0; x < board[y].length; x++) {
+                    char cell = board[y][x];
+                    float xPos = x * cellSize;
+                    float yPos = y * cellSize;
+                    float xPosOffset = (x+1) * cellSize;
+    
+                    switch (cell) {
+                        case 'X':
+                            image(wall0, xPos, yPos);
+                            break;
+                        case 'B':
+                            if (x + 1 < board[y].length) {
+                                char nextCell = board[y][x + 1];
+                                image(tile, xPos,yPos);
+                                switch (nextCell) {
+                                    case '0':
+                                        image(ball0, xPos, yPos);
+                                        break;
+                                    case '1':
+                                        image(ball1, xPos, yPos);
+                                    
+                                        break;
+                                    case '2':
+                                        image(ball2, xPos, yPos);
+                                        break;
+                                    case '3':
+                                        image(ball3, xPos, yPos);
+                                        break;
+                                    case '4':
+                                        image(ball4, xPos, yPos);
+                                        break;
+                                    default:
+                                        image(tile, xPos, yPos);
+                                        break;
+                                }
+                                image(tile, xPosOffset,yPos);
+                                x++;
+                            } else {
+                                image(tile, xPos, yPos);
+                            }
+                            break;
+                        case 'H':
+                            if (x + 1 < board[y].length) {
+                                char nextCell = board[y][x + 1];
+                                switch (nextCell) {
+                                    case '0':
+                                        image(hole0, xPos, yPos);
+                                        break;
+                                    case '1':
+                                        image(hole1, xPos, yPos);
+                                        break;
+                                    case '2':
+                                        image(hole2, xPos, yPos);
+                                        break;
+                                    case '3':
+                                        image(hole3, xPos, yPos);
+                                        break;
+                                    case '4':
+                                        image(hole4, xPos, yPos);
+                                        break;
+                                    default:
+                                        image(tile, xPos, yPos);
+                                        break;
+                                }
+                                x++;
+                            } else {
+                                image(tile, xPos, yPos);
+                            }
+                            break;
+                        case 'S':
+                            image(entryPoint, xPos, yPos);
+                            break;
+                        case '1':
+                            image(wall1, xPos, yPos);
+                            break;
+                        case '2':
+                            image(wall2, xPos, yPos);
+                            break;
+                        case '3':
+                            image(wall3, xPos, yPos);
+                            break;
+                        case '4':
+                            image(wall4, xPos, yPos);
+                            break;
+                        default:
+                            char rightUpper = board[y-1][x];
+                    
+                            if(rightUpper == 'H'){
+                                x++;
+                                break;
+                            }
+                            image(tile, xPos, yPos);
+                            break;
+                    }
                 }
-                
             }
         }
-        
-
-        //----------------------------------
-        //display Board for current level:
-        //----------------------------------
-        //TODO
-
-        //----------------------------------
-        //display score
-        //----------------------------------
-        //TODO
-        
-		//----------------------------------
-        //----------------------------------
-		//display game end message
-
     }
+
+
+            //----------------------------------
+            //display Board for current level:
+            //----------------------------------
+            //TODO
+
+            //----------------------------------
+            //display score
+            //----------------------------------
+            //TODO
+            
+            //----------------------------------
+            //----------------------------------
+            //display game end message
+
+    
 
 
     public static void main(String[] args) {
