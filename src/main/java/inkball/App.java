@@ -124,6 +124,18 @@ public class App extends PApplet {
 
     public static void main(String[] args) {
         PApplet.main("inkball.App");
+       
+        Config.setBoardArray();
+      
+
+        if (Config.board != null) {
+            for (char[] row : Config.board) {
+                System.out.println(java.util.Arrays.toString(row));
+            }
+        }
+        
+
+
     }
 
 }
