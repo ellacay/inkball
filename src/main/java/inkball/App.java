@@ -94,8 +94,17 @@ public class App extends PApplet {
     /**
      * Receive key pressed signal from the keyboard.
      */
-	@Override
-    public void keyPressed(KeyEvent event){
+    @Override
+    public void keyPressed(KeyEvent event) {
+        if (event.getKey() == 'r') {
+            restartGame();
+        }
+    }
+
+    private void restartGame() {
+        Config.setBoardArray();
+        System.out.println("stop");
+        loop(); 
         
     }
 
