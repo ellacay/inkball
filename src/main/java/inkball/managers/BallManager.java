@@ -1,32 +1,36 @@
-package inkball;
+package inkball.managers;
+import inkball.objects.Ball;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import inkball.App;
+import inkball.loaders.ImageLoader;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import java.util.*;
-
 public class BallManager {
     private PApplet app;
     private ImageLoader imageLoader;
-    private List<String> ballQueue = new ArrayList<>();
     private List<Ball> ballsInPlay;
+    private List<String> ballQueue; 
     private int spawnCounter;
     private int spawnInterval = 60; 
+
+
 
     public BallManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
         this.imageLoader = imageLoader;
-        this.ballQueue = new LinkedList<>();
         this.ballsInPlay = new ArrayList<>();
         this.spawnCounter = 0;
+        initializeBallQueue();
     }
 
     public void initializeBallQueue() {
-        ballQueue.add("blue");
-        ballQueue.add("orange");
-        ballQueue.add("grey");
-        ballQueue.add("green");
-        ballQueue.add("yellow");
+        ballQueue = new LinkedList<>(Arrays.asList("blue", "orange", "grey", "green", "yellow"));
     }
 
     public void updateAndDisplayBalls() {
@@ -44,20 +48,13 @@ public class BallManager {
         }
     }
 
-    private String pollBall() {
-        if (ballQueue.isEmpty()) {
-            return null;
-        }
-        return ballQueue.remove(0);
-    }
-
     private void spawnBall() {
         if (ballQueue.isEmpty()) {
             System.out.println("Ball queue is empty. No balls to spawn.");
             return;
         }
 
-        String ballColor = pollBall(); // Use the custom poll method
+        String ballColor = ballQueue.remove(0); // Use the custom poll method
         PImage ballImage = getBallImage(ballColor);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
@@ -66,8 +63,11 @@ public class BallManager {
 
         float velocityX = App.random.nextBoolean() ? 2 : -2;
         float velocityY = App.random.nextBoolean() ? 2 : -2;
+        float x = App.random.nextFloat() * App.WIDTH;
+        float y = App.random.nextFloat() * App.HEIGHT;
+        float radius = 10; // Example radius
 
-        Ball newBall = new Ball(app, ballImage, velocityX, velocityY, App.WIDTH, App.HEIGHT);
+        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius);
         ballsInPlay.add(newBall);
     }
 

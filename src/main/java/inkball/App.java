@@ -7,6 +7,10 @@ import processing.event.MouseEvent;
 
 import java.util.*;
 
+import inkball.loaders.ImageLoader;
+import inkball.managers.BallManager;
+import inkball.managers.BoardManager;
+
 public class App extends PApplet {
     private ImageLoader imageLoader;
     private BallManager ballManager;
@@ -45,7 +49,7 @@ public class App extends PApplet {
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
       
-        this.timer = 120; // Example: set to the level's time
+        this.timer = 120; 
 
         boardManager.loadBoard();
         ballManager.initializeBallQueue();

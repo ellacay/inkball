@@ -1,10 +1,18 @@
-package inkball;
+package inkball.managers;
+import java.util.ArrayList;
+import java.util.List;
+
+import inkball.App;
+import inkball.loaders.ConfigLoader;
+import inkball.loaders.ImageLoader;
+import inkball.objects.Wall;
 import processing.core.PApplet;
 
 public class BoardManager {
     private PApplet app;
     private ImageLoader imageLoader;
     public static char[][] board;
+    public static List<Wall> walls = new ArrayList<>();
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -12,12 +20,35 @@ public class BoardManager {
     }
 
     public void loadBoard() {
-        board = Config.setBoardArray();
+        board = ConfigLoader.setBoardArray();
         if (board == null) {
             System.err.println("Failed to load board configuration.");
             app.exit();
         }
+        initializeWalls();
     }
+private void initializeWalls() {
+    float cellSize = App.CELLSIZE;
+    for (int y = 0; y < board.length; y++) {
+        for (int x = 0; x < board[y].length; x++) {
+            char cell = board[y][x];
+            float xPos = x * cellSize;
+            float yPos = y * cellSize;
+            if (cell == 'X') {
+                // Add walls around the cell marked 'X'
+                float x1 = xPos;
+                float y1 = yPos;
+                float x2 = x1 + cellSize;
+                float y2 = y1 + cellSize;
+                // Add walls in all four directions
+                walls.add(new Wall(x1, y1, x2, y1)); // Top
+                walls.add(new Wall(x2, y1, x2, y2)); // Right
+                walls.add(new Wall(x2, y2, x1, y2)); // Bottom
+                walls.add(new Wall(x1, y2, x1, y1)); // Left
+            }
+        }
+    }
+}
 
     public void displayBoard() {
         if (board != null) {
@@ -36,6 +67,7 @@ public class BoardManager {
                             break;
                         case 'B':
                         handleBallCell(x,y,xPos,yPos,xPosOffset);
+                        x++;
 
                             break;
                         case 'H':

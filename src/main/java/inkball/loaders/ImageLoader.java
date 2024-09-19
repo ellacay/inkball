@@ -1,4 +1,4 @@
-package inkball;
+package inkball.loaders;
 
 import processing.core.PApplet;
 import processing.core.PImage;

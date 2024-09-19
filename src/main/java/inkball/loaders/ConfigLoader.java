@@ -1,4 +1,4 @@
-package inkball;
+package inkball.loaders;
 import java.nio.file.Files;
 import java.io.File;
 import java.io.FileReader;
@@ -15,7 +15,7 @@ import processing.data.*;
 
 import java.util.Map;
 
-public class Config {
+public class ConfigLoader {
 
     
     public String layout;
