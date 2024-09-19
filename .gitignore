@@ -1,0 +1,68 @@
+# Gradle build files
+.gradle/
+build/
+
+# Checksum files
+build/checksums/
+
+# Gradle wrapper files
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*.swn
+
+# Java class files
+*.class
+
+# Maven
+.mvn/
+
+# Test reports
+test-results/
+coverage/
+
+# Runtime and deployment files
+*.war
+*.jar
+*.ear
+*.class
+
+# Local configuration files
+local.properties
+
+# Other files
+*.apk
+*.ap_
+*.so
+*.dll
+*.dmg
+*.pem
+*.key
+*.csr
+*.p12
+
+# Ignore custom cleanup files or directories
+cleanup/
