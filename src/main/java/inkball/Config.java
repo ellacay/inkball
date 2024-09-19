@@ -19,6 +19,7 @@ public class Config {
     public Map<String, Integer> scoreDivider;
 
     public static void readConfig() {
+        
 
     }
 
