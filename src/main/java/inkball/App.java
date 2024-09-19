@@ -1,9 +1,8 @@
 package inkball;
 
 import processing.core.PApplet;
-import processing.core.PImage;
 import processing.event.KeyEvent;
-import processing.event.MouseEvent;
+
 
 import java.util.*;
 
@@ -15,6 +14,9 @@ public class App extends PApplet {
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
+
+    // Add this to your main game class or PApplet subclass
+private boolean isPaused = false;
 
     private int timer;
     public static Random random = new Random();
@@ -67,28 +69,53 @@ public class App extends PApplet {
     }
 
     @Override
-    public void draw() {
-        background(255);
-
-        updateTimer();
-        displayTimer();
-
-        boardManager.displayBoard();
-        ballManager.updateAndDisplayBalls();
-        ballManager.handleBallSpawning();
-        ballManager.updateBallDisplay();
+public void draw() {
+    if (!isPaused) {
+        // Update and display game elements
+        updateAndDisplayGameElements();
+    } else {
+        // Optionally, display a pause message or overlay
+        displayPauseOverlay();
     }
+}
+
+private void displayPauseOverlay() {
+    fill(0, 0, 0, 150); // Semi-transparent black background
+    rect(0, 0, width, height); // Cover the entire screen
+
+    fill(255); // White text
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("PAUSED", width / 2, height / 2);
+}
+private void updateAndDisplayGameElements() {
+background(255);
+
+    updateTimer();
+    displayTimer();
+
+    boardManager.displayBoard();
+    ballManager.updateAndDisplayBalls();
+    ballManager.handleBallSpawning();
+    ballManager.updateBallDisplay();
+}
+
 
     @Override
     public void keyPressed(KeyEvent event) {
         if (event.getKey() == 'r') {
             restartGame();
         }
+        if (event.getKey() == ' ') { 
+            isPaused = !isPaused;
+        }
     }
+   
 
     private void restartGame() {
         boardManager.loadBoard();
         ballManager.reset();
+        timer = 120;
         loop();
     }
 }
