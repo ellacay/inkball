@@ -11,7 +11,7 @@ public class BallManager {
     private List<String> ballQueue = new ArrayList<>();
     private List<Ball> ballsInPlay;
     private int spawnCounter;
-    private int spawnInterval = 60; // Example interval in frames
+    private int spawnInterval = 60; 
 
     public BallManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -46,9 +46,9 @@ public class BallManager {
 
     private String pollBall() {
         if (ballQueue.isEmpty()) {
-            return null; // or throw an exception if needed
+            return null;
         }
-        return ballQueue.remove(0); // Remove and return the first element
+        return ballQueue.remove(0);
     }
 
     private void spawnBall() {
