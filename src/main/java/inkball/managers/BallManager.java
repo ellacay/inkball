@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import inkball.App;
+import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
 
 import processing.core.PApplet;
@@ -18,7 +19,6 @@ public class BallManager {
     private List<String> ballQueue; 
     private int spawnCounter;
     private int spawnInterval = 60; 
-
 
 
     public BallManager(PApplet app, ImageLoader imageLoader) {
@@ -63,9 +63,10 @@ public class BallManager {
 
         float velocityX = App.random.nextBoolean() ? 2 : -2;
         float velocityY = App.random.nextBoolean() ? 2 : -2;
-        float x = App.random.nextFloat() * App.WIDTH;
-        float y = App.random.nextFloat() * App.HEIGHT;
-        float radius = 10; // Example radius
+        
+        float x = BoardManager.spawner.x2;
+        float y = BoardManager.spawner.y2;
+        float radius = 10; 
 
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius);
         ballsInPlay.add(newBall);

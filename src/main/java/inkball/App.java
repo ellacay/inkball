@@ -7,6 +7,7 @@ import processing.event.KeyEvent;
 import java.util.*;
 
 import inkball.loaders.ImageLoader;
+import inkball.loaders.ConfigLoader;
 import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
 
@@ -32,6 +33,9 @@ private boolean isPaused = false;
     public static final int BOARD_HEIGHT = 20;
     public static final int INITIAL_PARACHUTES = 1;
 
+    ConfigLoader configLoader = new ConfigLoader();
+
+    
     public static void main(String[] args) {
         PApplet.main("inkball.App");
     }
@@ -44,6 +48,7 @@ private boolean isPaused = false;
     @Override
     public void setup() {
         frameRate(FPS);
+        ConfigLoader.readConfig();
         
         imageLoader = new ImageLoader(this);
         imageLoader.loadImages();
@@ -51,7 +56,7 @@ private boolean isPaused = false;
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
       
-        this.timer = 120; 
+        this.timer = configLoader.time; 
 
         boardManager.loadBoard();
         ballManager.initializeBallQueue();

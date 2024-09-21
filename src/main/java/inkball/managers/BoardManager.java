@@ -6,12 +6,14 @@ import inkball.App;
 import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
 import inkball.objects.Wall;
+import inkball.objects.Spawner;
 import processing.core.PApplet;
 
 public class BoardManager {
     private PApplet app;
     private ImageLoader imageLoader;
     public static char[][] board;
+    public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
@@ -76,6 +78,7 @@ private void initializeWalls() {
                             break;
                         case 'S':
                             app.image(imageLoader.entryPoint, xPos, yPos);
+                            spawner = new Spawner(x, y, xPos, yPos);
                             break;
                         case '1':
                             app.image(imageLoader.wall1, xPos, yPos);

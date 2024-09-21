@@ -34,17 +34,37 @@ public class Ball {
     private void checkWallCollisions() {
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
+                float overlapX = 0;
+                float overlapY = 0;
+    
+                // Calculate overlap amounts
                 if (wall.isVertical()) {
+                    // Move the ball out of the wall horizontally
+                    if (x < wall.x1) {
+                        overlapX = (x - radius) - wall.x2; // Push left
+                        System.out.println("4");
+                    } else {
+                        overlapX = (x - radius) + wall.x2; // Push right
+                        System.out.println("3");
+                    }
                     xSpeed = -xSpeed; // Reverse horizontal direction
+                    x += overlapX; // Move ball out of the wall
                 } else if (wall.isHorizontal()) {
+                    // Move the ball out of the wall vertically
+                    if (y < wall.y1) {
+                        overlapY = (y - radius) - wall.y2; // Push up
+                        System.out.println("1");
+                    } else {
+                        overlapY = (y + radius) - wall.y1; // Push down
+                        System.out.println("2");
+                    }
                     ySpeed = -ySpeed; // Reverse vertical direction
+                    y += overlapY; // Move ball out of the wall
                 }
-                x -= xSpeed;
-                y -= ySpeed;
             }
         }
     }
-
+    
     private boolean checkCollisionWithWall(Wall wall) {
         float ballLeft = x - radius;
         float ballRight = x + radius;
