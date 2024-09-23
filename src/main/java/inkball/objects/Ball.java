@@ -2,6 +2,7 @@ package inkball.objects;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import inkball.App;
 import inkball.managers.BoardManager;
 
 public class Ball {
@@ -25,6 +26,16 @@ public class Ball {
         x += xSpeed;
         y += ySpeed;
         checkWallCollisions();
+
+    //     position.add(velocity);
+    
+    // // Check for collision with lines
+    // for (Line line : App.lines) {
+    //     if (line.isColliding(position.x, position.y, radius)) {
+    //         reflect(line);
+    //     }
+    // }
+
     }
 
     public void display() {

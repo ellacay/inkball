@@ -1,6 +1,7 @@
 package inkball;
 
 import processing.core.PApplet;
+import processing.core.PVector;
 import processing.event.KeyEvent;
 
 
@@ -10,11 +11,19 @@ import inkball.loaders.ImageLoader;
 import inkball.loaders.ConfigLoader;
 import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
+import inkball.objects.Line;
 
 public class App extends PApplet {
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
+
+
+    public static List<Line> lines = new ArrayList<>(); // Make it static or instance variable based on your needs
+    public static List<PVector> currentLinePoints = new ArrayList<>(); // For storing points of the current line
+    private PVector startPoint;
+    private PVector endPoint;
+
 
     // Add this to your main game class or PApplet subclass
 private boolean isPaused = false;
@@ -34,6 +43,7 @@ private boolean isPaused = false;
     public static final int INITIAL_PARACHUTES = 1;
 
     ConfigLoader configLoader = new ConfigLoader();
+
 
     
     public static void main(String[] args) {
@@ -103,8 +113,41 @@ background(255);
     ballManager.updateAndDisplayBalls();
     ballManager.handleBallSpawning();
     ballManager.updateBallDisplay();
+    displayLines();
+}
+private void displayLines() {
+    for (Line line : lines) {
+        line.display(this);
+    }
+
+    // Draw the current line being dragged
+    if (currentLinePoints.size() > 0) {
+        stroke(0);
+        noFill();
+        beginShape();
+        for (PVector point : currentLinePoints) {
+            vertex(point.x, point.y);
+        }
+        vertex(mouseX, mouseY); // Continue to the current mouse position
+        endShape();
+    }
 }
 
+public void mousePressed() {
+    currentLinePoints.clear(); // Clear previous points
+    currentLinePoints.add(new PVector(mouseX, mouseY)); // Add the starting point
+}
+
+public void mouseDragged() {
+    currentLinePoints.add(new PVector(mouseX, mouseY)); // Add points while dragging
+}
+
+public void mouseReleased() {
+    if (currentLinePoints.size() > 0) {
+        lines.add(new Line(new ArrayList<>(currentLinePoints))); // Store a copy of the current line
+    }
+    currentLinePoints.clear(); // Clear for the next line
+}
 
     @Override
     public void keyPressed(KeyEvent event) {
@@ -121,6 +164,7 @@ background(255);
         boardManager.loadBoard();
         ballManager.reset();
         timer = 120;
+        lines.clear(); // Clear all lines
         loop();
     }
 }
