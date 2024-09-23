@@ -21,11 +21,17 @@ public class Ball {
         this.radius = radius;
     }
 
+    public void display() {
+        app.image(image, position.x - radius, position.y - radius, radius * 2, radius * 2);
+    }
+
     public void update() {
         position.add(velocity);
         checkWallCollisions();
-        
-        // Check for collision with lines
+    
+        // Debugging prints
+        System.out.println("Position: " + position + " Velocity: " + velocity);
+    
         for (Line line : App.lines) {
             if (isColliding(line)) {
                 reflect(line);
@@ -33,54 +39,56 @@ public class Ball {
         }
     }
 
-    public void display() {
-        app.image(image, position.x - radius, position.y - radius, radius * 2, radius * 2);
-    }
-    
     private void checkWallCollisions() {
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
                 // Reflect the ball on collision
-                // Calculate how to move the ball out of the wall
                 if (wall.isVertical()) {
-                    velocity.x = -velocity.x; // Reverse horizontal direction
-                    if (position.x < wall.x1) {
-                        position.x = wall.x1 + radius; // Move the ball out of the wall
-                    } else {
-                        position.x = wall.x2 - radius; // Move the ball out of the wall
+                    // Check if ball is moving towards the wall before reflecting
+                    if ((velocity.x > 0 && position.x >= wall.x1) || (velocity.x < 0 && position.x <= wall.x2)) {
+                        velocity.x = -velocity.x; // Reverse horizontal direction
                     }
+                    // Move the ball out of the wall
+                    position.x = (velocity.x > 0) ? wall.x2 + radius : wall.x1 - radius;
                 } else if (wall.isHorizontal()) {
-                    velocity.y = -velocity.y; // Reverse vertical direction
-                    if (position.y < wall.y1) {
-                        position.y = wall.y1 + radius; // Move the ball out of the wall
-                    } else {
-                        position.y = wall.y2 - radius; // Move the ball out of the wall
+                    // Check if ball is moving towards the wall before reflecting
+                    if ((velocity.y > 0 && position.y >= wall.y1) || (velocity.y < 0 && position.y <= wall.y2)) {
+                        velocity.y = -velocity.y; // Reverse vertical direction
                     }
+                    // Move the ball out of the wall
+                    position.y = (velocity.y > 0) ? wall.y2 + radius : wall.y1 - radius;
                 }
             }
         }
     }
-    private boolean isColliding(Line line) {
-        PVector ballNextPosition = PVector.add(position, velocity);
-        PVector P1 = line.getStart();
-        PVector P2 = line.getEnd();
-        
-        float distanceP1 = PVector.dist(P1, ballNextPosition);
-        float distanceP2 = PVector.dist(P2, ballNextPosition);
-        float distanceLine = PVector.dist(P1, P2);
-        
-        return (distanceP1 + distanceP2 < distanceLine + radius);
-    }
-    private void reflect(Line line) {
-        PVector P1 = line.getStart();
-        PVector P2 = line.getEnd();
     
-        PVector lineDirection = PVector.sub(P2, P1);
+    
+    private boolean isColliding(Line line) {
+        PVector lineVector = PVector.sub(line.getEnd(), line.getStart());
+        PVector ballToLineStart = PVector.sub(position, line.getStart());
+        
+        float t = PVector.dot(ballToLineStart, lineVector) / lineVector.magSq();
+        t = PApplet.constrain(t, 0, 1);
+        
+        PVector closestPoint = PVector.add(line.getStart(), PVector.mult(lineVector, t));
+        float distance = PVector.dist(position, closestPoint);
+        
+        return distance <= radius;
+    }
+    
+    private void reflect(Line line) {
+        PVector lineDirection = PVector.sub(line.getEnd(), line.getStart()).normalize();
         PVector normal = new PVector(-lineDirection.y, lineDirection.x).normalize();
     
-        // Reflect the velocity vector
         float dotProduct = PVector.dot(velocity, normal);
         velocity.sub(PVector.mult(normal, 2 * dotProduct));
+    
+        // Adjust position to prevent sticking
+        PVector closestPoint = PVector.add(line.getStart(), PVector.mult(lineDirection, PVector.dot(PVector.sub(position, line.getStart()), lineDirection)));
+        float penetrationDepth = radius - PVector.dist(position, closestPoint);
+        if (penetrationDepth > 0) {
+            position.add(PVector.mult(normal, penetrationDepth + 1)); // Move ball slightly more to avoid sticking
+        }
     }
     
     private boolean checkCollisionWithWall(Wall wall) {
