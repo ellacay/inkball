@@ -68,7 +68,8 @@ public class BallManager {
         float y = BoardManager.spawner.y2;
         float radius = 10; 
 
-        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius);
+        BoardManager boardManager = new BoardManager(app, imageLoader);
+        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager);
         ballsInPlay.add(newBall);
     }
 

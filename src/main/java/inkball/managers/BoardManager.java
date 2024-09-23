@@ -1,12 +1,15 @@
 package inkball.managers;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import inkball.App;
 import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
+import inkball.objects.Ball;
 import inkball.objects.Wall;
 import inkball.objects.Spawner;
+import inkball.objects.Hole;
 import processing.core.PApplet;
 
 public class BoardManager {
@@ -15,6 +18,8 @@ public class BoardManager {
     public static char[][] board;
     public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
+    public static List<Hole> holes = new ArrayList<>();
+    public static List<Ball> balls = new ArrayList<>(); // List to store balls
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -28,52 +33,67 @@ public class BoardManager {
             app.exit();
         }
         initializeWalls();
+        initializeHoles();
     }
-private void initializeWalls() {
-    float cellSize = App.CELLSIZE;
-    for (int y = 0; y < board.length; y++) {
-        for (int x = 0; x < board[y].length; x++) {
-            char cell = board[y][x];
-            float xPos = x * cellSize;
-            float yPos = y * cellSize;
-            if (cell == 'X') {
-                // Add walls around the cell marked 'X'
-                float x1 = xPos;
-                float y1 = yPos;
-                float x2 = x1 + cellSize;
-                float y2 = y1 + cellSize;
-                // Add walls in all four directions
-                walls.add(new Wall(x1, y1, x2, y1)); // Top
-                walls.add(new Wall(x2, y1, x2, y2)); // Right
-                walls.add(new Wall(x2, y2, x1, y2)); // Bottom
-                walls.add(new Wall(x1, y2, x1, y1)); // Left
+
+    private void initializeWalls() {
+        float cellSize = App.CELLSIZE;
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                char cell = board[y][x];
+                float xPos = x * cellSize;
+                float yPos = y * cellSize;
+                if (cell == 'X') {
+                    // Add walls around the cell marked 'X'
+                    float x1 = xPos;
+                    float y1 = yPos;
+                    float x2 = x1 + cellSize;
+                    float y2 = y1 + cellSize;
+                    // Add walls in all four directions
+                    walls.add(new Wall(x1, y1, x2, y1)); // Top
+                    walls.add(new Wall(x2, y1, x2, y2)); // Right
+                    walls.add(new Wall(x2, y2, x1, y2)); // Bottom
+                    walls.add(new Wall(x1, y2, x1, y1)); // Left
+                }
             }
         }
     }
-}
+
+    private void initializeHoles() {
+        float cellSize = App.CELLSIZE;
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                char cell = board[y][x];
+                if (cell == 'H') {
+                    float xPos = x * cellSize + cellSize / 2;
+                    float yPos = y * cellSize + cellSize / 2;
+                    holes.add(new Hole(xPos, yPos, cellSize / 2));
+                }
+            }
+        }
+    }
 
     public void displayBoard() {
         if (board != null) {
             int cellSize = App.CELLSIZE;
-    
+
             for (int y = 0; y < board.length; y++) {
                 for (int x = 0; x < board[y].length; x++) {
                     char cell = board[y][x];
                     float xPos = x * cellSize;
                     float yPos = y * cellSize;
                     float xPosOffset = (x + 1) * cellSize;
-    
+
                     switch (cell) {
                         case 'X':
                             app.image(imageLoader.wall0, xPos, yPos);
                             break;
                         case 'B':
-                        handleBallCell(x,y,xPos,yPos,xPosOffset);
-                        x++;
-
+                            handleBallCell(x, y, xPos, yPos, xPosOffset);
+                            x++;
                             break;
                         case 'H':
-                            handleHoleCell(x,y,xPos,yPos);
+                            handleHoleCell(x, y, xPos, yPos);
                             x++;
                             break;
                         case 'S':
@@ -107,8 +127,10 @@ private void initializeWalls() {
             }
         }
     }
-    
 
+    public void removeBall(Ball ball) {
+        balls.remove(ball);
+    }
     private void handleBallCell(int x, int y, float xPos, float yPos, float xPosOffset) {
         if (x + 1 < board[y].length) {
             char nextCell = board[y][x + 1];
@@ -163,9 +185,8 @@ private void initializeWalls() {
                     app.image(imageLoader.tile, xPos, yPos);
                     break;
             }
-         
         } else {
             app.image(imageLoader.tile, xPos, yPos);
         }
-    
-    }}
+    }
+}
