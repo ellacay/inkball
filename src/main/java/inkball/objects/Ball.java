@@ -2,85 +2,92 @@ package inkball.objects;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 import inkball.App;
 import inkball.managers.BoardManager;
 
 public class Ball {
     private PApplet app;
     private PImage image;
-    private float x, y;
-    private float xSpeed, ySpeed;
+    private PVector position; // Use PVector for position
+    private PVector velocity; // Use PVector for velocity
     private float radius;
 
     public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius) {
         this.app = app;
         this.image = image;
-        this.x = x;
-        this.y = y;
-        this.xSpeed = xSpeed;
-        this.ySpeed = ySpeed;
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(xSpeed, ySpeed);
         this.radius = radius;
     }
 
     public void update() {
-        x += xSpeed;
-        y += ySpeed;
+        position.add(velocity);
         checkWallCollisions();
-
-    //     position.add(velocity);
-    
-    // // Check for collision with lines
-    // for (Line line : App.lines) {
-    //     if (line.isColliding(position.x, position.y, radius)) {
-    //         reflect(line);
-    //     }
-    // }
-
+        
+        // Check for collision with lines
+        for (Line line : App.lines) {
+            if (isColliding(line)) {
+                reflect(line);
+            }
+        }
     }
 
     public void display() {
-        app.image(image, x - radius, y - radius); // Adjust to center ball image
+        app.image(image, position.x - radius, position.y - radius, radius * 2, radius * 2);
     }
-
+    
     private void checkWallCollisions() {
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
-                float overlapX = 0;
-                float overlapY = 0;
-    
-                // Calculate overlap amounts
+                // Reflect the ball on collision
+                // Calculate how to move the ball out of the wall
                 if (wall.isVertical()) {
-                    // Move the ball out of the wall horizontally
-                    if (x < wall.x1) {
-                        overlapX = (x - radius) - wall.x2; // Push left
-                        System.out.println("4");
+                    velocity.x = -velocity.x; // Reverse horizontal direction
+                    if (position.x < wall.x1) {
+                        position.x = wall.x1 + radius; // Move the ball out of the wall
                     } else {
-                        overlapX = (x - radius) + wall.x2; // Push right
-                        System.out.println("3");
+                        position.x = wall.x2 - radius; // Move the ball out of the wall
                     }
-                    xSpeed = -xSpeed; // Reverse horizontal direction
-                    x += overlapX; // Move ball out of the wall
                 } else if (wall.isHorizontal()) {
-                    // Move the ball out of the wall vertically
-                    if (y < wall.y1) {
-                        overlapY = (y - radius) - wall.y2; // Push up
-                        System.out.println("1");
+                    velocity.y = -velocity.y; // Reverse vertical direction
+                    if (position.y < wall.y1) {
+                        position.y = wall.y1 + radius; // Move the ball out of the wall
                     } else {
-                        overlapY = (y + radius) - wall.y1; // Push down
-                        System.out.println("2");
+                        position.y = wall.y2 - radius; // Move the ball out of the wall
                     }
-                    ySpeed = -ySpeed; // Reverse vertical direction
-                    y += overlapY; // Move ball out of the wall
                 }
             }
         }
     }
+    private boolean isColliding(Line line) {
+        PVector ballNextPosition = PVector.add(position, velocity);
+        PVector P1 = line.getStart();
+        PVector P2 = line.getEnd();
+        
+        float distanceP1 = PVector.dist(P1, ballNextPosition);
+        float distanceP2 = PVector.dist(P2, ballNextPosition);
+        float distanceLine = PVector.dist(P1, P2);
+        
+        return (distanceP1 + distanceP2 < distanceLine + radius);
+    }
+    private void reflect(Line line) {
+        PVector P1 = line.getStart();
+        PVector P2 = line.getEnd();
+    
+        PVector lineDirection = PVector.sub(P2, P1);
+        PVector normal = new PVector(-lineDirection.y, lineDirection.x).normalize();
+    
+        // Reflect the velocity vector
+        float dotProduct = PVector.dot(velocity, normal);
+        velocity.sub(PVector.mult(normal, 2 * dotProduct));
+    }
     
     private boolean checkCollisionWithWall(Wall wall) {
-        float ballLeft = x - radius;
-        float ballRight = x + radius;
-        float ballTop = y - radius;
-        float ballBottom = y + radius;
+        float ballLeft = position.x - radius;
+        float ballRight = position.x + radius;
+        float ballTop = position.y - radius;
+        float ballBottom = position.y + radius;
 
         float wallLeft = wall.x1;
         float wallRight = wall.x2;
