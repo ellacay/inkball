@@ -7,7 +7,7 @@ public class ImageLoader {
     private PApplet app;
     public PImage ball0, ball1, ball2, ball3, ball4;
     public PImage entryPoint, hole0, hole1, hole2, hole3, hole4;
-    public PImage inkballSpritesheet, tile, wall0, wall1, wall2, wall3, wall4;
+    public PImage inkballSpritesheet, tile, wall0, wall1, wall2, wall3, wall4, smashedWall0,smashedWall1,smashedWall2,smashedWall3,smashedWall4;
 
     public ImageLoader(PApplet app) {
         this.app = app;
@@ -32,5 +32,10 @@ public class ImageLoader {
         wall2 = app.loadImage("src/main/resources/inkball/wall2.png");
         wall3 = app.loadImage("src/main/resources/inkball/wall3.png");
         wall4 = app.loadImage("src/main/resources/inkball/wall4.png");
+        smashedWall0 = app.loadImage("src/main/resources/inkball/SmashedTile0.png");
+        smashedWall1 = app.loadImage("src/main/resources/inkball/SmashedTile01.png");
+        smashedWall2 = app.loadImage("src/main/resources/inkball/SmashedTile02.png");
+        smashedWall3 = app.loadImage("src/main/resources/inkball/SmashedTile03.png");
+        smashedWall4 = app.loadImage("src/main/resources/inkball/SmashedTile04.png");
     }
 }

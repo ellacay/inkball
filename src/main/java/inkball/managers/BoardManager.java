@@ -52,10 +52,10 @@ public class BoardManager {
                        continue;
                     } else {
                         // Add walls around the cell in all four directions
-                        walls.add(new Wall(xPos, yPos, xPos + cellSize, yPos)); // Top
-                        walls.add(new Wall(xPos + cellSize, yPos, xPos + cellSize, yPos + cellSize)); // Right
-                        walls.add(new Wall(xPos + cellSize, yPos + cellSize, xPos, yPos + cellSize)); // Bottom
-                        walls.add(new Wall(xPos, yPos + cellSize, xPos, yPos)); // Left
+                        walls.add(new Wall(app,xPos, yPos, xPos + cellSize, yPos,cell)); // Top
+                        walls.add(new Wall(app,xPos + cellSize, yPos, xPos + cellSize, yPos + cellSize,cell)); // Right
+                        walls.add(new Wall(app,xPos + cellSize, yPos + cellSize, xPos, yPos + cellSize,cell)); // Bottom
+                        walls.add(new Wall(app, xPos, yPos + cellSize, xPos, yPos,cell)); // Left
                     }
                 }
     
@@ -66,10 +66,10 @@ public class BoardManager {
                     float x2 = x1 + cellSize;
                     float y2 = y1 + cellSize;
                     // Add walls in all four directions around 'X'
-                    walls.add(new Wall(x1, y1, x2, y1)); // Top
-                    walls.add(new Wall(x2, y1, x2, y2)); // Right
-                    walls.add(new Wall(x2, y2, x1, y2)); // Bottom
-                    walls.add(new Wall(x1, y2, x1, y1)); // Left
+                    walls.add(new Wall(app,x1, y1, x2, y1, '0')); // Top
+                    walls.add(new Wall(app,x2, y1, x2, y2, '0')); // Right
+                    walls.add(new Wall(app,x2, y2, x1, y2,'0')); // Bottom
+                    walls.add(new Wall(app,x1, y2, x1, y1, '0')); // Left
                 }
             }
         }
@@ -148,6 +148,7 @@ public class BoardManager {
     }
 
     public void displayBoard() {
+     
         if (board != null) {
             int cellSize = App.CELLSIZE;
 
@@ -159,9 +160,7 @@ public class BoardManager {
                     float xPosOffset = (x + 1) * cellSize;
 
                     switch (cell) {
-                        case 'X':
-                            app.image(imageLoader.wall0, xPos, yPos);
-                            break;
+                       
                         case 'B':
                             handleBallCell(x, y, xPos, yPos, xPosOffset);
                             x++;
@@ -174,18 +173,7 @@ public class BoardManager {
                             app.image(imageLoader.entryPoint, xPos, yPos);
                             spawner = new Spawner(x, y, xPos, yPos);
                             break;
-                        case '1':
-                            app.image(imageLoader.wall1, xPos, yPos);
-                            break;
-                        case '2':
-                            app.image(imageLoader.wall2, xPos, yPos);
-                            break;
-                        case '3':
-                            app.image(imageLoader.wall3, xPos, yPos);
-                            break;
-                        case '4':
-                            app.image(imageLoader.wall4, xPos, yPos);
-                            break;
+                        
                         default:
                             if (y > 0) { 
                                 char rightUpper = board[y - 1][x];
@@ -200,6 +188,53 @@ public class BoardManager {
                 }
             }
         }
+        for (Wall wall : walls) {
+        int status = wall.display();
+        char color = wall.color;
+
+        switch(color){
+            
+        case '1':
+        if(status == 0){
+            app.image(imageLoader.wall1, wall.x1, wall.y1);
+            break;
+        }
+        else{
+            app.image(imageLoader.smashedWall1, wall.x1, wall.y1);
+            break;
+        }
+           
+        case '2':
+        if(status == 0){
+            app.image(imageLoader.wall2, wall.x1, wall.y1);
+            break;
+        }
+        else{
+            app.image(imageLoader.smashedWall2, wall.x1, wall.y1);
+            break;
+        }
+           
+        case '3':
+        if(status == 0){
+            app.image(imageLoader.wall3, wall.x1, wall.y1);
+            break;
+        }
+        else{
+            app.image(imageLoader.smashedWall3, wall.x1, wall.y1);
+            break;
+        }
+           
+        case '4':
+        if(status == 0){
+            app.image(imageLoader.wall4, wall.x1, wall.y1);
+            break;
+        }
+        else{
+            app.image(imageLoader.smashedWall4, wall.x1, wall.y1);
+            break;
+        }
+           
+        }}
     }
 
     public void removeBall(Ball ball) {
