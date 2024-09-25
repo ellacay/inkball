@@ -15,6 +15,7 @@ import processing.core.PApplet;
 public class BoardManager {
     private PApplet app;
     private ImageLoader imageLoader;
+    public static int score;
     public static char[][] board;
     public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
@@ -43,13 +44,28 @@ public class BoardManager {
                 char cell = board[y][x];
                 float xPos = x * cellSize;
                 float yPos = y * cellSize;
-                if (cell == 'X') {
-                    // Add walls around the cell marked 'X'
+    
+                // Check if the cell contains '1', '2', '3', or '4'
+                if (cell == '1' || cell == '2' || cell == '3' || cell == '4') {
+                    // Check if the cell to the left contains 'h'
+                    if (x > 0 && board[y][x - 1] == 'h') {
+                       continue;
+                    } else {
+                        // Add walls around the cell in all four directions
+                        walls.add(new Wall(xPos, yPos, xPos + cellSize, yPos)); // Top
+                        walls.add(new Wall(xPos + cellSize, yPos, xPos + cellSize, yPos + cellSize)); // Right
+                        walls.add(new Wall(xPos + cellSize, yPos + cellSize, xPos, yPos + cellSize)); // Bottom
+                        walls.add(new Wall(xPos, yPos + cellSize, xPos, yPos)); // Left
+                    }
+                }
+    
+                // Original condition: Add walls for 'X' cells
+                else if (cell == 'X') {
                     float x1 = xPos;
                     float y1 = yPos;
                     float x2 = x1 + cellSize;
                     float y2 = y1 + cellSize;
-                    // Add walls in all four directions
+                    // Add walls in all four directions around 'X'
                     walls.add(new Wall(x1, y1, x2, y1)); // Top
                     walls.add(new Wall(x2, y1, x2, y2)); // Right
                     walls.add(new Wall(x2, y2, x1, y2)); // Bottom
@@ -57,8 +73,65 @@ public class BoardManager {
                 }
             }
         }
-    }
+      
+        // List<Wall> walls2 = new ArrayList<>();
+        // walls2.add(new Wall(0.0f, 0.0f, 32.0f, 0.0f));
+        // walls2.add(new Wall(32.0f, 0.0f, 32.0f, 32.0f));
+        // walls2.add(new Wall(32.0f, 32.0f, 0.0f, 32.0f));
+        // walls2.add(new Wall(0.0f, 32.0f, 0.0f, 0.0f));
+        // walls2.add(new Wall(32.0f, 0.0f, 64.0f, 0.0f));
+        // walls2.add(new Wall(64.0f, 0.0f, 64.0f, 32.0f));
+        // walls2.add(new Wall(64.0f, 32.0f, 32.0f, 32.0f));
+        // walls2.add(new Wall(32.0f, 32.0f, 32.0f, 0.0f));
+        
+        
+        // printGrid(walls2, 80, 50);
 
+
+    }
+    public static void printGrid(List<Wall> walls, int width, int height) {
+        char[][] grid = new char[height][width];
+
+        // Initialize the grid with spaces
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                grid[i][j] = ' ';
+            }
+        }
+
+        // Fill in the walls
+        for (Wall wall : walls) {
+            int x1 = (int) wall.x1;
+            int y1 = (int) wall.y1;
+            int x2 = (int) wall.x2;
+            int y2 = (int) wall.y2;
+
+            if (x1 == x2) { // Vertical wall
+                for (int y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
+                    if (y >= 0 && y < height && x1 >= 0 && x1 < width) {
+                        grid[y][x1] = '|';
+                    }
+                }
+            } else if (y1 == y2) { // Horizontal wall
+                for (int x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
+                    if (x >= 0 && x < width && y1 >= 0 && y1 < height) {
+                        grid[y1][x] = '-';
+                    }
+                }
+            }
+        }
+
+        // Print the grid
+        for (char[] row : grid) {
+            System.out.println(new String(row));
+        }
+    }
+    public void increaseScore(int baseScore) {
+        int increment = (int) (baseScore * ConfigLoader.scoreIncrease);
+        score += increment;
+        System.out.println("Score increased! Current score: " + score);
+    }
+    
     private void initializeHoles() {
         float cellSize = App.CELLSIZE;
         for (int y = 0; y < board.length; y++) {
@@ -67,7 +140,8 @@ public class BoardManager {
                 if (cell == 'H') {
                     float xPos = x * cellSize + cellSize / 2;
                     float yPos = y * cellSize + cellSize / 2;
-                    holes.add(new Hole(xPos, yPos, cellSize / 2));
+                    char colour = board[y][x+1];
+                    holes.add(new Hole(xPos, yPos, cellSize / 2, colour));
                 }
             }
         }

@@ -30,7 +30,7 @@ private boolean isPaused = false;
 
     private int timer;
     public static Random random = new Random();
-    
+   
     public static final int WIDTH = 576;
     public static final int HEIGHT = 640;
     public static final int FPS = 30;
@@ -44,8 +44,7 @@ private boolean isPaused = false;
 
     ConfigLoader configLoader = new ConfigLoader();
 
-
-    
+   
     public static void main(String[] args) {
         PApplet.main("inkball.App");
     }
@@ -54,7 +53,8 @@ private boolean isPaused = false;
     public void settings() {
         size(WIDTH, HEIGHT);
     }
-
+   
+    
     @Override
     public void setup() {
         frameRate(FPS);
@@ -75,6 +75,12 @@ private boolean isPaused = false;
         if (frameCount % App.FPS == 0) {
             timer--;
         }
+    }
+
+    public void displayScore() {
+        fill(0);
+        textSize(16);
+        text("Score:  " + BoardManager.score, 10, App.HEIGHT -45);
     }
 
     public void displayTimer() {
@@ -108,6 +114,7 @@ background(255);
 
     updateTimer();
     displayTimer();
+    displayScore();
 
     boardManager.displayBoard();
     ballManager.updateAndDisplayBalls();

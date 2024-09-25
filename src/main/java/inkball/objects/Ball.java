@@ -4,6 +4,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
 import inkball.App;
+import inkball.loaders.ConfigLoader;
 import inkball.managers.BoardManager;
 
 public class Ball {
@@ -12,21 +13,25 @@ public class Ball {
     private PVector position; // Use PVector for position
     private PVector velocity; // Use PVector for velocity
     private float radius;
+    private char colour;
     private boolean captured = false; // Flag to indicate if ball is captured
     private BoardManager boardManager;
+    private int scoreValue;
 
+  
     private static final float GRAVITY_STRENGTH = 0.5f; // Strength of gravitational pull towards hole
     private static final float SHRINK_RATE = 0.05f; // Rate at which the ball shrinks near the hole
 
-    public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius, BoardManager boardManager) {
+    public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius, BoardManager boardManager, char colour) {
         this.app = app;
+        this.colour = colour;
         this.image = image;
         this.position = new PVector(x, y);
         this.velocity = new PVector(xSpeed, ySpeed);
         this.radius = radius;
         this.boardManager = boardManager; // Initialize the boardManager
     }
-    
+
 
     public void display() {
         app.image(image, position.x - radius, position.y - radius, radius * 2, radius * 2);
@@ -34,10 +39,12 @@ public class Ball {
     public void update() {
         position.add(velocity);
         checkWallCollisions();
-        gravitateTowardsHole(); // Make sure this is called here
+      gravitateTowardsHole();
+        
+
+        // gravitateTowardsHole(); // Make sure this is called here
     
-        // Debugging prints
-        System.out.println("Position: " + position + " Velocity: " + velocity);
+
     
         for (Line line : App.lines) {
             if (isColliding(line)) {
@@ -46,31 +53,63 @@ public class Ball {
         }
     }
     
+    public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
+        // Check if the ball is captured by the hole
+        if (hole!=null && levelMultiplier!=null) {
+        
+        
+        if (isCapturedByHole(hole)) {
+            char ballColor = this.colour; // Assuming this.colour is a String
+            int holeColor = hole.getColour(); // Assuming hole.getColour() returns a String
     
+            boolean isColourMatch = ballColor == holeColor; // Check color match
+            boolean isGreyBall = ballColor=='0'; // Check if the ball is grey
+            boolean isGreyHole = holeColor=='0'; // Check if the hole is grey
+    
+            // Calculate the score based on the conditions
+            if (isColourMatch || isGreyBall || isGreyHole) {
+                return scoreValue * levelMultiplier; // Score based on configuration
+            }
+        }
+            // Your logic here
+        }
+        return 0; // No score if not captured or color does not match
+    }
 
     // Method to check if the ball is near a hole and gravitate towards it
     private void gravitateTowardsHole() {
         for (Hole hole : BoardManager.holes) {
-            if (isNearHole(hole)) {
-                // Calculate the direction vector towards the hole
-                PVector direction = PVector.sub(hole.getPosition(), position).normalize();
-                
-                // Apply a force towards the hole, dampening the velocity for smoother capture
-                velocity.add(PVector.mult(direction, GRAVITY_STRENGTH));
-                
-                // Slow down the ball's velocity for a smoother approach
-                velocity.mult(0.98f);
-                
-                // Gradually reduce the radius
-                radius = PApplet.max(radius - SHRINK_RATE, 0);
-                
-                // Check if the ball should be captured
-                if (isCapturedByHole(hole)) {
-                    captured = true;
-                    boardManager.removeBall(this); // Remove the ball once captured
-                    System.out.println("Ball captured by hole!"); // Debugging print
-                    return; // Exit the method once captured to avoid further checks
-                }
+            if(isNearHole(hole)){
+                // Define a very small threshold to determine when to stop the ball
+        float stoppingThreshold = 0.1f;  // Adjust this as needed (smaller value for more precision)
+    
+        // Calculate the direction vector towards the hole
+        PVector direction = PVector.sub(hole.getPosition(), position).normalize();
+        
+        // Apply a force towards the hole, making the ball move directly to the center
+        velocity = direction.mult(2); // Adjust the speed as necessary
+    
+        // Check the distance between the ball and the center of the hole
+        float distanceToHole = PVector.dist(position, hole.getPosition());
+    
+        // If the ball is very close to the center of the hole, stop it
+        if (distanceToHole < stoppingThreshold) {
+            velocity = new PVector(0, 0);  // Stop the ball completely
+            position = hole.getPosition().copy();  // Snap the ball to the exact center of the hole
+           
+        }
+    
+        // Gradually reduce the radius for a visual effect as the ball gets closer
+        radius = PApplet.max(radius - SHRINK_RATE, 0);
+    
+        // Check if the ball should be captured by the hole
+        if (isCapturedByHole(hole)) {
+            captured = true;
+            boardManager.removeBall(this);
+            
+            // int score = getScoreForCapture(hole, ConfigLoader.scoreMultiplier.get("grey"));
+            // boardManager.increaseScore(score); // Update score
+        }
             }
         }
     }
@@ -78,7 +117,8 @@ public class Ball {
     
     private boolean isNearHole(Hole hole) {
         // Check if the ball is within a reasonable distance to start gravitating towards the hole
-        return PVector.dist(position, hole.getPosition()) < hole.getRadius() * 5; // Adjust this value as needed
+        boolean isNear = PVector.dist(position, hole.getPosition()) < 32;
+        return isNear;
     }
     
 
@@ -93,28 +133,61 @@ public class Ball {
         return isPositionClose && isSizeSmallEnough;
     }
     
-
     private void checkWallCollisions() {
+        boolean collided = false;
+    
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
-                // Reflect the ball on collision
-                if (wall.isVertical()) {
-                    // Check if ball is moving towards the wall before reflecting
-                    if ((velocity.x > 0 && position.x >= wall.x1) || (velocity.x < 0 && position.x <= wall.x2)) {
-                        velocity.x = -velocity.x; // Reverse horizontal direction
+                collided = true;
+    
+                // Calculate penetration depths
+                float penetrationX = Math.min((position.x + radius) - wall.x1, wall.x2 - (position.x - radius));
+                float penetrationY = Math.min((position.y + radius) - wall.y1, wall.y2 - (position.y - radius));
+                
+    
+                boolean isCornerCollision = (penetrationX < radius && penetrationY < radius);
+
+                if (isCornerCollision) {
+                    // this.velocity = new PVector(0,0);
+                    // position.x = wall.x1 - radius;
+                    // position.y = wall.y1 - radius;
+                    velocity.x = -velocity.x; 
+                    velocity.y = -velocity.y;
+                }
+
+                else if (penetrationX < penetrationY) {
+                    // Horizontal collision
+                    if (position.x + radius > wall.x1 && position.x - radius < wall.x1) {
+                        // Colliding from the left
+                        position.x = wall.x1 - radius; // Move ball out of the wall
+                    } else if (position.x - radius < wall.x2 && position.x + radius > wall.x2) {
+                        // Colliding from the right
+                        position.x = wall.x2 + radius; // Move ball out of the wall
                     }
-                    // Move the ball out of the wall
-                    position.x = (velocity.x > 0) ? wall.x2 + radius : wall.x1 - radius;
-                } else if (wall.isHorizontal()) {
-                    // Check if ball is moving towards the wall before reflecting
-                    if ((velocity.y > 0 && position.y >= wall.y1) || (velocity.y < 0 && position.y <= wall.y2)) {
-                        velocity.y = -velocity.y; // Reverse vertical direction
+                    velocity.x = -velocity.x; // Reverse horizontal direction
+                } else {
+                    // Vertical collision
+                    if (position.y + radius > wall.y1 && position.y - radius < wall.y1) {
+                        // Colliding from the top
+                        position.y = wall.y1 - radius; // Move ball out of the wall
+                    } else if (position.y - radius < wall.y2 && position.y + radius > wall.y2) {
+                        // Colliding from the bottom
+                        position.y = wall.y2 + radius; // Move ball out of the wall
                     }
-                    // Move the ball out of the wall
-                    position.y = (velocity.y > 0) ? wall.y2 + radius : wall.y1 - radius;
+                    velocity.y = -velocity.y; // Reverse vertical direction
                 }
             }
         }
+    }
+    
+    
+    
+    private void moveToCenter() {
+        // Assuming the board's center is at (centerX, centerY)
+        float centerX = App.WIDTH / 2; // Replace with your board's actual width
+        float centerY = App.HEIGHT / 2; // Replace with your board's actual height
+        position.set(centerX, centerY);
+        velocity.set(0, 0); // Optionally reset the velocity
     }
 
     private boolean isColliding(Line line) {

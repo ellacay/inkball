@@ -21,10 +21,10 @@ public class ConfigLoader {
     public String layout;
     public int time;
     public int spawnInterval;
-    public double scoreIncrease;
+    public static double scoreIncrease;
     public double scoreDecrease;
     public String[] balls;
-    public Map<String, Integer> scoreMultiplier;
+    public static Map<String, Integer> scoreMultiplier;
     public Map<String, Integer> scoreDivider;
     static JSONObject gameConfig;
     public static void readConfig() {

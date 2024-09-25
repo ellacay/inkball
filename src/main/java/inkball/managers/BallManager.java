@@ -50,7 +50,7 @@ public class BallManager {
 
     private void spawnBall() {
         if (ballQueue.isEmpty()) {
-            System.out.println("Ball queue is empty. No balls to spawn.");
+           
             return;
         }
 
@@ -66,10 +66,24 @@ public class BallManager {
         
         float x = BoardManager.spawner.x2;
         float y = BoardManager.spawner.y2;
+        String colourString = ballColor ;
+        char colour = 0;
+        switch(colourString){
+            case("grey"):
+            colour = 0;
+            case("orange"):
+            colour = 1;
+            case("blue"):
+            colour = 2;
+            case("green"):
+            colour = 3;
+            case("yellow"):
+            colour = 4;
+        }
         float radius = 10; 
 
         BoardManager boardManager = new BoardManager(app, imageLoader);
-        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager);
+        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager, colour);
         ballsInPlay.add(newBall);
     }
 
