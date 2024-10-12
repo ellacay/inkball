@@ -32,6 +32,14 @@ public class Ball {
         this.boardManager = boardManager; // Initialize the boardManager
     }
 
+    public boolean collidesWith(Wall wall) {
+        // Simple rectangle collision check using PVector position
+        boolean collided = (position.x + radius > wall.x1 && position.x - radius < wall.x2 &&
+                            position.y + radius > wall.y1 && position.y - radius < wall.y2);
+        return collided;
+    }
+    
+
 
     public void display() {
         app.image(image, position.x - radius, position.y - radius, radius * 2, radius * 2);
@@ -133,11 +141,14 @@ public class Ball {
         return isPositionClose && isSizeSmallEnough;
     }
     
+
+
     private void checkWallCollisions() {
         boolean collided = false;
     
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
+                wall.hit();
                 collided = true;
     
                 // Calculate penetration depths
