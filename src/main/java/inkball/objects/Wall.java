@@ -19,13 +19,8 @@ public class Wall {
         this.color = color;
         this.imageLoader = imageLoader; // Make sure this is properly initialized
     }
-    
-
     public void hit() {
-       
             this.hitCount++;
-          
-        
     }
 
     public boolean canBeDamagedBy(char ballColor) {
@@ -79,7 +74,6 @@ public class Wall {
                 app.image(imageLoader.smashedWall3, this.x1, this.y1);
                 break;
             }
-               
             case '4':
             if(this.hitCount == 0){
                 app.image(imageLoader.wall4, this.x1, this.y1);
@@ -89,10 +83,6 @@ public class Wall {
                 app.image(imageLoader.smashedWall4, this.x1, this.y1);
                 break;
             }
-               
-            
-    
     }
-
-
-    }}
+    }
+}

@@ -22,7 +22,7 @@ public class BoardManager {
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
-    public boolean ballSpawned = false; // Flag to track if a ball has been spawned
+    public boolean ballSpawned = false;
     private int finishedBallCount;
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
@@ -49,7 +49,7 @@ public class BoardManager {
             for (int x = 0; x < board[y].length; x++) {
                 char cell = board[y][x];
                 float xPos = x * cellSize;
-                float yPos = (y * cellSize) + App.TOPBAR; // Apply the top bar offset
+                float yPos = (y * cellSize) + App.TOPBAR;
 
                 boolean isPreviousCellHole = (x > 0 && board[y][x - 1] == 'H');
 
@@ -68,10 +68,9 @@ public class BoardManager {
         float cellSize = App.CELLSIZE;
         for (int y = 0; y < board.length; y++) {
             for (int x = 0; x < board[y].length; x++) {
-                char cell = board[y][x];
-                if (cell == 'H') {
+                if (board[y][x] == 'H') {
                     float xPos = x * cellSize + cellSize / 2;
-                    float yPos = (y * cellSize) + App.TOPBAR + (cellSize / 2); // Apply the top bar offset
+                    float yPos = (y * cellSize) + App.TOPBAR + (cellSize / 2);
                     char colour = board[y][x + 1];
                     holes.add(new Hole(xPos, yPos, cellSize / 2, colour));
                 }
@@ -80,29 +79,27 @@ public class BoardManager {
     }
 
     public void addFinishedBall() {
-        finishedBallCount++; // Increment the finished ball count
+        finishedBallCount++;
     }
 
     public boolean checkIfFinished() {
         if (finishedBallCount >= BallManager.ballsInPlay.size() + BallManager.ballQueue.size()) {
-            System.out.println("Finished!"); // Print when all balls are finished
+            System.out.println("Finished!");
             return true;
         }
         return false;
     }
+
     public void reset() {
-        finishedBallCount = 0; // Reset finished ball count
-        walls.clear(); // Clear walls if needed
-        holes.clear(); // Clear holes if needed
-        balls.clear(); // Clear any existing balls
-        // Optionally, reload the board
-        loadBoard(); // If you want to reload the initial state
+        finishedBallCount = 0;
+        walls.clear();
+        holes.clear();
+        balls.clear();
+        loadBoard();
     }
-    
 
     public static void increaseScore(int baseScore) {
-        int increment = (int) (score + 1);
-        score += increment;
+        score += baseScore + 1;
         System.out.println("Score increased! Current score: " + score);
     }
 
@@ -115,48 +112,45 @@ public class BoardManager {
                 for (int x = 0; x < board[y].length; x++) {
                     char cell = board[y][x];
                     float xPos = x * cellSize;
-                    float yPos = (y * cellSize) + yOffset; // Apply the offset
+                    float yPos = (y * cellSize) + yOffset;
 
                     switch (cell) {
                         case 'B':
-                            // Spawn only if no ball has been spawned yet
                             if (!ballSpawned && x + 1 < board[y].length) {
                                 char nextCell = board[y][x + 1];
-                                String ballColor = Character.toString(nextCell);
-                                spawnBallAtPosition(xPos, yPos, ballColor);
-                                ballSpawned = true; // Set flag to true after spawning
+                                spawnBallAtPosition(xPos, yPos, Character.toString(nextCell));
+                                ballSpawned = true;
                             }
                             app.image(imageLoader.tile, xPos, yPos);
-                            x++; // Move to the next cell to skip the color cell
+                            x++;
                             app.image(imageLoader.tile, xPos, yPos);
                             break;
                         case 'H':
-                            handleHoleCell(x, y, xPos, yPos); // Apply offset
+                            handleHoleCell(x, y, xPos, yPos);
                             x++;
                             break;
                         case 'S':
                             app.image(imageLoader.entryPoint, xPos, yPos);
-                            spawner = new Spawner(x, y, xPos, yPos); // Apply offset
+                            spawner = new Spawner(x, y, xPos, yPos);
                             break;
-                        default:if (y > 0) {
-                            char rightUpper = board[y - 1][x];
-                            if (rightUpper == 'H') {
+                        default:
+                            if (y > 0 && board[y - 1][x] == 'H') {
                                 x++;
                                 break;
                             }
-                        }                            app.image(imageLoader.tile, xPos, yPos); // Apply offset
+                            app.image(imageLoader.tile, xPos, yPos);
                             break;
                     }
                 }
             }
             for (Wall wall : walls) {
-                wall.display(); // Pass the top bar height for wall rendering
+                wall.display();
             }
         }
     }
 
     private void spawnBallAtPosition(float x, float y, String ballColor) {
-        PImage ballImage = BallManager.getBallImage(ballColor, this.imageLoader);
+        PImage ballImage = BallManager.getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
             return;
@@ -164,18 +158,9 @@ public class BoardManager {
 
         float velocityX = App.random.nextBoolean() ? 2 : -2;
         float velocityY = App.random.nextBoolean() ? 2 : -2;
-        char colour = 0;
-
-        switch (ballColor) {
-            case "0": colour = 0; break;
-            case "1": colour = 1; break;
-            case "2": colour = 2; break;
-            case "3": colour = 3; break;
-            case "4": colour = 4; break;
-        }
+        char colour = ballColor.charAt(0);
 
         float radius = 10;
-
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, this, colour);
         BallManager.ballsInPlay.add(newBall);
     }

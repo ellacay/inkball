@@ -3,23 +3,28 @@ package inkball.objects;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import inkball.App;
 import inkball.managers.BoardManager;
 
 public class Ball {
     private PApplet app;
     private PImage image;
-    private PVector position; 
-    private PVector velocity; 
+    private PVector position;
+    private PVector velocity;
     private float radius;
     private char colour;
-    private boolean captured = false; 
+    private boolean captured = false;
     private BoardManager boardManager;
     private int scoreValue;
 
-    private static final float GRAVITY_STRENGTH = 0.5f; 
-    private static final float SHRINK_RATE = 0.05f; 
-
+    private static final float GRAVITY_STRENGTH = 0.5f;
+    private static final float SHRINK_RATE = 0.05f;
+    private static final float STOPPING_THRESHOLD = 0.1f;
+    private static final float NEAR_HOLE_DISTANCE = 32;
     private static final float BOARD_LEFT = 0;
     private static final float BOARD_RIGHT = 800; // Example width
     private static final float BOARD_TOP = 0;
@@ -32,7 +37,7 @@ public class Ball {
         this.position = new PVector(x, y);
         this.velocity = new PVector(xSpeed, ySpeed);
         this.radius = radius;
-        this.boardManager = boardManager; 
+        this.boardManager = boardManager;
     }
 
     public void display() {
@@ -43,45 +48,40 @@ public class Ball {
         position.add(velocity);
         applyCollisionLogic();
         gravitateTowardsHole();
-        
-        // Check boundaries
         checkBoundaries();
-
-        for (Line line : App.lines) {
-            if (isColliding(line)) {
-                reflect(line);
-            }
-        }
+        handleLineCollisions();
     }
 
     private void checkBoundaries() {
-        if (position.x - radius < BOARD_LEFT || position.x + radius > BOARD_RIGHT ||
-            position.y - radius < BOARD_TOP || position.y + radius > BOARD_BOTTOM) {
+        if (isOutOfBound()) {
             setFinished(); // Notify that this ball is finished
         }
+    }
+
+    private boolean isOutOfBound() {
+        return position.x - radius < BOARD_LEFT || position.x + radius > BOARD_RIGHT ||
+               position.y - radius < BOARD_TOP || position.y + radius > BOARD_BOTTOM;
     }
 
     private void gravitateTowardsHole() {
         for (Hole hole : BoardManager.holes) {
             if (isNearHole(hole)) {
-                float stoppingThreshold = 0.1f; 
-                
                 float distanceToHole = PVector.dist(position, hole.getPosition());
                 PVector direction = PVector.sub(hole.getPosition(), position).normalize();
                 velocity = direction.mult(2); // Move towards the hole
-                
-                float shrinkAmount = PApplet.map(distanceToHole, 0, hole.getRadius(), SHRINK_RATE, 1); 
+
+                float shrinkAmount = PApplet.map(distanceToHole, 0, hole.getRadius(), SHRINK_RATE, 1);
                 radius = PApplet.max(radius - shrinkAmount, 0);
-                
+
                 position.add(velocity);
-                
-                if (distanceToHole < stoppingThreshold) {
+
+                if (distanceToHole < STOPPING_THRESHOLD) {
                     position = hole.getPosition().copy(); // Snap to hole's center
                     velocity.set(0, 0); // Stop the ball
                 }
-                
-                if (isCapturedByHole(hole)&&this.captured!=true) {
-                    this.captured = true;
+
+                if (isCapturedByHole(hole) && !captured) {
+                    captured = true;
                     BoardManager.increaseScore(1);
                     setFinished(); // Notify that this ball is finished
                     boardManager.checkIfFinished();
@@ -96,7 +96,7 @@ public class Ball {
     }
 
     private boolean isNearHole(Hole hole) {
-        return PVector.dist(position, hole.getPosition()) < 32;
+        return PVector.dist(position, hole.getPosition()) < NEAR_HOLE_DISTANCE;
     }
 
     private boolean isCapturedByHole(Hole hole) {
@@ -105,59 +105,64 @@ public class Ball {
         return isPositionClose && isSizeSmallEnough;
     }
 
-    // The rest of the methods remain unchanged...
-
-
+    private void handleLineCollisions() {
+        List<Line> linesToRemove = new ArrayList<>();
+        for (Line line : App.lines) {
+            if (isColliding(line)) {
+                reflect(line);
+                linesToRemove.add(line); // Mark for removal
+            }
+        }
+        App.lines.removeAll(linesToRemove); // Remove marked lines
+    }
 
     private void applyCollisionLogic() {
         for (Wall wall : BoardManager.walls) {
             if (checkCollisionWithWall(wall)) {
-                wall.hit();
-
-                float penetrationX = Math.min((position.x + radius) - wall.x1, wall.x2 - (position.x - radius));
-                float penetrationY = Math.min((position.y + radius) - wall.y1, wall.y2 - (position.y - radius));
-
-                if (penetrationX < radius && penetrationY < radius) {
-                    velocity.x = -velocity.x; 
-                    velocity.y = -velocity.y;
-                } else if (penetrationX < penetrationY) {
-                    if (position.x + radius > wall.x1) {
-                        position.x = wall.x1 - radius; 
-                    } else {
-                        position.x = wall.x2 + radius; 
-                    }
-                } else {
-                    if (position.y + radius > wall.y1) {
-                        position.y = wall.y1 - radius; 
-                    } else {
-                        position.y = wall.y2 + radius; 
-                    }
-                }
-
-                PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
-                PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
-                velocity = reflect(velocity, normal);
+                handleWallCollision(wall);
             }
         }
     }
+
+    private void handleWallCollision(Wall wall) {
+        wall.hit();
+
+        float penetrationX = Math.min((position.x + radius) - wall.x1, wall.x2 - (position.x - radius));
+        float penetrationY = Math.min((position.y + radius) - wall.y1, wall.y2 - (position.y - radius));
+
+        if (penetrationX < radius && penetrationY < radius) {
+            velocity.x = -velocity.x; 
+            velocity.y = -velocity.y;
+        } else if (penetrationX < penetrationY) {
+            position.x += position.x + radius > wall.x1 ? -(radius + 1) : (radius + 1);
+        } else {
+            position.y += position.y + radius > wall.y1 ? -(radius + 1) : (radius + 1);
+        }
+
+        PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
+        PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
+        velocity = reflect(velocity, normal);
+    }
+
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
-            char ballColor = this.colour; 
-            int holeColor = hole.getColour(); 
+            char ballColor = this.colour;
+            int holeColor = hole.getColour();
 
-            boolean isColourMatch = ballColor == holeColor; 
-            boolean isGreyBall = ballColor == '0'; 
-            boolean isGreyHole = holeColor == '0'; 
+            boolean isColourMatch = ballColor == holeColor;
+            boolean isGreyBall = ballColor == '0';
+            boolean isGreyHole = holeColor == '0';
 
             if (isColourMatch || isGreyBall || isGreyHole) {
-                return scoreValue * levelMultiplier; 
+                return scoreValue * levelMultiplier;
             }
         }
-        return 0; 
+        return 0;
     }
+
     private PVector reflect(PVector velocity, PVector normal) {
         float dotProduct = PVector.dot(velocity, normal);
-        return PVector.sub(velocity, PVector.mult(normal, 2 * dotProduct)); 
+        return PVector.sub(velocity, PVector.mult(normal, 2 * dotProduct));
     }
 
     private boolean isColliding(Line line) {
@@ -199,3 +204,4 @@ public class Ball {
         return overlapX && overlapY;
     }
 }
+

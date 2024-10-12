@@ -15,9 +15,7 @@ import inkball.managers.BoardManager;
 import inkball.objects.Line;
 
 public class App extends PApplet {
-    public int getSpawnTimer(){
-        return this.spawnTimer;
-    }
+
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
@@ -27,6 +25,12 @@ public class App extends PApplet {
     public static List<PVector> currentLinePoints = new ArrayList<>(); // For storing points of the current line
     private PVector startPoint;
     private PVector endPoint;
+    private int score;
+    private int scoreIncrementTimer;
+    private final int SCORE_INCREMENT_RATE = 67; // 0.067 seconds in frames (assuming FPS = 30)
+    private List<PVector> yellowTiles; // Store positions of yellow tiles
+    private int currentTileIndex; // Track current position in the clockwise path
+    private final int TILE_SPEED = 67; // Move every 0.067 seconds
 
 
     // Add this to your main game class or PApplet subclass
@@ -47,7 +51,7 @@ private boolean isPaused = false;
     public static final int INITIAL_PARACHUTES = 1;
 
     ConfigLoader configLoader = new ConfigLoader();
-    public int spawnTimer;
+    public double spawnTimer;
     
 
    
@@ -81,6 +85,23 @@ private boolean isPaused = false;
 
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
+
+        yellowTiles = new ArrayList<>();
+        currentTileIndex = 0;
+    
+        // Define the positions of yellow tiles
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            yellowTiles.add(new PVector(i * CELLSIZE, 0)); // Top row
+        }
+        for (int i = 1; i < BOARD_HEIGHT; i++) {
+            yellowTiles.add(new PVector((BOARD_WIDTH - 1) * CELLSIZE, i * CELLSIZE)); // Right column
+        }
+        for (int i = BOARD_WIDTH - 2; i >= 0; i--) {
+            yellowTiles.add(new PVector(i * CELLSIZE, (BOARD_HEIGHT - 1) * CELLSIZE)); // Bottom row
+        }
+        for (int i = BOARD_HEIGHT - 2; i > 0; i--) {
+            yellowTiles.add(new PVector(0, i * CELLSIZE)); // Left column
+        }
     }
 
    
@@ -90,10 +111,12 @@ private boolean isPaused = false;
         }
     }
     public void updateSpawnTimer() {
-        if (frameCount % App.FPS == 0) {
-            this.spawnTimer--;
+        if (frameCount % 3 == 0 && spawnTimer > 0) { // Decrement every 0.1 seconds
+            spawnTimer -= 0.1; // Decrease by 0.1
         }
     }
+    
+    
 
     public void displayScore() {
         fill(0);
@@ -111,7 +134,7 @@ private boolean isPaused = false;
     public void displaySpawnTimer() {
         fill(0);
         textSize(16);
-        text("Spawn Interval: " + this.spawnTimer,  WIDTH-350, 40);
+        text("Spawn Interval: " + String.format("%.1f", this.spawnTimer), WIDTH - 350, 40);
     }
 
     @Override
@@ -129,15 +152,90 @@ public void draw() {
         displayPauseOverlay();
     }
 
-    // Check for key presses regardless of game state
-    if (boardManager.checkIfFinished()) {
-        // Handle restart if 'R' is pressed
-        if (keyPressed && key == 'r') {
-            restartGame();
+    
+    if (boardManager.checkIfFinished() && timer > 0) {
+        scoreIncrementTimer++;
+        if (scoreIncrementTimer >= SCORE_INCREMENT_RATE) {
+            score++; // Increment score
+            scoreIncrementTimer = 0; // Reset timer
+        }
+          // Move yellow tiles
+    if (frameCount % TILE_SPEED == 0) {
+        moveYellowTiles();
+    }
+    }
+
+  
+
+  
+}
+
+private void moveYellowTiles() {
+    // Move the current yellow tile
+    currentTileIndex++;
+    if (currentTileIndex >= yellowTiles.size()) {
+        currentTileIndex = 0; // Loop back to the start
+    }
+}
+
+private void displayYellowTiles() {
+    fill(255, 255, 0); // Yellow color
+    for (int i = 0; i < yellowTiles.size(); i++) {
+        PVector tile = yellowTiles.get(i);
+        if (i == currentTileIndex) {
+            rect(tile.x, tile.y, CELLSIZE, CELLHEIGHT); // Draw yellow tile
         }
     }
 }
 
+
+public void mousePressed() {
+    // Check if the right mouse button is pressed or Ctrl + left click
+    if (mouseButton == RIGHT || (keyPressed && keyCode == CONTROL)) {
+        // Remove the nearest line to the mouse position
+        removeLineAtMousePosition(mouseX, mouseY);
+    } else {
+        // Clear previous points and add the starting point for a new line
+        currentLinePoints.clear();
+        currentLinePoints.add(new PVector(mouseX, mouseY));
+    }
+}
+
+private void removeLineAtMousePosition(float mouseX, float mouseY) {
+    // Find and remove the nearest line to the given mouse position
+    Line closestLine = null;
+    float closestDistance = Float.MAX_VALUE;
+
+    for (Line line : lines) {
+        float distance = distanceToLine(mouseX, mouseY, line);
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestLine = line;
+        }
+    }
+
+    // If a close enough line is found, remove it
+    if (closestLine != null && closestDistance < 10) { // Threshold for removal
+        lines.remove(closestLine);
+    }
+}
+
+// Calculate the distance from a point to a line segment
+private float distanceToLine(float x, float y, Line line) {
+    PVector start = line.getStart();
+    PVector end = line.getEnd();
+
+    // Calculate the length of the line segment
+    float lineLength = PVector.dist(start, end);
+    if (lineLength == 0) return PVector.dist(new PVector(x, y), start); // The line is a point
+
+    // Calculate the projection of the point onto the line
+    float t = PVector.dot(new PVector(x, y).copy().sub(start), end.copy().sub(start)) / (lineLength * lineLength);
+    t = PApplet.constrain(t, 0, 1); // Constrain t to the segment
+    PVector projection = PVector.add(start, PVector.mult(end.copy().sub(start), t));
+
+    return PVector.dist(new PVector(x, y), projection); // Return distance from the point to the projected point
+}
 private void displayPauseOverlay() {
     fill(0, 0, 0, 150); // Semi-transparent black background
     rect(0, 0, width, height); // Cover the entire screen
@@ -174,6 +272,7 @@ background(255);
     ballManager.handleBallSpawning();
     ballManager.updateBallDisplay();
     displayLines();
+    displayYellowTiles(); // Display yellow tiles
 }
 private void displayLines() {
     for (Line line : lines) {
@@ -193,10 +292,6 @@ private void displayLines() {
     }
 }
 
-public void mousePressed() {
-    currentLinePoints.clear(); // Clear previous points
-    currentLinePoints.add(new PVector(mouseX, mouseY)); // Add the starting point
-}
 
 public void mouseDragged() {
     currentLinePoints.add(new PVector(mouseX, mouseY)); // Add points while dragging

@@ -9,6 +9,4 @@ public class Spawner {
         this.x2 = x2;
         this.y2 = y2;
     }
-
-    
 }

@@ -13,11 +13,10 @@ public class Line {
     }
 
     public PVector getStart() {
-        return points.get(0); // Return the first point
-    }
+        return points.get(0);}
 
     public PVector getEnd() {
-        return points.get(points.size() - 1); // Return the last point
+        return points.get(points.size() - 1);
     }
 
     public void display(PApplet applet) {

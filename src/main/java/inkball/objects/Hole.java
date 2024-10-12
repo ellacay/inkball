@@ -5,7 +5,7 @@ import processing.core.PVector;
 public class Hole {
     private PVector position;
     private float radius;
-    private int color; // Assuming color is stored as an int (ARGB)
+    private int color; 
 
     public Hole(float x, float y, float radius, char color) {
         this.position = new PVector(x+16, y+16);
