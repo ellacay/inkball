@@ -111,9 +111,9 @@ public class BallManager {
             }
         }
         
-        int xOffset = 0;
+        int xOffset = 20;
         for (PImage img : upcomingBalls) {
-            app.image(img, xOffset, 0);
+            app.image(img, xOffset, 20);
             xOffset += img.width;
         }
     }

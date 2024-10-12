@@ -98,36 +98,46 @@ private boolean isPaused = false;
     public void displayScore() {
         fill(0);
         textSize(16);
-        text("Score:  " + BoardManager.score, 10, App.HEIGHT -45);
+        text("Score:  " + BoardManager.score, WIDTH-150, 50);
     }
 
     public void displayTimer() {
         fill(0);
         textSize(16);
-        text("Time Left: " + this.timer, 10, App.HEIGHT - 20);
+    
+        text("Time Left: " + this.timer, WIDTH-150, 30);
     }
 
     public void displaySpawnTimer() {
         fill(0);
         textSize(16);
-        text("Spawn Interval: " + this.spawnTimer, 10, App.HEIGHT - 10);
+        text("Spawn Interval: " + this.spawnTimer,  WIDTH-350, 40);
     }
 
     @Override
-    public void draw() {
-        if (!isPaused) {
-            // Check if the game has ended
-            if (boardManager.checkIfFinished()) {
-                displayGameOver();
-            } else {
-                // Update and display game elements
-                updateAndDisplayGameElements();
-            }
+public void draw() {
+    if (!isPaused) {
+        // Check if the game has ended
+        if (boardManager.checkIfFinished()) {
+            displayGameOver();
         } else {
-            // Optionally, display a pause message or overlay
-            displayPauseOverlay();
+            // Update and display game elements
+            updateAndDisplayGameElements();
+        }
+    } else {
+        // Optionally, display a pause message or overlay
+        displayPauseOverlay();
+    }
+
+    // Check for key presses regardless of game state
+    if (boardManager.checkIfFinished()) {
+        // Handle restart if 'R' is pressed
+        if (keyPressed && key == 'r') {
+            restartGame();
         }
     }
+}
+
 private void displayPauseOverlay() {
     fill(0, 0, 0, 150); // Semi-transparent black background
     rect(0, 0, width, height); // Cover the entire screen
@@ -211,10 +221,13 @@ public void mouseReleased() {
    
 
     private void restartGame() {
-        boardManager.loadBoard();
-        ballManager.reset();
-        timer = 120;
+        boardManager.reset(); // Reset the board manager
+        ballManager.reset(); // Reset the ball manager if needed
+        this.spawnTimer = spawnInterval;
+       this.timer = 120; // Reset timer
+       boardManager.ballSpawned =false;
         lines.clear(); // Clear all lines
-        loop();
+        loop(); // Restart the draw loop
     }
+    
 }

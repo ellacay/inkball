@@ -21,6 +21,8 @@ public class Line {
     }
 
     public void display(PApplet applet) {
+        applet.strokeWeight(10);
+    
         applet.noFill();
         applet.beginShape();
         for (PVector point : points) {
