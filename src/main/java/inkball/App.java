@@ -11,13 +11,17 @@ import inkball.loaders.ImageLoader;
 import inkball.loaders.ConfigLoader;
 import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
+
 import inkball.objects.Line;
 
 public class App extends PApplet {
+    public int getSpawnTimer(){
+        return this.spawnTimer;
+    }
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
-
+    public int spawnInterval;
 
     public static List<Line> lines = new ArrayList<>(); // Make it static or instance variable based on your needs
     public static List<PVector> currentLinePoints = new ArrayList<>(); // For storing points of the current line
@@ -43,6 +47,8 @@ private boolean isPaused = false;
     public static final int INITIAL_PARACHUTES = 1;
 
     ConfigLoader configLoader = new ConfigLoader();
+    public int spawnTimer;
+    
 
    
     public static void main(String[] args) {
@@ -66,14 +72,26 @@ private boolean isPaused = false;
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
       
-        this.timer = configLoader.time; 
+        
+        List<ConfigLoader.LevelConfig> levels = ConfigLoader.getLevelsConfig();
+        ConfigLoader.LevelConfig firstLevel = levels.get(0);
+        this.timer = firstLevel.time; 
+        this.spawnInterval = firstLevel.spawnInterval;
+        this.spawnTimer = firstLevel.spawnInterval;
 
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
     }
+
+   
     public void updateTimer() {
         if (frameCount % App.FPS == 0) {
-            timer--;
+            this.timer--;
+        }
+    }
+    public void updateSpawnTimer() {
+        if (frameCount % App.FPS == 0) {
+            this.spawnTimer--;
         }
     }
 
@@ -86,20 +104,30 @@ private boolean isPaused = false;
     public void displayTimer() {
         fill(0);
         textSize(16);
-        text("Time Left: " + timer, 10, App.HEIGHT - 20);
+        text("Time Left: " + this.timer, 10, App.HEIGHT - 20);
+    }
+
+    public void displaySpawnTimer() {
+        fill(0);
+        textSize(16);
+        text("Spawn Interval: " + this.spawnTimer, 10, App.HEIGHT - 10);
     }
 
     @Override
-public void draw() {
-    if (!isPaused) {
-        // Update and display game elements
-        updateAndDisplayGameElements();
-    } else {
-        // Optionally, display a pause message or overlay
-        displayPauseOverlay();
+    public void draw() {
+        if (!isPaused) {
+            // Check if the game has ended
+            if (boardManager.checkIfFinished()) {
+                displayGameOver();
+            } else {
+                // Update and display game elements
+                updateAndDisplayGameElements();
+            }
+        } else {
+            // Optionally, display a pause message or overlay
+            displayPauseOverlay();
+        }
     }
-}
-
 private void displayPauseOverlay() {
     fill(0, 0, 0, 150); // Semi-transparent black background
     rect(0, 0, width, height); // Cover the entire screen
@@ -109,11 +137,26 @@ private void displayPauseOverlay() {
     textAlign(CENTER, CENTER);
     text("PAUSED", width / 2, height / 2);
 }
+
+private void displayGameOver() {
+    fill(0, 0, 0, 150); // Semi-transparent black background
+    rect(0, 0, width, height); // Cover the entire screen
+
+    fill(255); // White text
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("GAME OVER", width / 2, height / 2 - 20);
+    textSize(16);
+    text("Press 'R' to Restart", width / 2, height / 2 + 20);
+}
+
 private void updateAndDisplayGameElements() {
 background(255);
 
     updateTimer();
     displayTimer();
+    updateSpawnTimer();
+    displaySpawnTimer();
     displayScore();
 
     boardManager.displayBoard();

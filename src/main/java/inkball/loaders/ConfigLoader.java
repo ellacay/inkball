@@ -1,35 +1,41 @@
 package inkball.loaders;
+
 import java.nio.file.Files;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.text.ParseException;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import processing.data.JSONArray;
 import processing.data.JSONObject;
-import processing.data.*;
-
-import java.util.Map;
 
 public class ConfigLoader {
-
     
-    public String layout;
-    public int time;
-    public int spawnInterval;
-    public static double scoreIncrease;
-    public double scoreDecrease;
-    public String[] balls;
-    public static Map<String, Integer> scoreMultiplier;
-    public Map<String, Integer> scoreDivider;
-    static JSONObject gameConfig;
+    public static class LevelConfig {
+        public String layout;
+        public int time;
+        public int spawnInterval;
+        public double scoreIncrease;
+        public double scoreDecrease;
+        public String[] balls;
+
+        public LevelConfig(String layout, int time, int spawnInterval, double scoreIncrease, double scoreDecrease, String[] balls) {
+            this.layout = layout;
+            this.time = time;
+            this.spawnInterval = spawnInterval;
+            this.scoreIncrease = scoreIncrease;
+            this.scoreDecrease = scoreDecrease;
+            this.balls = balls;
+        }
+    }
+
+    private static List<LevelConfig> levelsConfig = new ArrayList<>();
+
     public static void readConfig() {
         String jsonContent = readFileAsString("config.json");
-
         JSONObject gameConfig = JSONObject.parse(jsonContent);
 
         JSONArray levels = gameConfig.getJSONArray("levels");
@@ -48,33 +54,21 @@ public class ConfigLoader {
                 balls[j] = ballsJsonObject.getString(j);
             }
 
+            levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncrease, scoreDecrease, balls));
+
+            // Debug output
             System.out.println("Level Layout: " + layout);
             System.out.println("Level Time: " + time);
             System.out.println("Spawn Interval: " + spawnInterval);
             System.out.println("Score Increase from Hole Capture: " + scoreIncrease);
-            System.out.println("Score Decrease from Hole Capture: " + scoreDecrease);
-        for (int m = 0; m < balls.length; m++) {
-            System.out.println("Ball " + m + ": " + balls[m]);
-        }
+            System.out.println("Score Decrease from Wrong Hole Capture: " + scoreDecrease);
+            for (int m = 0; m < balls.length; m++) {
+                System.out.println("Ball " + m + ": " + balls[m]);
+            }
             System.out.println();
         }
-    
-        JSONObject increaseScores = gameConfig.getJSONObject("score_increase_from_hole_capture");
-        System.out.println("Score Increase from Hole Capture:");
-        for (Object keyObj : increaseScores.keys()) {
-            String key = (String) keyObj; 
-            int value = increaseScores.getInt(key);
-            System.out.println("  " + key + ": " + value);
-        }
-        System.out.println();
 
-        JSONObject decreaseScores = gameConfig.getJSONObject("score_decrease_from_wrong_hole");
-        System.out.println("Score Decrease from Wrong Hole:");
-        for (Object keyObj : decreaseScores.keys()) {
-            String key = (String) keyObj; 
-            int value = decreaseScores.getInt(key);
-            System.out.println("  " + key + ": " + value);
-        }
+        // Handle other configurations as needed
     }
 
     private static String readFileAsString(String fileName) {
@@ -86,24 +80,9 @@ public class ConfigLoader {
         }
         return content;
     }
-    public String[] addSurroundingWall() {
-        return new String[]{""};
-    }
 
-    public String[] addTiles() {
-        return new String[]{""};
-    }
-
-    public String[] addBalls() {
-        return new String[]{""};
-    }
-
-    public String[] addHoles() {
-        return new String[]{""};
-    }
-
-    public String[] addSpawners() {
-        return new String[]{""};
+    public static List<LevelConfig> getLevelsConfig() {
+        return levelsConfig;
     }
 
     public static char[][] setBoardArray() {
@@ -143,6 +122,6 @@ public class ConfigLoader {
 
     public static void main(String[] args) {
         readConfig();
-        
+        // You can retrieve and use the level configurations here if needed
     }
 }

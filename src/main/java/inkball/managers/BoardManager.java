@@ -23,6 +23,7 @@ public class BoardManager {
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
     boolean ballSpawned = false; // Flag to track if a ball has been spawned
+    private int finishedBallCount;
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -30,6 +31,8 @@ public class BoardManager {
     }
 
     public void loadBoard() {
+    
+
         board = ConfigLoader.setBoardArray();
         if (board == null) {
             System.err.println("Failed to load board configuration.");
@@ -77,8 +80,22 @@ public class BoardManager {
         }
     }
 
-    public void increaseScore(int baseScore) {
-        int increment = (int) (baseScore * ConfigLoader.scoreIncrease);
+    public void addFinishedBall() {
+
+        finishedBallCount++; // Increment the finished ball count
+    }
+
+    public boolean checkIfFinished() {
+       
+        if (finishedBallCount >= BallManager.ballsInPlay.size()+BallManager.ballQueue.size()) {
+            System.out.println("Finished!"); // Print when all balls are finished
+            return true;
+        }
+        return false;
+    }
+    
+    public static void increaseScore(int baseScore) {
+        int increment = (int) (score + 1);
         score += increment;
         System.out.println("Score increased! Current score: " + score);
     }

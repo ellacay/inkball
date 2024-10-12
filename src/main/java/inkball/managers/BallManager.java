@@ -1,30 +1,30 @@
 package inkball.managers;
+
 import inkball.objects.Ball;
+
+import java.applet.Applet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import inkball.App;
+import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 
 public class BallManager {
-    private PApplet app;
-    private  ImageLoader imageLoader;
-    public static List<Ball> ballsInPlay =  new ArrayList<>(); // Initialize here
+    private App app;
+    private ImageLoader imageLoader;
+    public static List<Ball> ballsInPlay = new ArrayList<>(); // Initialize here
     public static List<String> ballQueue; 
-    private int spawnCounter;
-    private int spawnInterval = 60; 
+    private int finishedBallCount = 0; // Track finished balls
 
-
-    public BallManager(PApplet app, ImageLoader imageLoader) {
+    public BallManager(App app, ImageLoader imageLoader) {
         this.imageLoader = imageLoader;
-       
         this.app = app;
-        this.spawnCounter = 0;
         initializeBallQueue();
     }
 
@@ -37,13 +37,15 @@ public class BallManager {
             ball.update();
             ball.display();
         }
+        
     }
 
     public void handleBallSpawning() {
-        spawnCounter++;
-        if (spawnCounter >= spawnInterval) {
+        System.out.println(app.spawnTimer);
+    
+        if (app.spawnTimer <=0 ) {
             spawnBall();
-            spawnCounter = 0;
+            app.spawnTimer = app.spawnInterval;
         }
     }
 
@@ -79,9 +81,6 @@ public class BallManager {
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager, colour);
         BallManager.ballsInPlay.add(newBall);
     }
-    
-
-   
 
     public static PImage getBallImage(String color, ImageLoader imageLoader) {
         switch (color) {
@@ -98,8 +97,9 @@ public class BallManager {
             default: return null;
         }
     }
-    
 
+
+    
     public void updateBallDisplay() {
         List<PImage> upcomingBalls = new ArrayList<>();
         
@@ -120,6 +120,7 @@ public class BallManager {
     
     public void reset() {
         ballsInPlay.clear();
+        finishedBallCount = 0; // Reset finished ball count
         initializeBallQueue();
     }
 }
