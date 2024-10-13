@@ -1,6 +1,7 @@
 package inkball.managers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import inkball.App;
@@ -15,7 +16,7 @@ import processing.core.PImage;
 
 public class BoardManager {
     private PApplet app;
-    private ImageLoader imageLoader;
+    public ImageLoader imageLoader;
     public static int score;
     public static char[][] board;
     public static Spawner spawner;
@@ -38,6 +39,7 @@ public class BoardManager {
         }
         initializeWalls();
         initializeHoles();
+        printWallGrid();
     }
 
     private void initializeWalls() {
@@ -97,6 +99,34 @@ public class BoardManager {
         balls.clear();
         loadBoard();
     }
+public void printWallGrid() {
+    int rows = board.length;
+    int cols = board[0].length;
+    char[][] grid = new char[rows][cols];
+
+    // Initialize the grid with spaces
+    for (int y = 0; y < rows; y++) {
+        Arrays.fill(grid[y], ' ');
+    }
+
+    // Mark wall positions in the grid
+    for (Wall wall : walls) {
+        int x = (int) (wall.x1 / App.CELLSIZE);
+        int y = (int) ((wall.y1 - App.TOPBAR) / App.CELLSIZE);
+        if (x >= 0 && y >= 0 && y < rows && x < cols) {
+            grid[y][x] = '#';
+        }
+    }
+
+    // Print the grid
+    for (int y = 0; y < rows; y++) {
+        for (int x = 0; x < cols; x++) {
+            System.out.print(grid[y][x]);
+            if (x < cols - 1) System.out.print(" ");
+        }
+        System.out.println();
+    }
+}
 
     public static void increaseScore(int baseScore) {
         score += baseScore + 1;

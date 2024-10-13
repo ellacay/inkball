@@ -3,11 +3,15 @@ package inkball.objects;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
+import inkball.loaders.ImageLoader;
 
+import java.applet.Applet;
 import java.util.ArrayList;
 import java.util.List;
 
 import inkball.App;
+import inkball.loaders.ImageLoader;
+import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
 
 public class Ball {
@@ -48,20 +52,10 @@ public class Ball {
         position.add(velocity);
         applyCollisionLogic();
         gravitateTowardsHole();
-        checkBoundaries();
+  
         handleLineCollisions();
     }
 
-    private void checkBoundaries() {
-        if (isOutOfBound()) {
-            setFinished(); // Notify that this ball is finished
-        }
-    }
-
-    private boolean isOutOfBound() {
-        return position.x - radius < BOARD_LEFT || position.x + radius > BOARD_RIGHT ||
-               position.y - radius < BOARD_TOP || position.y + radius > BOARD_BOTTOM;
-    }
 
     private void gravitateTowardsHole() {
         for (Hole hole : BoardManager.holes) {
@@ -81,6 +75,12 @@ public class Ball {
                 }
 
                 if (isCapturedByHole(hole) && !captured) {
+
+                    if(!correctBall(hole)){
+                        
+                        BallManager.addToQueueAgain(this);
+                        System.out.println("Wrong colour");
+                    }
                     captured = true;
                     BoardManager.increaseScore(1);
                     setFinished(); // Notify that this ball is finished
@@ -88,6 +88,26 @@ public class Ball {
                 }
             }
         }
+    }
+
+    public String getColour(){
+        return Character.toString(this.colour);
+    }
+
+    private boolean correctBall(Hole hole){
+        System.out.println("colour"+this.colour);
+        if(this.colour == hole.getColour()){
+            return true;
+        }
+        else if(this.colour == '0'){
+            System.out.println("ball colour is grey");
+            return true;
+        }
+        else if(hole.getColour()=='0'){
+            return true;
+        }
+        return false;
+
     }
 
     private void setFinished() {
@@ -126,24 +146,34 @@ public class Ball {
 
     private void handleWallCollision(Wall wall) {
         wall.hit();
-
+    
         float penetrationX = Math.min((position.x + radius) - wall.x1, wall.x2 - (position.x - radius));
         float penetrationY = Math.min((position.y + radius) - wall.y1, wall.y2 - (position.y - radius));
-
+    
         if (penetrationX < radius && penetrationY < radius) {
-            velocity.x = -velocity.x; 
+            velocity.x = -velocity.x;
             velocity.y = -velocity.y;
         } else if (penetrationX < penetrationY) {
-            position.x += position.x + radius > wall.x1 ? -(radius + 1) : (radius + 1);
+            // Move the ball slightly back in the opposite direction of collision
+            if (position.x + radius > wall.x1) {
+                position.x -= penetrationX + 1;
+            } else {
+                position.x += penetrationX + 1;
+            }
         } else {
-            position.y += position.y + radius > wall.y1 ? -(radius + 1) : (radius + 1);
+            if (position.y + radius > wall.y1) {
+                position.y -= penetrationY + 1;
+            } else {
+                position.y += penetrationY + 1;
+            }
         }
-
+    
+        // Reflect the velocity based on the wall's normal
         PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
         PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
         velocity = reflect(velocity, normal);
     }
-
+    
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
             char ballColor = this.colour;
@@ -198,9 +228,9 @@ public class Ball {
         float ballTop = position.y - radius;
         float ballBottom = position.y + radius;
 
-        boolean overlapX = (ballRight >= wall.x1 && ballLeft <= wall.x2);
-        boolean overlapY = (ballBottom >= wall.y1 && ballTop <= wall.y2);
-
+        boolean overlapX = (ballRight > wall.x1 && ballLeft < wall.x2);
+        boolean overlapY = (ballBottom > wall.y1 && ballTop < wall.y2);
+        
         return overlapX && overlapY;
     }
 }

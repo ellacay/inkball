@@ -9,19 +9,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class BallManager {
-    private final App app;
-    private final ImageLoader imageLoader;
+    private static App app;
+    private static ImageLoader imageLoader;
     public static List<Ball> ballsInPlay = new ArrayList<>();
     public static List<String> ballQueue;
 
-    public BallManager(App app, ImageLoader imageLoader) {
-        this.app = app;
-        this.imageLoader = imageLoader;
+    public BallManager(App appRef, ImageLoader imgLoader) {
+        app = appRef;
+        imageLoader = imgLoader;
         initializeBallQueue();
     }
 
     public void initializeBallQueue() {
-        ballQueue = new LinkedList<>(Arrays.asList("blue", "orange", "grey", "green", "yellow"));
+        ballQueue = new LinkedList<>(Arrays.asList("2", "1", "0", "3", "4"));
     }
 
     public void updateAndDisplayBalls() {
@@ -40,7 +40,6 @@ public class BallManager {
 
     private void spawnBall() {
         if (ballQueue.isEmpty()) return;
-
         String ballColor = ballQueue.remove(0);
         PImage ballImage = getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
@@ -52,7 +51,8 @@ public class BallManager {
         float velocityY = App.random.nextBoolean() ? 2 : -2;
         float x = BoardManager.spawner.x2; // Spawn from spawner
         float y = BoardManager.spawner.y2;
-        char colour = ballColor.charAt(3);
+   
+        char colour = ballColor.charAt(0);
         float radius = 10;
         BoardManager boardManager = new BoardManager(app, imageLoader);
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager, colour);
@@ -75,11 +75,20 @@ public class BallManager {
         }
     }
 
-    public void updateBallDisplay() {
+    public static void addToQueueAgain(Ball ball){
+        ballQueue.add(ball.getColour());
+        updateBallDisplay();
+        System.out.println("add to queue again");
+
+    }
+
+    public static void updateBallDisplay() {
         List<PImage> upcomingBalls = new ArrayList<>();
+
 
         for (int i = 0; i < Math.min(5, ballQueue.size()); i++) {
             String ballColor = ballQueue.get(i);
+            
             PImage ballImage = getBallImage(ballColor, imageLoader);
             if (ballImage != null) {
                 upcomingBalls.add(ballImage);
@@ -88,6 +97,7 @@ public class BallManager {
 
         int xOffset = 20;
         for (PImage img : upcomingBalls) {
+            
             app.image(img, xOffset, 20);
             xOffset += img.width;
         }
