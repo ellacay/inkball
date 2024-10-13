@@ -1,14 +1,12 @@
 package inkball.objects;
-
 import inkball.loaders.ImageLoader;
-import inkball.managers.BoardManager;
 import processing.core.PApplet;
 
 public class Wall {
     private PApplet app;
-    public float x1, y1, x2, y2; // Coordinates of the wall
-    private int hitCount = 0; // Tracks hits
-    public char colour; // Wall colour
+    public float x1, y1, x2, y2; 
+    private int hitCount = 0; 
+    public char colour; 
     private ImageLoader imageLoader;
     public boolean collided = false;
     public boolean isRemoved = false;
@@ -20,7 +18,7 @@ public class Wall {
         this.x2 = x2;
         this.y2 = y2;
         this.colour = colour;
-        this.imageLoader = imageLoader; // Make sure this is properly initialized
+        this.imageLoader = imageLoader; 
     }
 
     public void hit() {
@@ -28,33 +26,28 @@ public class Wall {
     }
 
     public boolean canBeDamagedBy(char ballColour) {
-        return this.colour == ballColour || this.colour == '0'; // Grey can be hit by any colour
+        return this.colour == ballColour || this.colour == '0'; 
     }
 
     public boolean isRemoved() {
-        return hitCount >= 3; // Wall is removed after 3 hits
+        return hitCount >= 3; 
     }
 
     public void display() {
         if (this.hitCount >= 3) {
-            // Apply tint for the tile to make it look different
-            app.tint(255, 255, 255, 128); // White tint with 50% transparency
+            app.tint(255, 255, 255, 128); 
             app.image(imageLoader.tile, this.x1, this.y1);
-            app.noTint(); // Reset tint for other images
+            app.noTint(); 
             this.isRemoved = true;
             return;
         }
-
-        // Apply tint based on hit count
         if (hitCount == 1) {
-            app.tint(255, 255, 255, 128); // White tint with 50% transparency for dimming effect
+            app.tint(255, 255, 255, 128); 
         } else if (hitCount == 3) {
-            app.tint(255, 255, 255, 64); // Lower transparency for smashed wall
+            app.tint(255, 255, 255, 64); 
         } else {
-            app.noTint(); // No tint for other cases
+            app.noTint(); 
         }
-
-        // Display wall image according to colour and hit count
         switch (this.colour) {
             case '0':
                 app.image(hitCount < 2 ? imageLoader.wall0 : imageLoader.smashedWall0, this.x1, this.y1);
@@ -72,8 +65,6 @@ public class Wall {
                 app.image(hitCount < 2 ? imageLoader.wall4 : imageLoader.smashedWall4, this.x1, this.y1);
                 break;
         }
-
-        // Reset tint for any subsequent drawing
         app.noTint();
     }
 

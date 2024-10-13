@@ -1,14 +1,11 @@
 package inkball.loaders;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -111,6 +108,5 @@ public class ConfigLoader {
 
     public static void main(String[] args) {
         readConfig();
-        // You can retrieve and use the level configurations here if needed
     }
 }

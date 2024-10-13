@@ -4,14 +4,9 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
 import inkball.loaders.ConfigLoader;
-import inkball.loaders.ImageLoader;
-
-import java.applet.Applet;
 import java.util.ArrayList;
 import java.util.List;
-
 import inkball.App;
-import inkball.loaders.ImageLoader;
 import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
 
@@ -30,10 +25,6 @@ public class Ball {
     private static final float SHRINK_RATE = 0.05f;
     private static final float STOPPING_THRESHOLD = 0.1f;
     private static final float NEAR_HOLE_DISTANCE = 32;
-    private static final float BOARD_LEFT = 0;
-    private static final float BOARD_RIGHT = 800; // Example width
-    private static final float BOARD_TOP = 0;
-    private static final float BOARD_BOTTOM = 600; // Example height
 
     public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius,
             BoardManager boardManager, char colour) {
@@ -63,7 +54,7 @@ public class Ball {
             if (isNearHole(hole)) {
                 float distanceToHole = PVector.dist(position, hole.getPosition());
                 PVector direction = PVector.sub(hole.getPosition(), position).normalize();
-                velocity = direction.mult(2); // Move towards the hole
+                velocity = direction.mult(2);
 
                 float shrinkAmount = PApplet.map(distanceToHole, 0, hole.getRadius(), SHRINK_RATE, 1);
                 radius = PApplet.max(radius - shrinkAmount, 0);
@@ -71,20 +62,18 @@ public class Ball {
                 position.add(velocity);
 
                 if (distanceToHole < STOPPING_THRESHOLD) {
-                    position = hole.getPosition().copy(); // Snap to hole's center
-                    velocity.set(0, 0); // Stop the ball
+                    position = hole.getPosition().copy();
+                    velocity.set(0, 0);
                 }
 
                 if (isCapturedByHole(hole) && !captured) {
 
                     if (!correctBall(hole)) {
-
                         BallManager.addToQueueAgain(this);
-
                     }
                     captured = true;
                     BoardManager.increaseScore(1);
-                    setFinished(); // Notify that this ball is finished
+                    setFinished();
                     boardManager.checkIfFinished();
                 }
             }
@@ -110,8 +99,8 @@ public class Ball {
     }
 
     private void setFinished() {
-        boardManager.addFinishedBall(); // Notify the board manager that this ball is finished
-        boardManager.removeBall(this); // Remove the ball from play
+        boardManager.addFinishedBall();
+        boardManager.removeBall(this);
     }
 
     private boolean isNearHole(Hole hole) {
@@ -120,7 +109,7 @@ public class Ball {
 
     private boolean isCapturedByHole(Hole hole) {
         boolean isPositionClose = PVector.dist(position, hole.getPosition()) < hole.getRadius();
-        boolean isSizeSmallEnough = radius <= hole.getRadius() * 0.5f;
+        boolean isSizeSmallEnough = radius <= hole.getRadius() * GRAVITY_STRENGTH;
         return isPositionClose && isSizeSmallEnough;
     }
 
@@ -129,10 +118,10 @@ public class Ball {
         for (Line line : App.lines) {
             if (isColliding(line)) {
                 reflect(line);
-                linesToRemove.add(line); // Mark for removal
+                linesToRemove.add(line); 
             }
         }
-        App.lines.removeAll(linesToRemove); // Remove marked lines
+        App.lines.removeAll(linesToRemove); 
     }
 
     private void applyCollisionLogic() {
@@ -153,62 +142,41 @@ public class Ball {
             }
 
         }
-
-        // Calculate the distance to the edges of the wall
         float leftEdge = wall.x1;
         float rightEdge = wall.x2;
         float topEdge = wall.y1;
         float bottomEdge = wall.y2;
 
-        // Calculate distances to each edge
-        float distanceToLeft = (position.x + radius) - leftEdge; // Right side of ball to left edge of wall
-        float distanceToRight = rightEdge - (position.x - radius); // Left side of ball to right edge of wall
-        float distanceToTop = (position.y + radius) - topEdge; // Bottom side of ball to top edge of wall
-        float distanceToBottom = bottomEdge - (position.y - radius); // Top side of ball to bottom edge of wall
+        float distanceToLeft = (position.x + radius) - leftEdge; 
+        float distanceToRight = rightEdge - (position.x - radius); 
+        float distanceToTop = (position.y + radius) - topEdge;
+        float distanceToBottom = bottomEdge - (position.y - radius);
 
-        // Determine the smallest penetration
         float minXPenetration = Math.min(distanceToLeft, distanceToRight);
         float minYPenetration = Math.min(distanceToTop, distanceToBottom);
 
-        PVector normal = new PVector(); // Normal vector for reflection
+        PVector normal = new PVector(); 
 
         if (minXPenetration < minYPenetration) {
-            // Horizontal Collision
             if (distanceToLeft < distanceToRight) {
-                // Collided with left side
-
-                position.x = leftEdge - radius; // Push the ball out
-                normal.set(1, 0); // Normal pointing right
+                position.x = leftEdge - radius; 
+                normal.set(1, 0); 
             } else {
-                // Collided with right side
-
-                position.x = rightEdge + radius; // Push the ball out
-                normal.set(-1, 0); // Normal pointing left
+                position.x = rightEdge + radius; 
+                normal.set(-1, 0); 
             }
-            velocity = reflect(velocity, normal); // Reflect the velocity
+            velocity = reflect(velocity, normal); 
         } else {
-            // Vertical Collision
             if (distanceToTop < distanceToBottom) {
-                // Collided with top side
-
-                position.y = topEdge - radius; // Push the ball out
-                normal.set(0, 1); // Normal pointing down
+                position.y = topEdge - radius; 
+                normal.set(0, 1); 
             } else {
-                // Collided with bottom side
-
-                position.y = bottomEdge + radius; // Push the ball out
-                normal.set(0, -1); // Normal pointing up
+                position.y = bottomEdge + radius; 
+                normal.set(0, -1); 
             }
-            velocity = reflect(velocity, normal); // Reflect the velocity
+            velocity = reflect(velocity, normal); 
         }
-
     }
-
-    // Stop the ball if it is no longer colliding with the wall
-
-    // PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
-    // PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
-    // velocity = reflect(velocity, normal);
 
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
@@ -272,39 +240,39 @@ public class Ball {
     }
 
     public PVector getPosition() {
-        return position.copy(); // Return a copy to prevent external modification
+        return position.copy();
     }
 
     public float getVelocityY() {
-        return velocity.y; // Return the Y component of the velocity vector
+        return velocity.y;
     }
 
     public float getVelocityX() {
-        return velocity.x; // Return the Y component of the velocity vector
+        return velocity.x;
     }
 
     public void setVelocityY(float newVelocity) {
-        velocity.y = newVelocity; // Return the Y component of the velocity vector
+        velocity.y = newVelocity;
     }
 
     public void setVelocityX(float newVelocity) {
-        velocity.x = newVelocity; // Return the Y component of the velocity vector
+        velocity.x = newVelocity;
     }
 
     public float getY() {
-        return position.y; // Return the Y component of the velocity vector
+        return position.y;
     }
 
     public float getX() {
-        return position.x; // Return the Y component of the velocity vector
+        return position.x;
     }
 
     public void setY(float newY) {
-        position.y = newY; // Return the Y component of the velocity vector
+        position.y = newY;
     }
 
     public void setX(float newX) {
-        position.x = newX; // Return the Y component of the velocity vector
+        position.x = newX;
     }
 
     public float getRadius() {

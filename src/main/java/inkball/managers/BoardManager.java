@@ -55,14 +55,14 @@ public class BoardManager {
                 float yPos = (y * cellSize) + App.TOPBAR;
 
                 boolean isPreviousCellBall = (x > 0 && board[y][x - 1] == 'B');
-
-                if ((cell >= '1' && cell <= '4') && !wallAdded[y][x] && !isPreviousCellBall) {
+                boolean isPreviousCellHole = (x > 0 && board[y][x - 1] == 'H');
+                if ((cell >= '1' && cell <= '4') && !wallAdded[y][x] && !isPreviousCellBall && !isPreviousCellHole) {
                     walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, cell, imageLoader));
                     wallAdded[y][x] = true;
-                } else if (cell == 'X' && !wallAdded[y][x] && !isPreviousCellBall) {
+                } else if (cell == 'X' && !wallAdded[y][x] && !isPreviousCellBall && !isPreviousCellHole) {
                     walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, '0', imageLoader));
                     wallAdded[y][x] = true;
-                } else if (isPreviousCellBall) {
+                } else if (isPreviousCellBall || isPreviousCellHole) {
                     // If the previous cell is a 'B', just add a tile image instead of a wall
                     app.image(imageLoader.tile, xPos, yPos);
                 }

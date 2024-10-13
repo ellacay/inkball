@@ -125,23 +125,17 @@ public class BallManager {
         float nextX = ball.getX() + ball.getVelocityX();
         float nextY = ball.getY() + ball.getVelocityY();
 
-        // Board boundaries
         float leftBoundary = 0;
         float rightBoundary = BoardManager.board[0].length * App.CELLSIZE;
         float topBoundary = App.TOPBAR;
         float bottomBoundary = BoardManager.board.length * App.CELLSIZE + App.TOPBAR;
 
-        // Check left and right boundaries
         if (nextX <= leftBoundary || nextX >= rightBoundary - ball.getRadius()) {
             ball.setVelocityX(-ball.getVelocityX());
         }
-
-        // Check top and bottom boundaries
         if (nextY <= topBoundary || nextY >= bottomBoundary - ball.getRadius()) {
             ball.setVelocityY(-ball.getVelocityY());
         }
-
-        // Update ball position
         ball.setX(nextX);
         ball.setY(nextY);
     }
