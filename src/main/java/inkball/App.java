@@ -15,7 +15,7 @@ import inkball.managers.BoardManager;
 import inkball.objects.Line;
 
 public class App extends PApplet {
-
+    public static int level = 1;
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
@@ -49,6 +49,12 @@ private boolean isPaused = false;
     public static final int BOARD_WIDTH = WIDTH/CELLSIZE;
     public static final int BOARD_HEIGHT = 20;
     public static final int INITIAL_PARACHUTES = 1;
+    public static List<ConfigLoader.LevelConfig> levels;
+    private int currentDirection = 0; // 0 = right, 1 = down, 2 = left, 3 = up
+    private int currentX = 0; // Current X position
+    private int currentY = 0; // Current Y position
+    // private final int TILE_SPEED = 1; // Speed of the tile movement
+
 
     ConfigLoader configLoader = new ConfigLoader();
     public double spawnTimer;
@@ -67,7 +73,9 @@ private boolean isPaused = false;
     
     @Override
     public void setup() {
-        frameRate(FPS);
+    levels = ConfigLoader.getLevelsConfig();
+
+    frameRate(FPS);
         ConfigLoader.readConfig();
         
         imageLoader = new ImageLoader(this);
@@ -77,32 +85,58 @@ private boolean isPaused = false;
         ballManager = new BallManager(this, imageLoader);
       
         
-        List<ConfigLoader.LevelConfig> levels = ConfigLoader.getLevelsConfig();
-        ConfigLoader.LevelConfig firstLevel = levels.get(0);
+     
+        ConfigLoader.LevelConfig firstLevel = levels.get(level);
         this.timer = firstLevel.time; 
         this.spawnInterval = firstLevel.spawnInterval;
         this.spawnTimer = firstLevel.spawnInterval;
 
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
+       // Set the initial position of the yellow tile
+    currentX = 0;
+    currentY = 0;
+}
 
-        yellowTiles = new ArrayList<>();
-        currentTileIndex = 0;
-    
-        // Define the positions of yellow tiles
-        for (int i = 0; i < BOARD_WIDTH; i++) {
-            yellowTiles.add(new PVector(i * CELLSIZE, 0)); // Top row
-        }
-        for (int i = 1; i < BOARD_HEIGHT; i++) {
-            yellowTiles.add(new PVector((BOARD_WIDTH - 1) * CELLSIZE, i * CELLSIZE)); // Right column
-        }
-        for (int i = BOARD_WIDTH - 2; i >= 0; i--) {
-            yellowTiles.add(new PVector(i * CELLSIZE, (BOARD_HEIGHT - 1) * CELLSIZE)); // Bottom row
-        }
-        for (int i = BOARD_HEIGHT - 2; i > 0; i--) {
-            yellowTiles.add(new PVector(0, i * CELLSIZE)); // Left column
-        }
+private void moveYellowTile() {
+    // Move the yellow tile in the current direction
+    switch (currentDirection) {
+        case 0: // Move right
+            currentX += TILE_SPEED;
+            if (currentX >= (BOARD_WIDTH - 1) * CELLSIZE) {
+                currentX = (BOARD_WIDTH - 1) * CELLSIZE; // Ensure it doesn't go out of bounds
+                currentDirection = 1; // Change direction to down
+            }
+            break;
+        case 1: // Move down
+            currentY += TILE_SPEED;
+            if (currentY >= (BOARD_HEIGHT - 1) * CELLSIZE) {
+                currentY = (BOARD_HEIGHT - 1) * CELLSIZE; // Ensure it doesn't go out of bounds
+                currentDirection = 2; // Change direction to left
+            }
+            break;
+        case 2: // Move left
+            currentX -= TILE_SPEED;
+            if (currentX < 0) {
+                currentX = 0; // Ensure it doesn't go out of bounds
+                currentDirection = 3; // Change direction to up
+            }
+            break;
+        case 3: // Move up
+            currentY -= TILE_SPEED;
+            if (currentY < 0) {
+                currentY = 0; // Ensure it doesn't go out of bounds
+                currentDirection = 0; // Change direction to right
+            }
+            break;
     }
+}
+
+private void displayYellowTiles() {
+    strokeWeight(0);
+    fill(255, 255, 0); // Yellow color
+    rect(currentX, currentY, CELLSIZE, CELLHEIGHT); // Draw single yellow tile at the current position
+}
 
    
     public void updateTimer() {
@@ -115,8 +149,7 @@ private boolean isPaused = false;
             spawnTimer -= 0.1; // Decrease by 0.1
         }
     }
-    
-    
+
 
     public void displayScore() {
         fill(0);
@@ -141,11 +174,16 @@ private boolean isPaused = false;
 public void draw() {
     if (!isPaused) {
         // Check if the game has ended
-        if (boardManager.checkIfFinished()) {
+        if (boardManager.checkIfFinished() && this.timer >0) {
+            displayWin();
+        } 
+        else if( this.timer < 0 ){
             displayGameOver();
-        } else {
+        }
+        else {
             // Update and display game elements
             updateAndDisplayGameElements();
+            handleLevelTransition();
         }
     } else {
         // Optionally, display a pause message or overlay
@@ -153,40 +191,11 @@ public void draw() {
     }
 
     
-    if (boardManager.checkIfFinished() && timer > 0) {
-        scoreIncrementTimer++;
-        if (scoreIncrementTimer >= SCORE_INCREMENT_RATE) {
-            score++; // Increment score
-            scoreIncrementTimer = 0; // Reset timer
-        }
-          // Move yellow tiles
-    if (frameCount % TILE_SPEED == 0) {
-        moveYellowTiles();
-    }
+    
     }
 
   
 
-  
-}
-
-private void moveYellowTiles() {
-    // Move the current yellow tile
-    currentTileIndex++;
-    if (currentTileIndex >= yellowTiles.size()) {
-        currentTileIndex = 0; // Loop back to the start
-    }
-}
-
-private void displayYellowTiles() {
-    fill(255, 255, 0); // Yellow color
-    for (int i = 0; i < yellowTiles.size(); i++) {
-        PVector tile = yellowTiles.get(i);
-        if (i == currentTileIndex) {
-            rect(tile.x, tile.y, CELLSIZE, CELLHEIGHT); // Draw yellow tile
-        }
-    }
-}
 
 
 public void mousePressed() {
@@ -258,6 +267,55 @@ private void displayGameOver() {
     text("Press 'R' to Restart", width / 2, height / 2 + 20);
 }
 
+private boolean levelWon = false; // New variable to track if the level has been won
+
+private void displayWin() {
+    background(255);
+    fill(0); // White text
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text("YOU WIN! MOVE ON TO NEXT LEVEL", width / 2, height / 2 - 20);
+    textSize(16);
+   
+    displayYellowTiles();
+    moveYellowTile();
+   
+    // Check if the timer is greater than 0 for scoring
+    if (this.timer > 0) {
+        scoreIncrementTimer++;
+        if (scoreIncrementTimer >= SCORE_INCREMENT_RATE) {
+            score++; // Increment score
+            scoreIncrementTimer = 0; // Reset timer
+        }
+    }
+
+    // Set levelWon to true after the win condition is displayed
+    levelWon = true; 
+    
+}
+
+// Call this method in the draw loop to handle level transition
+private void handleLevelTransition() {
+    if (levelWon) {
+        if (frameCount % 60 == 0) {
+            levelWon = false; // Reset the win state
+           
+
+            if (level++ < levels.size()) {
+                // Load the new level
+                level++; // Move to the next level
+  
+                loop();
+            } else {
+                System.out.println("No more levels available."); // Inform the user
+                level = 1;
+                displayGameOver(); // Handle game completion
+            }
+        }
+    }
+}
+
+
 private void updateAndDisplayGameElements() {
 background(255);
 
@@ -270,9 +328,9 @@ background(255);
     boardManager.displayBoard();
     ballManager.updateAndDisplayBalls();
     ballManager.handleBallSpawning();
-    ballManager.updateBallDisplay();
+    BallManager.updateBallDisplay();
     displayLines();
-    displayYellowTiles(); // Display yellow tiles
+    
 }
 private void displayLines() {
     for (Line line : lines) {

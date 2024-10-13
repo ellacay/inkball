@@ -15,6 +15,7 @@ import processing.data.JSONObject;
 public class ConfigLoader {
     
     public static class LevelConfig {
+        public int level;
         public String layout;
         public int time;
         public int spawnInterval;
@@ -56,19 +57,9 @@ public class ConfigLoader {
 
             levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncrease, scoreDecrease, balls));
 
-            // Debug output
-            System.out.println("Level Layout: " + layout);
-            System.out.println("Level Time: " + time);
-            System.out.println("Spawn Interval: " + spawnInterval);
-            System.out.println("Score Increase from Hole Capture: " + scoreIncrease);
-            System.out.println("Score Decrease from Wrong Hole Capture: " + scoreDecrease);
-            for (int m = 0; m < balls.length; m++) {
-                System.out.println("Ball " + m + ": " + balls[m]);
-            }
-            System.out.println();
         }
 
-        // Handle other configurations as needed
+
     }
 
     private static String readFileAsString(String fileName) {
@@ -85,8 +76,8 @@ public class ConfigLoader {
         return levelsConfig;
     }
 
-    public static char[][] setBoardArray() {
-        File file = new File("level1.txt");
+    public static char[][] setBoardArray(int index) {
+        File file = new File("level"+index+".txt");
 
 
         int rows = 0;

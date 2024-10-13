@@ -78,7 +78,7 @@ public class BallManager {
     public static void addToQueueAgain(Ball ball){
         ballQueue.add(ball.getColour());
         updateBallDisplay();
-        System.out.println("add to queue again");
+
 
     }
 

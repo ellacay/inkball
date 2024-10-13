@@ -9,6 +9,7 @@ public class Wall {
     private int hitCount = 0; // Tracks hits
     public char color; // Wall color
     private ImageLoader imageLoader;
+    public boolean collided = false;
 
     public Wall(PApplet app, float x1, float y1, float x2, float y2, char color, ImageLoader imageLoader) {
         this.app = app;
@@ -31,6 +32,19 @@ public class Wall {
         return hitCount >= 3; // Wall is removed after 3 hits
     }
 
+
+    // public void display() {
+    //     app.stroke(255, 0, 0); // Set color to red for visibility
+    //     app.strokeWeight(3); // Increase stroke weight for better visibility
+
+    //     // Draw horizontal lines
+    //     app.line(x1, y1, x2, y1); // Top edge
+    //     app.line(x1, y2, x2, y2); // Bottom edge
+
+    //     // Draw vertical lines
+    //     app.line(x1, y1, x1, y2); // Left edge
+    //     app.line(x2, y1, x2, y2); // Right edge
+    // }
     public void display() {
 
         switch(this.color){

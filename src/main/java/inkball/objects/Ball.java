@@ -79,7 +79,7 @@ public class Ball {
                     if(!correctBall(hole)){
                         
                         BallManager.addToQueueAgain(this);
-                        System.out.println("Wrong colour");
+                       
                     }
                     captured = true;
                     BoardManager.increaseScore(1);
@@ -95,12 +95,12 @@ public class Ball {
     }
 
     private boolean correctBall(Hole hole){
-        System.out.println("colour"+this.colour);
+      
         if(this.colour == hole.getColour()){
             return true;
         }
         else if(this.colour == '0'){
-            System.out.println("ball colour is grey");
+   
             return true;
         }
         else if(hole.getColour()=='0'){
@@ -147,33 +147,70 @@ public class Ball {
     private void handleWallCollision(Wall wall) {
         wall.hit();
     
-        float penetrationX = Math.min((position.x + radius) - wall.x1, wall.x2 - (position.x - radius));
-        float penetrationY = Math.min((position.y + radius) - wall.y1, wall.y2 - (position.y - radius));
+
+        // Calculate the distance to the edges of the wall
+        float leftEdge = wall.x1;
+        float rightEdge = wall.x2;
+        float topEdge = wall.y1;
+        float bottomEdge = wall.y2;
     
-        if (penetrationX < radius && penetrationY < radius) {
-            velocity.x = -velocity.x;
-            velocity.y = -velocity.y;
-        } else if (penetrationX < penetrationY) {
-            // Move the ball slightly back in the opposite direction of collision
-            if (position.x + radius > wall.x1) {
-                position.x -= penetrationX + 1;
+        // Calculate distances to each edge
+        float distanceToLeft = (position.x + radius) - leftEdge;   // Right side of ball to left edge of wall
+        float distanceToRight = rightEdge - (position.x - radius); // Left side of ball to right edge of wall
+        float distanceToTop = (position.y + radius) - topEdge;     // Bottom side of ball to top edge of wall
+        float distanceToBottom = bottomEdge - (position.y - radius); // Top side of ball to bottom edge of wall
+    
+        // Determine the smallest penetration
+        float minXPenetration = Math.min(distanceToLeft, distanceToRight);
+        float minYPenetration = Math.min(distanceToTop, distanceToBottom);
+    
+        PVector normal = new PVector(); // Normal vector for reflection
+    
+        if (minXPenetration < minYPenetration) {
+            // Horizontal Collision
+            if (distanceToLeft < distanceToRight) {
+                // Collided with left side
+
+                position.x = leftEdge - radius; // Push the ball out
+                normal.set(1, 0); // Normal pointing right
             } else {
-                position.x += penetrationX + 1;
+                // Collided with right side
+          
+                position.x = rightEdge + radius; // Push the ball out
+                normal.set(-1, 0); // Normal pointing left
             }
+            velocity = reflect(velocity, normal); // Reflect the velocity
         } else {
-            if (position.y + radius > wall.y1) {
-                position.y -= penetrationY + 1;
+            // Vertical Collision
+            if (distanceToTop < distanceToBottom) {
+                // Collided with top side
+
+                position.y = topEdge - radius; // Push the ball out
+                normal.set(0, 1); // Normal pointing down
             } else {
-                position.y += penetrationY + 1;
-            }
-        }
+                // Collided with bottom side
     
-        // Reflect the velocity based on the wall's normal
-        PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
-        PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
-        velocity = reflect(velocity, normal);
+                position.y = bottomEdge + radius; // Push the ball out
+                normal.set(0, -1); // Normal pointing up
+            }
+            velocity = reflect(velocity, normal); // Reflect the velocity
+        }
+        
+
     }
     
+        // Stop the ball if it is no longer colliding with the wall
+       
+           
+        
+    
+    
+    
+        // PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
+        // PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
+        // velocity = reflect(velocity, normal);
+    
+
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
             char ballColor = this.colour;

@@ -23,8 +23,9 @@ public class BoardManager {
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
+  
     public boolean ballSpawned = false;
-    private int finishedBallCount;
+    private static int finishedBallCount;
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -32,14 +33,14 @@ public class BoardManager {
     }
 
     public void loadBoard() {
-        board = ConfigLoader.setBoardArray();
+        board = ConfigLoader.setBoardArray(App.level);
         if (board == null) {
             System.err.println("Failed to load board configuration.");
             app.exit();
         }
         initializeWalls();
         initializeHoles();
-        printWallGrid();
+
     }
 
     private void initializeWalls() {
@@ -56,12 +57,13 @@ public class BoardManager {
                 boolean isPreviousCellHole = (x > 0 && board[y][x - 1] == 'H');
 
                 if ((cell >= '1' && cell <= '4') && !wallAdded[y][x] && !isPreviousCellHole) {
-                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos, cell, imageLoader));
+                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, cell, imageLoader)); // Correctly set y2
                     wallAdded[y][x] = true;
                 } else if (cell == 'X' && !wallAdded[y][x]) {
-                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos, '0', imageLoader));
+                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, '0', imageLoader)); // Set y2 for vertical walls as needed
                     wallAdded[y][x] = true;
                 }
+                
             }
         }
     }
@@ -82,14 +84,25 @@ public class BoardManager {
 
     public void addFinishedBall() {
         finishedBallCount++;
+     
     }
+    
 
     public boolean checkIfFinished() {
-        if (finishedBallCount >= BallManager.ballsInPlay.size() + BallManager.ballQueue.size()) {
-            System.out.println("Finished!");
+        // System.out.println("Checking");
+        // System.out.println(this.finishedBallCount);
+        // System.out.println(BallManager.ballsInPlay.size() + BallManager.ballQueue.size());
+
+        if(finishedBallCount==1){
             return true;
         }
         return false;
+
+        // if (finishedBallCount >= BallManager.ballsInPlay.size() + BallManager.ballQueue.size()) {
+        //     System.out.println("Finished!");
+        //     return true;
+        // }
+        // return false;
     }
 
     public void reset() {
@@ -99,38 +112,9 @@ public class BoardManager {
         balls.clear();
         loadBoard();
     }
-public void printWallGrid() {
-    int rows = board.length;
-    int cols = board[0].length;
-    char[][] grid = new char[rows][cols];
-
-    // Initialize the grid with spaces
-    for (int y = 0; y < rows; y++) {
-        Arrays.fill(grid[y], ' ');
-    }
-
-    // Mark wall positions in the grid
-    for (Wall wall : walls) {
-        int x = (int) (wall.x1 / App.CELLSIZE);
-        int y = (int) ((wall.y1 - App.TOPBAR) / App.CELLSIZE);
-        if (x >= 0 && y >= 0 && y < rows && x < cols) {
-            grid[y][x] = '#';
-        }
-    }
-
-    // Print the grid
-    for (int y = 0; y < rows; y++) {
-        for (int x = 0; x < cols; x++) {
-            System.out.print(grid[y][x]);
-            if (x < cols - 1) System.out.print(" ");
-        }
-        System.out.println();
-    }
-}
-
     public static void increaseScore(int baseScore) {
         score += baseScore + 1;
-        System.out.println("Score increased! Current score: " + score);
+    
     }
 
     public void displayBoard() {
