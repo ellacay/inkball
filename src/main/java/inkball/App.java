@@ -20,6 +20,7 @@ public class App extends PApplet {
     private BallManager ballManager;
     private BoardManager boardManager;
     public int spawnInterval;
+    public boolean gameWon;
 
     public static List<Line> lines = new ArrayList<>(); // Make it static or instance variable based on your needs
     public static List<PVector> currentLinePoints = new ArrayList<>(); // For storing points of the current line
@@ -86,7 +87,7 @@ private boolean isPaused = false;
       
         
      
-        ConfigLoader.LevelConfig firstLevel = levels.get(level);
+        ConfigLoader.LevelConfig firstLevel = levels.get(level-1);
         this.timer = firstLevel.time; 
         this.spawnInterval = firstLevel.spawnInterval;
         this.spawnTimer = firstLevel.spawnInterval;
@@ -169,30 +170,48 @@ private void displayYellowTiles() {
         textSize(16);
         text("Spawn Interval: " + String.format("%.1f", this.spawnTimer), WIDTH - 350, 40);
     }
-
     @Override
-public void draw() {
-    if (!isPaused) {
-        // Check if the game has ended
-        if (boardManager.checkIfFinished() && this.timer >0) {
-            displayWin();
-        } 
-        else if( this.timer < 0 ){
-            displayGameOver();
+    public void draw() {
+        background(255);
+        if (!isPaused) {
+            // Check if the game has ended
+            if(gameWon){
+                displayGameOver();
+            }
+            else if (boardManager.checkIfFinished() && this.timer > 0) {
+                displayWin();
+            } else if (this.timer < 0) {
+                displayGameOver();
+            } else {
+                // Update and display game elements
+                updateAndDisplayGameElements();
+            }
+        } else {
+            // Optionally, display a pause message or overlay
+            displayPauseOverlay();
         }
-        else {
-            // Update and display game elements
-            updateAndDisplayGameElements();
-            handleLevelTransition();
+    
+        // Manage yellow tile movement after a win
+        if (isMovingTiles) {
+            
+            moveYellowTile();
+            displayYellowTiles();
+            moveTimer++; // Increment move timer
+          
+            // Stop moving after a certain duration (adjust as needed)
+            if (moveTimer > 60) { // 60 frames (2 seconds at 30 FPS)
+                isMovingTiles = false; // Stop moving tiles
+                levelWon = true; // Allow level transition
+                handleLevelTransition(); // Call to transition to the next level
+            }
         }
-    } else {
-        // Optionally, display a pause message or overlay
-        displayPauseOverlay();
-    }
 
-    
-    
+          // Check for restart input even when the game is over
+    if (keyPressed && key == 'r') {
+        restartGame(); // Restart the game if 'R' is pressed
     }
+    }
+    
 
   
 
@@ -254,8 +273,11 @@ private void displayPauseOverlay() {
     textAlign(CENTER, CENTER);
     text("PAUSED", width / 2, height / 2);
 }
+private boolean isMovingTiles = false; // Flag to check if the yellow tiles are moving
+private static int moveTimer = 0; // Timer for managing the move duration
 
 private void displayGameOver() {
+    background(255);
     fill(0, 0, 0, 150); // Semi-transparent black background
     rect(0, 0, width, height); // Cover the entire screen
 
@@ -276,10 +298,11 @@ private void displayWin() {
     textAlign(CENTER, CENTER);
     text("YOU WIN! MOVE ON TO NEXT LEVEL", width / 2, height / 2 - 20);
     textSize(16);
-   
-    displayYellowTiles();
-    moveYellowTile();
-   
+    
+    // Start moving the yellow tiles
+    isMovingTiles = true; // Set the flag to true
+
+
     // Check if the timer is greater than 0 for scoring
     if (this.timer > 0) {
         scoreIncrementTimer++;
@@ -291,25 +314,38 @@ private void displayWin() {
 
     // Set levelWon to true after the win condition is displayed
     levelWon = true; 
-    
 }
 
 // Call this method in the draw loop to handle level transition
 private void handleLevelTransition() {
+    // isMovingTiles = false; // Stop moving tiles
+    // levelWon = true; // Allow level transition
+
     if (levelWon) {
         if (frameCount % 60 == 0) {
             levelWon = false; // Reset the win state
-           
+            level++; // Move to the next level
+            print("Level Size: "+levels.size());
+            print("Level: "+level);
 
-            if (level++ < levels.size()) {
+            if (level <= levels.size()) {
+            
                 // Load the new level
-                level++; // Move to the next level
-  
+              
+                // Reset the timer or spawn the new level state if needed
+                this.spawnTimer = levels.get(level-1).spawnInterval; // Set new spawn interval
+                this.timer = levels.get(level-1).time; // Set new time from level config 
+                lines.clear();
+                restartGame();
                 loop();
             } else {
+                level = levels.size();
+                gameWon= true;
+
                 System.out.println("No more levels available."); // Inform the user
-                level = 1;
-                displayGameOver(); // Handle game completion
+             
+                draw();
+                // noLoop(); // Stop the draw loop
             }
         }
     }
@@ -371,8 +407,6 @@ public void mouseReleased() {
             isPaused = !isPaused;
         }
     }
-   
-
     private void restartGame() {
         boardManager.reset(); // Reset the board manager
         ballManager.reset(); // Reset the ball manager if needed
