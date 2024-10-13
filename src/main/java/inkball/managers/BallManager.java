@@ -1,4 +1,5 @@
 package inkball.managers;
+
 import inkball.objects.Ball;
 import inkball.App;
 import inkball.loaders.ImageLoader;
@@ -26,7 +27,9 @@ public class BallManager {
 
     public void updateAndDisplayBalls() {
         for (Ball ball : ballsInPlay) {
+
             ball.update();
+            updateBallPosition(ball);
             ball.display();
         }
     }
@@ -39,7 +42,8 @@ public class BallManager {
     }
 
     private void spawnBall() {
-        if (ballQueue.isEmpty()) return;
+        if (ballQueue.isEmpty())
+            return;
         String ballColor = ballQueue.remove(0);
         PImage ballImage = getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
@@ -51,7 +55,7 @@ public class BallManager {
         float velocityY = App.random.nextBoolean() ? 2 : -2;
         float x = BoardManager.spawner.x2; // Spawn from spawner
         float y = BoardManager.spawner.y2;
-   
+
         char colour = ballColor.charAt(0);
         float radius = 10;
         BoardManager boardManager = new BoardManager(app, imageLoader);
@@ -61,34 +65,43 @@ public class BallManager {
 
     public static PImage getBallImage(String color, ImageLoader imageLoader) {
         switch (color) {
-            case "blue": return imageLoader.ball0;
-            case "orange": return imageLoader.ball1;
-            case "grey": return imageLoader.ball2;
-            case "green": return imageLoader.ball3;
-            case "yellow": return imageLoader.ball4;
-            case "0": return imageLoader.ball0;
-            case "1": return imageLoader.ball1;
-            case "2": return imageLoader.ball2;
-            case "3": return imageLoader.ball3;
-            case "4": return imageLoader.ball4;
-            default: return null;
+            case "blue":
+                return imageLoader.ball0;
+            case "orange":
+                return imageLoader.ball1;
+            case "grey":
+                return imageLoader.ball2;
+            case "green":
+                return imageLoader.ball3;
+            case "yellow":
+                return imageLoader.ball4;
+            case "0":
+                return imageLoader.ball0;
+            case "1":
+                return imageLoader.ball1;
+            case "2":
+                return imageLoader.ball2;
+            case "3":
+                return imageLoader.ball3;
+            case "4":
+                return imageLoader.ball4;
+            default:
+                return null;
         }
     }
 
-    public static void addToQueueAgain(Ball ball){
+    public static void addToQueueAgain(Ball ball) {
         ballQueue.add(ball.getColour());
         updateBallDisplay();
-
 
     }
 
     public static void updateBallDisplay() {
         List<PImage> upcomingBalls = new ArrayList<>();
 
-
         for (int i = 0; i < Math.min(5, ballQueue.size()); i++) {
             String ballColor = ballQueue.get(i);
-            
+
             PImage ballImage = getBallImage(ballColor, imageLoader);
             if (ballImage != null) {
                 upcomingBalls.add(ballImage);
@@ -97,7 +110,7 @@ public class BallManager {
 
         int xOffset = 20;
         for (PImage img : upcomingBalls) {
-            
+
             app.image(img, xOffset, 20);
             xOffset += img.width;
         }
@@ -107,4 +120,30 @@ public class BallManager {
         ballsInPlay.clear();
         initializeBallQueue();
     }
+
+    public void updateBallPosition(Ball ball) {
+        float nextX = ball.getX() + ball.getVelocityX();
+        float nextY = ball.getY() + ball.getVelocityY();
+
+        // Board boundaries
+        float leftBoundary = 0;
+        float rightBoundary = BoardManager.board[0].length * App.CELLSIZE;
+        float topBoundary = App.TOPBAR;
+        float bottomBoundary = BoardManager.board.length * App.CELLSIZE + App.TOPBAR;
+
+        // Check left and right boundaries
+        if (nextX <= leftBoundary || nextX >= rightBoundary - ball.getRadius()) {
+            ball.setVelocityX(-ball.getVelocityX());
+        }
+
+        // Check top and bottom boundaries
+        if (nextY <= topBoundary || nextY >= bottomBoundary - ball.getRadius()) {
+            ball.setVelocityY(-ball.getVelocityY());
+        }
+
+        // Update ball position
+        ball.setX(nextX);
+        ball.setY(nextY);
+    }
+
 }

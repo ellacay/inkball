@@ -13,7 +13,8 @@ public class Line {
     }
 
     public PVector getStart() {
-        return points.get(0);}
+        return points.get(0);
+    }
 
     public PVector getEnd() {
         return points.get(points.size() - 1);
@@ -21,7 +22,7 @@ public class Line {
 
     public void display(PApplet applet) {
         applet.strokeWeight(10);
-    
+
         applet.noFill();
         applet.beginShape();
         for (PVector point : points) {

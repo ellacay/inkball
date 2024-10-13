@@ -23,7 +23,7 @@ public class BoardManager {
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
-  
+
     public boolean ballSpawned = false;
     private static int finishedBallCount;
 
@@ -54,16 +54,18 @@ public class BoardManager {
                 float xPos = x * cellSize;
                 float yPos = (y * cellSize) + App.TOPBAR;
 
-                boolean isPreviousCellHole = (x > 0 && board[y][x - 1] == 'H');
+                boolean isPreviousCellBall = (x > 0 && board[y][x - 1] == 'B');
 
-                if ((cell >= '1' && cell <= '4') && !wallAdded[y][x] && !isPreviousCellHole) {
-                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, cell, imageLoader)); // Correctly set y2
+                if ((cell >= '1' && cell <= '4') && !wallAdded[y][x] && !isPreviousCellBall) {
+                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, cell, imageLoader));
                     wallAdded[y][x] = true;
-                } else if (cell == 'X' && !wallAdded[y][x]) {
-                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, '0', imageLoader)); // Set y2 for vertical walls as needed
+                } else if (cell == 'X' && !wallAdded[y][x] && !isPreviousCellBall) {
+                    walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, '0', imageLoader));
                     wallAdded[y][x] = true;
+                } else if (isPreviousCellBall) {
+                    // If the previous cell is a 'B', just add a tile image instead of a wall
+                    app.image(imageLoader.tile, xPos, yPos);
                 }
-                
             }
         }
     }
@@ -84,23 +86,24 @@ public class BoardManager {
 
     public void addFinishedBall() {
         finishedBallCount++;
-     
+
     }
-    
 
     public boolean checkIfFinished() {
         // System.out.println("Checking");
         // System.out.println(this.finishedBallCount);
-        // System.out.println(BallManager.ballsInPlay.size() + BallManager.ballQueue.size());
+        // System.out.println(BallManager.ballsInPlay.size() +
+        // BallManager.ballQueue.size());
 
-        if(finishedBallCount==1){
+        if (finishedBallCount == 1) {
             return true;
         }
         return false;
 
-        // if (finishedBallCount >= BallManager.ballsInPlay.size() + BallManager.ballQueue.size()) {
-        //     System.out.println("Finished!");
-        //     return true;
+        // if (finishedBallCount >= BallManager.ballsInPlay.size() +
+        // BallManager.ballQueue.size()) {
+        // System.out.println("Finished!");
+        // return true;
         // }
         // return false;
     }
@@ -112,9 +115,10 @@ public class BoardManager {
         balls.clear();
         loadBoard();
     }
+
     public static void increaseScore(int baseScore) {
         score += baseScore + 1;
-    
+
     }
 
     public void displayBoard() {
@@ -130,14 +134,15 @@ public class BoardManager {
 
                     switch (cell) {
                         case 'B':
+                            app.image(imageLoader.tile, xPos, yPos);
                             if (!ballSpawned && x + 1 < board[y].length) {
+
                                 char nextCell = board[y][x + 1];
                                 spawnBallAtPosition(xPos, yPos, Character.toString(nextCell));
                                 ballSpawned = true;
+
                             }
-                            app.image(imageLoader.tile, xPos, yPos);
-                            x++;
-                            app.image(imageLoader.tile, xPos, yPos);
+
                             break;
                         case 'H':
                             handleHoleCell(x, y, xPos, yPos);
@@ -157,9 +162,16 @@ public class BoardManager {
                     }
                 }
             }
+
+            List<Wall> wallsToRemove = new ArrayList<>();
             for (Wall wall : walls) {
                 wall.display();
+                if (wall.isRemoved()) {
+                    wallsToRemove.add(wall);
+                }
             }
+            walls.removeAll(wallsToRemove); // Remove all marked walls after iteration
+
         }
     }
 
@@ -187,12 +199,24 @@ public class BoardManager {
         if (x + 1 < board[y].length) {
             char nextCell = board[y][x + 1];
             switch (nextCell) {
-                case '0': app.image(imageLoader.hole0, xPos, yPos); break;
-                case '1': app.image(imageLoader.hole1, xPos, yPos); break;
-                case '2': app.image(imageLoader.hole2, xPos, yPos); break;
-                case '3': app.image(imageLoader.hole3, xPos, yPos); break;
-                case '4': app.image(imageLoader.hole4, xPos, yPos); break;
-                default: app.image(imageLoader.tile, xPos, yPos); break;
+                case '0':
+                    app.image(imageLoader.hole0, xPos, yPos);
+                    break;
+                case '1':
+                    app.image(imageLoader.hole1, xPos, yPos);
+                    break;
+                case '2':
+                    app.image(imageLoader.hole2, xPos, yPos);
+                    break;
+                case '3':
+                    app.image(imageLoader.hole3, xPos, yPos);
+                    break;
+                case '4':
+                    app.image(imageLoader.hole4, xPos, yPos);
+                    break;
+                default:
+                    app.image(imageLoader.tile, xPos, yPos);
+                    break;
             }
         } else {
             app.image(imageLoader.tile, xPos, yPos);

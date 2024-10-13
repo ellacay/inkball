@@ -3,6 +3,7 @@ package inkball.objects;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
+import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
 
 import java.applet.Applet;
@@ -18,7 +19,7 @@ public class Ball {
     private PApplet app;
     private PImage image;
     private PVector position;
-    private PVector velocity;
+    public PVector velocity;
     private float radius;
     private char colour;
     private boolean captured = false;
@@ -34,7 +35,8 @@ public class Ball {
     private static final float BOARD_TOP = 0;
     private static final float BOARD_BOTTOM = 600; // Example height
 
-    public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius, BoardManager boardManager, char colour) {
+    public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius,
+            BoardManager boardManager, char colour) {
         this.app = app;
         this.colour = colour;
         this.image = image;
@@ -52,10 +54,9 @@ public class Ball {
         position.add(velocity);
         applyCollisionLogic();
         gravitateTowardsHole();
-  
+
         handleLineCollisions();
     }
-
 
     private void gravitateTowardsHole() {
         for (Hole hole : BoardManager.holes) {
@@ -76,10 +77,10 @@ public class Ball {
 
                 if (isCapturedByHole(hole) && !captured) {
 
-                    if(!correctBall(hole)){
-                        
+                    if (!correctBall(hole)) {
+
                         BallManager.addToQueueAgain(this);
-                       
+
                     }
                     captured = true;
                     BoardManager.increaseScore(1);
@@ -90,20 +91,18 @@ public class Ball {
         }
     }
 
-    public String getColour(){
+    public String getColour() {
         return Character.toString(this.colour);
     }
 
-    private boolean correctBall(Hole hole){
-      
-        if(this.colour == hole.getColour()){
+    private boolean correctBall(Hole hole) {
+
+        if (this.colour == hole.getColour()) {
             return true;
-        }
-        else if(this.colour == '0'){
-   
+        } else if (this.colour == '0') {
+
             return true;
-        }
-        else if(hole.getColour()=='0'){
+        } else if (hole.getColour() == '0') {
             return true;
         }
         return false;
@@ -145,27 +144,34 @@ public class Ball {
     }
 
     private void handleWallCollision(Wall wall) {
-        wall.hit();
-    
+
+        if (ConfigLoader.extensionFeature) {
+            if (this.colour == wall.colour) {
+                wall.hit();
+            } else if (wall.colour == 0) {
+                wall.hit();
+            }
+
+        }
 
         // Calculate the distance to the edges of the wall
         float leftEdge = wall.x1;
         float rightEdge = wall.x2;
         float topEdge = wall.y1;
         float bottomEdge = wall.y2;
-    
+
         // Calculate distances to each edge
-        float distanceToLeft = (position.x + radius) - leftEdge;   // Right side of ball to left edge of wall
+        float distanceToLeft = (position.x + radius) - leftEdge; // Right side of ball to left edge of wall
         float distanceToRight = rightEdge - (position.x - radius); // Left side of ball to right edge of wall
-        float distanceToTop = (position.y + radius) - topEdge;     // Bottom side of ball to top edge of wall
+        float distanceToTop = (position.y + radius) - topEdge; // Bottom side of ball to top edge of wall
         float distanceToBottom = bottomEdge - (position.y - radius); // Top side of ball to bottom edge of wall
-    
+
         // Determine the smallest penetration
         float minXPenetration = Math.min(distanceToLeft, distanceToRight);
         float minYPenetration = Math.min(distanceToTop, distanceToBottom);
-    
+
         PVector normal = new PVector(); // Normal vector for reflection
-    
+
         if (minXPenetration < minYPenetration) {
             // Horizontal Collision
             if (distanceToLeft < distanceToRight) {
@@ -175,7 +181,7 @@ public class Ball {
                 normal.set(1, 0); // Normal pointing right
             } else {
                 // Collided with right side
-          
+
                 position.x = rightEdge + radius; // Push the ball out
                 normal.set(-1, 0); // Normal pointing left
             }
@@ -189,27 +195,20 @@ public class Ball {
                 normal.set(0, 1); // Normal pointing down
             } else {
                 // Collided with bottom side
-    
+
                 position.y = bottomEdge + radius; // Push the ball out
                 normal.set(0, -1); // Normal pointing up
             }
             velocity = reflect(velocity, normal); // Reflect the velocity
         }
-        
 
     }
-    
-        // Stop the ball if it is no longer colliding with the wall
-       
-           
-        
-    
-    
-    
-        // PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
-        // PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
-        // velocity = reflect(velocity, normal);
-    
+
+    // Stop the ball if it is no longer colliding with the wall
+
+    // PVector wallDirection = new PVector(wall.x2 - wall.x1, wall.y2 - wall.y1);
+    // PVector normal = new PVector(-wallDirection.y, wallDirection.x).normalize();
+    // velocity = reflect(velocity, normal);
 
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
@@ -252,7 +251,8 @@ public class Ball {
         float dotProduct = PVector.dot(velocity, normal);
         velocity.sub(PVector.mult(normal, 2 * dotProduct));
 
-        PVector closestPoint = PVector.add(line.getStart(), PVector.mult(lineDirection, PVector.dot(PVector.sub(position, line.getStart()), lineDirection)));
+        PVector closestPoint = PVector.add(line.getStart(),
+                PVector.mult(lineDirection, PVector.dot(PVector.sub(position, line.getStart()), lineDirection)));
         float penetrationDepth = radius - PVector.dist(position, closestPoint);
         if (penetrationDepth > 0) {
             position.add(PVector.mult(normal, penetrationDepth + 1));
@@ -267,8 +267,56 @@ public class Ball {
 
         boolean overlapX = (ballRight > wall.x1 && ballLeft < wall.x2);
         boolean overlapY = (ballBottom > wall.y1 && ballTop < wall.y2);
-        
+
         return overlapX && overlapY;
     }
-}
 
+    public PVector getPosition() {
+        return position.copy(); // Return a copy to prevent external modification
+    }
+
+    public float getVelocityY() {
+        return velocity.y; // Return the Y component of the velocity vector
+    }
+
+    public float getVelocityX() {
+        return velocity.x; // Return the Y component of the velocity vector
+    }
+
+    public void setVelocityY(float newVelocity) {
+        velocity.y = newVelocity; // Return the Y component of the velocity vector
+    }
+
+    public void setVelocityX(float newVelocity) {
+        velocity.x = newVelocity; // Return the Y component of the velocity vector
+    }
+
+    public float getY() {
+        return position.y; // Return the Y component of the velocity vector
+    }
+
+    public float getX() {
+        return position.x; // Return the Y component of the velocity vector
+    }
+
+    public void setY(float newY) {
+        position.y = newY; // Return the Y component of the velocity vector
+    }
+
+    public void setX(float newX) {
+        position.x = newX; // Return the Y component of the velocity vector
+    }
+
+    public float getRadius() {
+        return radius;
+    }
+
+    public char getCharColour() {
+        return colour;
+    }
+
+    public boolean isCaptured() {
+        return captured;
+    }
+
+}

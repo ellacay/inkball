@@ -13,7 +13,9 @@ import processing.data.JSONArray;
 import processing.data.JSONObject;
 
 public class ConfigLoader {
-    
+
+    public static boolean extensionFeature = true;
+
     public static class LevelConfig {
         public int level;
         public String layout;
@@ -59,7 +61,6 @@ public class ConfigLoader {
 
         }
 
-
     }
 
     private static String readFileAsString(String fileName) {
@@ -77,15 +78,12 @@ public class ConfigLoader {
     }
 
     public static char[][] setBoardArray(int index) {
-        File file = new File("level"+index+".txt");
-
+        File file = new File("level" + index + ".txt");
 
         int rows = 0;
         int cols = 0;
 
-
         List<String> lines = new ArrayList<>();
-
 
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
