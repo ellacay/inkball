@@ -8,6 +8,7 @@ import inkball.objects.Spawner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 import java.util.Arrays;
@@ -16,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BallManagerTest {
     private App app;
+    
     private ImageLoader imageLoader;
     private BallManager ballManager;
 
     @BeforeEach
     void setUp() {
         app = new App(); // Instantiate your main application
+           PApplet.runSketch(new String[] {"inkball.App"}, app);
         imageLoader = new ImageLoader(app); // Initialize your ImageLoader
         ballManager = new BallManager(app, imageLoader);
         

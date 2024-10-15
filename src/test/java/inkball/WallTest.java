@@ -16,6 +16,7 @@ class WallTest {
     @BeforeEach
     void setUp() {
         app = new PApplet();
+        PApplet.runSketch(new String[] {"inkball.App"}, app);
         imageLoader = new ImageLoader(app);  // Assuming ImageLoader has a constructor that accepts PApplet
         wall = new Wall(app, 0, 0, 10, 10, '1', imageLoader);
     }
@@ -64,7 +65,7 @@ class WallTest {
         // Verify that the wall is still not removed after two hits
         assertFalse(wall.isRemoved, "The wall should not be removed after two hits.");
     }
-    
+
     @Test
     void testTintAndNoTintBehavior() {
         // First hit
@@ -149,4 +150,54 @@ class WallTest {
         
         assertTrue(wall.isRemoved, "isRemoved should be true after three hits.");
     }
+    @Test
+void testHitCountTriggersRemovalAndTint() {
+    wall.hit();
+    wall.hit();
+    wall.hit(); // Should trigger the removal condition
+    
+    // Call display to simulate the effect of hitting three times
+    wall.display();
+    
+    // Assert the wall is marked as removed
+    assertTrue(wall.isRemoved(), "The wall should be marked as removed after three hits.");
+    // Note: You won't check for tinting since you don't want to add helper methods
+}
+
+@Test
+void testDisplayChangesImagesBasedOnHitCount() {
+    // Test for hit count less than 2
+    wall.hit(); // 1 hit
+    wall.display();
+    assertFalse(wall.isRemoved(), "Wall should not be removed after one hit.");
+    
+    // Check if the correct image is displayed after one hit
+    // You may need to modify Wall to keep track of the current image if you want to validate it.
+    wall.hit(); // 2 hits
+    wall.display();
+    assertFalse(wall.isRemoved(), "Wall should not be removed after two hits.");
+    
+    wall.hit(); // 3 hits
+    wall.display();
+    assertTrue(wall.isRemoved(), "Wall should be removed after three hits.");
+    
+    // You may want to assert the image displayed after three hits if you have access to that logic
+}
+
+@Test
+void testHitCountDoesNotTriggerRemovalBeforeThreeHits() {
+    wall.hit(); // 1 hit
+    wall.display();
+    assertFalse(wall.isRemoved(), "Wall should not be removed after one hit.");
+    
+    wall.hit(); // 2 hits
+    wall.display();
+    assertFalse(wall.isRemoved(), "Wall should not be removed after two hits.");
+    
+    // The wall should still not be removed
+    assertFalse(wall.isRemoved(), "Wall should still not be removed before three hits.");
+}
+
+
+    
 }

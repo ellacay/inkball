@@ -28,6 +28,7 @@ public class BallTest {
     @BeforeEach
     public void setUp() {
         app = new App(); // Create a new PApplet instance
+        PApplet.runSketch(new String[] {"inkball.App"}, app);
         app.settings(); // Call the settings method to set up the PApplet
         app.setup(); // Call setup to initialize game state
         imageLoader = new ImageLoader(app);

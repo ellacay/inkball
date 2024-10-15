@@ -1,4 +1,5 @@
 package inkball;
+
 import inkball.loaders.ImageLoader;
 import inkball.managers.BoardManager;
 import inkball.managers.BallManager;
@@ -10,15 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BoardManagerTest {
 
-    private PApplet mockApp;
-    private ImageLoader mockLoader;
+    private App app;
+    
+    private ImageLoader imageLoader;
     private BoardManager boardManager;
 
     @BeforeEach
     void setUp() {
-        mockApp = new PApplet(); // Replace with actual mock implementation
-        mockLoader = new ImageLoader(mockApp); // Replace with actual mock implementation
-        boardManager = new BoardManager(mockApp, mockLoader);
+        app = new App(); // Replace with actual mock implementation
+        PApplet.runSketch(new String[] {"inkball.App"}, app);
+        imageLoader = new ImageLoader(app); // Replace with actual mock implementation
+        boardManager = new BoardManager(app, imageLoader);
     }
 
     @Test
@@ -51,7 +54,7 @@ class BoardManagerTest {
 
     @Test
     void testIncreaseScore() {
-        Ball mockBall = new Ball(mockApp, mockLoader.tile, 0, 0, 0, 0, 10, boardManager, '3'); // Assuming 'R' is red
+        Ball mockBall = new Ball(app, imageLoader.tile, 0, 0, 0, 0, 10, boardManager, '3'); // Assuming 'R' is red
         App.increaseScore.put("green", 10);
         App.increaseScoreMultipler = 2; // Example multiplier
 
@@ -63,7 +66,7 @@ class BoardManagerTest {
 
     @Test
     void testDecreaseScore() {
-        Ball mockBall = new Ball(mockApp, mockLoader.tile, 0, 0, 0, 0, 10, boardManager, 'B'); // Assuming 'B' is blue
+        Ball mockBall = new Ball(app, imageLoader.tile, 0, 0, 0, 0, 10, boardManager, 'B'); // Assuming 'B' is blue
         App.decreaseScore.put("B", 5);
         App.decreaseScoreMultipler = 2; // Example multiplier
 
@@ -76,7 +79,7 @@ class BoardManagerTest {
     @Test
     void testCheckIfFinished() {
         BoardManager.setFinishedBallCount(3); // Simulate two balls finished
-        BallManager.ballsInPlay.add(new Ball(mockApp, mockLoader.tile, 0, 0, 0, 0, 10, boardManager, 'R'));
+        BallManager.ballsInPlay.add(new Ball(app, imageLoader.tile, 0, 0, 0, 0, 10, boardManager, 'R'));
         BallManager.ballQueue.add("3");
 
         assertTrue(boardManager.checkIfFinished(), "Check if the game is finished should return true.");
