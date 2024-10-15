@@ -1,5 +1,7 @@
 package inkball.objects;
 
+import inkball.App;
+
 public class Spawner {
 
     public float x1, x2, y1, y2;
@@ -10,4 +12,6 @@ public class Spawner {
         this.x2 = x2;
         this.y2 = y2;
     }
+
+
 }

@@ -1,11 +1,16 @@
 package inkball.loaders;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
@@ -18,16 +23,22 @@ public class ConfigLoader {
         public String layout;
         public int time;
         public int spawnInterval;
-        public double scoreIncrease;
-        public double scoreDecrease;
+        public Map<String, Integer> scoreDecreaseMap = new HashMap<>();
+        public Map<String, Integer> scoreIncreaseMap = new HashMap<>();
+        public double scoreIncreaseMultipler;
+        public double scoreDecreaseMultipler;
         public String[] balls;
 
-        public LevelConfig(String layout, int time, int spawnInterval, double scoreIncrease, double scoreDecrease, String[] balls) {
+        public LevelConfig(String layout, int time, int spawnInterval, Map<String, Integer> scoreIncrease,
+                Map<String, Integer> scoreDecrease, double scoreIncreaseMultipler, double scoreDecreaseMultipler,
+                String[] balls) {
             this.layout = layout;
             this.time = time;
             this.spawnInterval = spawnInterval;
-            this.scoreIncrease = scoreIncrease;
-            this.scoreDecrease = scoreDecrease;
+            this.scoreIncreaseMap = scoreIncrease; // Initialize here
+            this.scoreDecreaseMap = scoreDecrease; // Initialize here
+            this.scoreIncreaseMultipler = scoreIncreaseMultipler;
+            this.scoreDecreaseMultipler = scoreDecreaseMultipler;
             this.balls = balls;
         }
     }
@@ -40,27 +51,44 @@ public class ConfigLoader {
 
         JSONArray levels = gameConfig.getJSONArray("levels");
 
+        // Read score increase map from the JSON
+        Map<String, Integer> scoreIncreaseMap = new HashMap<>();
+        JSONObject scoreIncreaseJson = gameConfig.getJSONObject("score_increase_from_hole_capture");
+        Set<String> increaseKeys = scoreIncreaseJson.keys(); // Get keys
+        for (String key : increaseKeys) {
+            scoreIncreaseMap.put(key, scoreIncreaseJson.getInt(key));
+        }
+
+        // Read score decrease map from the JSON
+        Map<String, Integer> scoreDecreaseMap = new HashMap<>();
+        JSONObject scoreDecreaseJson = gameConfig.getJSONObject("score_decrease_from_wrong_hole");
+        Set<String> decreaseKeys = scoreDecreaseJson.keys(); // Get keys
+        for (String key : decreaseKeys) {
+            scoreDecreaseMap.put(key, scoreDecreaseJson.getInt(key)); // Fixed here
+        }
+
         for (int i = 0; i < levels.size(); i++) {
             JSONObject level = levels.getJSONObject(i);
             String layout = level.getString("layout");
             int time = level.getInt("time");
             int spawnInterval = level.getInt("spawn_interval");
-            double scoreIncrease = level.getDouble("score_increase_from_hole_capture_modifier");
-            double scoreDecrease = level.getDouble("score_decrease_from_wrong_hole_modifier");
-            JSONArray ballsJsonObject = level.getJSONArray("balls");
-            String[] balls = new String[ballsJsonObject.size()];
 
+            double scoreIncreaseMultipler = level.getDouble("score_increase_from_hole_capture_modifier");
+            double scoreDecreaseMultipler = level.getDouble("score_decrease_from_wrong_hole_modifier");
+            JSONArray ballsJsonObject = level.getJSONArray("balls");
+
+            String[] balls = new String[ballsJsonObject.size()];
             for (int j = 0; j < ballsJsonObject.size(); j++) {
                 balls[j] = ballsJsonObject.getString(j);
             }
 
-            levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncrease, scoreDecrease, balls));
-
+            // Use the map for score increases and decreases
+            levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncreaseMap, scoreDecreaseMap,
+                    scoreIncreaseMultipler, scoreDecreaseMultipler, balls));
         }
-
     }
 
-    private static String readFileAsString(String fileName) {
+    public static String readFileAsString(String fileName) {
         String content = "";
         try {
             content = new String(Files.readAllBytes(Paths.get(fileName)));

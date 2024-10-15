@@ -1,9 +1,12 @@
 package inkball.managers;
 
 import inkball.objects.Ball;
+import inkball.objects.Spawner;
 import inkball.App;
 import inkball.loaders.ImageLoader;
 import processing.core.PImage;
+import processing.core.PVector;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -41,7 +44,22 @@ public class BallManager {
         }
     }
 
-    private void spawnBall() {
+    public void freezeToggle(boolean toggle) {
+
+        // Stop updating balls by setting their velocities to zero
+        if (toggle) {
+            for (Ball ball : ballsInPlay) {
+                ball.freeze();
+            }
+        } else {
+            for (Ball ball : ballsInPlay) {
+                ball.unfreeze();
+            }
+        }
+
+    }
+
+    public void spawnBall() {
         if (ballQueue.isEmpty())
             return;
         String ballColor = ballQueue.remove(0);
@@ -51,10 +69,12 @@ public class BallManager {
             return;
         }
 
-        float velocityX = App.random.nextBoolean() ? 2 : -2;
-        float velocityY = App.random.nextBoolean() ? 2 : -2;
-        float x = BoardManager.spawner.x2; // Spawn from spawner
-        float y = BoardManager.spawner.y2;
+        float velocityX = (App.random.nextBoolean() ? 2 : -2);
+        float velocityY = (App.random.nextBoolean() ? 2 : -2);
+        Spawner selectedSpawner = BoardManager.spawners.get(App.random.nextInt(BoardManager.spawners.size()));
+        float x = selectedSpawner.x2 + (App.CELLSIZE / 2); // Use x of the selected spawner
+        float y = selectedSpawner.y2 + (App.CELLSIZE / 2);
+        ; // Use y of the selected spawner
 
         char colour = ballColor.charAt(0);
         float radius = 10;

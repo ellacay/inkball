@@ -43,6 +43,13 @@ test {
     // Use junit platform for unit tests
     useJUnitPlatform()
     ignoreFailures = true
+   
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full" // This will show the full stack trace for failures
+    }
+
+
 }
 
 jar {

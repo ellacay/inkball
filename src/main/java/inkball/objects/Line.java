@@ -12,6 +12,8 @@ public class Line {
         this.points = points;
     }
 
+   
+
     public PVector getStart() {
         return points.get(0);
     }

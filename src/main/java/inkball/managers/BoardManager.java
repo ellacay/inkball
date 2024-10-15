@@ -1,9 +1,7 @@
 package inkball.managers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
 import inkball.App;
 import inkball.loaders.ConfigLoader;
 import inkball.loaders.ImageLoader;
@@ -18,12 +16,13 @@ public class BoardManager {
     private PApplet app;
     public ImageLoader imageLoader;
     public static int score;
+    public static int levelScore;
     public static char[][] board;
     public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
-
+    public static List<Spawner> spawners = new ArrayList<>();
     public boolean ballSpawned = false;
     private static int finishedBallCount;
 
@@ -40,6 +39,7 @@ public class BoardManager {
         }
         initializeWalls();
         initializeHoles();
+        spawners.clear();
 
     }
 
@@ -63,8 +63,7 @@ public class BoardManager {
                     walls.add(new Wall(app, xPos, yPos, xPos + cellSize, yPos + cellSize, '0', imageLoader));
                     wallAdded[y][x] = true;
                 } else if (isPreviousCellBall || isPreviousCellHole) {
-                    // If the previous cell is a 'B', just add a tile image instead of a wall
-                    app.image(imageLoader.tile, xPos, yPos);
+                    cell = ' ';
                 }
             }
         }
@@ -84,28 +83,26 @@ public class BoardManager {
         }
     }
 
+    public static int getFinishedBallCount() {
+        return finishedBallCount;
+    }
+
+    public static void setFinishedBallCount(int count) {
+        finishedBallCount = count;
+    }
+
     public void addFinishedBall() {
         finishedBallCount++;
 
     }
 
     public boolean checkIfFinished() {
-        // System.out.println("Checking");
-        // System.out.println(this.finishedBallCount);
-        // System.out.println(BallManager.ballsInPlay.size() +
-        // BallManager.ballQueue.size());
 
-        if (finishedBallCount == 1) {
+        if (finishedBallCount >= BallManager.ballsInPlay.size() +
+                BallManager.ballQueue.size()) {
             return true;
         }
         return false;
-
-        // if (finishedBallCount >= BallManager.ballsInPlay.size() +
-        // BallManager.ballQueue.size()) {
-        // System.out.println("Finished!");
-        // return true;
-        // }
-        // return false;
     }
 
     public void reset() {
@@ -116,9 +113,26 @@ public class BoardManager {
         loadBoard();
     }
 
-    public static void increaseScore(int baseScore) {
-        score += baseScore + 1;
+    public static void increaseScore(Ball ball) {
+        System.out.println("Increase");
+        System.out.println("Ball colour: " + ball.getColourString());
+        System.out.println("Ball score: " + App.increaseScore.get(ball.getColourString()));
+        System.out.println("Multiplyer: " + App.increaseScoreMultipler);
+        System.out.println("Before score: " + score);
+        score += (App.increaseScore.get(ball.getColourString())) * App.increaseScoreMultipler;
+        System.out.println("Current score: " + score);
+        System.out.println();
+    }
 
+    public static void decreaseScore(Ball ball) {
+        System.out.println("Decrease");
+        System.out.println("Ball colour: " + ball.getColourString());
+        System.out.println("Ball score: " + App.decreaseScore.get(ball.getColourString()));
+        System.out.println("Multiplyer: " + App.decreaseScoreMultipler);
+        System.out.println("Before score: " + score);
+        score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
+        System.out.println("Current score: " + score);
+        System.out.println();
     }
 
     public void displayBoard() {
@@ -151,6 +165,7 @@ public class BoardManager {
                         case 'S':
                             app.image(imageLoader.entryPoint, xPos, yPos);
                             spawner = new Spawner(x, y, xPos, yPos);
+                            spawners.add(spawner);
                             break;
                         default:
                             if (y > 0 && board[y - 1][x] == 'H') {

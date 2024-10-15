@@ -5,12 +5,12 @@ import processing.core.PVector;
 public class Hole {
     private PVector position;
     private float radius;
-    private int color;
+    private int colour;
 
-    public Hole(float x, float y, float radius, char color) {
+    public Hole(float x, float y, float radius, char colour) {
         this.position = new PVector(x + 16, y + 16);
         this.radius = radius;
-        this.color = color;
+        this.colour = colour;
     }
 
     public PVector getPosition() {
@@ -22,7 +22,11 @@ public class Hole {
     }
 
     public int getColour() {
-        return color;
+        return colour;
+    }
+
+    public void setColour(int colour) {
+        this.colour = colour;
     }
 
 }

@@ -17,6 +17,7 @@ public class App extends PApplet {
     private BoardManager boardManager;
     public int spawnInterval;
     public boolean gameWon;
+    public boolean gameOver;
     private boolean isMovingTiles = false;
     private static int moveTimer = 0;
     private boolean levelWon = false;
@@ -26,7 +27,7 @@ public class App extends PApplet {
     private final int SCORE_INCREMENT_RATE = 67;
     private final int TILE_SPEED = 67;
     private boolean isPaused = false;
-    private int timer;
+    public int timer;
     public static Random random = new Random();
     public static final int WIDTH = 576;
     public static final int HEIGHT = 640;
@@ -39,12 +40,22 @@ public class App extends PApplet {
     public static final int BOARD_HEIGHT = 20;
     public static final int INITIAL_PARACHUTES = 1;
     public static List<ConfigLoader.LevelConfig> levels;
-    private int currentDirection = 0;
-    private int currentX = 0;
-    private int currentY = 0;
+    public int currentDirection1 = 0; // For the first tile
+    public int currentX1 = 0; // Top left tile's X position
+    public int currentY1 = 0; // Top left tile's Y position
+    ConfigLoader.LevelConfig thisLevel;
+
+    public int currentDirection2 = 0; // For the second tile
+    public int currentX2 = WIDTH - CELLSIZE; // Bottom right tile's X position
+    public int currentY2 = HEIGHT - CELLSIZE; // Bottom right tile's Y position
 
     ConfigLoader configLoader = new ConfigLoader();
     public double spawnTimer;
+    private boolean freeze;
+    public static Map<String, Integer> increaseScore;
+    public static double increaseScoreMultipler;
+    public static Map<String, Integer> decreaseScore;
+    public static double decreaseScoreMultipler;
 
     public static void main(String[] args) {
         PApplet.main("inkball.App");
@@ -64,53 +75,93 @@ public class App extends PApplet {
         imageLoader.loadImages();
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
-        ConfigLoader.LevelConfig firstLevel = levels.get(level - 1);
-        this.timer = firstLevel.time;
-        this.spawnInterval = firstLevel.spawnInterval;
-        this.spawnTimer = firstLevel.spawnInterval;
+        thisLevel = levels.get(level - 1);
+        System.out.println("this level" + (level - 1));
+        this.timer = thisLevel.time;
+        this.spawnInterval = thisLevel.spawnInterval;
+        this.spawnTimer = thisLevel.spawnInterval;
+        increaseScore = thisLevel.scoreIncreaseMap;
+        increaseScoreMultipler = thisLevel.scoreIncreaseMultipler;
+        decreaseScore = thisLevel.scoreDecreaseMap;
+        decreaseScoreMultipler = thisLevel.scoreDecreaseMultipler;
+        spawnTimer = thisLevel.spawnInterval;
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
-        currentX = 0;
-        currentY = 0;
-    }
-
-    private void moveYellowTile() {
-        switch (currentDirection) {
+        currentX1 = 0;
+        currentY1 = 0;
+        currentX2 = WIDTH;
+        currentY2 = HEIGHT;
+    }public void moveYellowTile() {
+        // Move the first yellow tile
+        switch (currentDirection1) {
             case 0: // Move right
-                currentX += TILE_SPEED;
-                if (currentX >= (BOARD_WIDTH - 1) * CELLSIZE) {
-                    currentX = (BOARD_WIDTH - 1) * CELLSIZE;
-                    currentDirection = 1;
+                currentX1 += TILE_SPEED;
+                if (currentX1 >= (BOARD_WIDTH - 1) * CELLSIZE) {
+                    currentX1 = (BOARD_WIDTH - 1) * CELLSIZE;
+                    currentDirection1 = 1; // Change direction to down
                 }
                 break;
             case 1: // Move down
-                currentY += TILE_SPEED;
-                if (currentY >= (BOARD_HEIGHT - 1) * CELLSIZE) {
-                    currentY = (BOARD_HEIGHT - 1) * CELLSIZE;
-                    currentDirection = 2;
+                currentY1 += TILE_SPEED;
+                if (currentY1 >= (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR) {
+                    currentY1 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR;
+                    currentDirection1 = 2; // Change direction to left
                 }
                 break;
             case 2: // Move left
-                currentX -= TILE_SPEED;
-                if (currentX < 0) {
-                    currentX = 0;
-                    currentDirection = 3;
+                currentX1 -= TILE_SPEED;
+                if (currentX1 < 0) {
+                    currentX1 = 0;
+                    currentDirection1 = 3; // Change direction to up
                 }
                 break;
             case 3: // Move up
-                currentY -= TILE_SPEED;
-                if (currentY < 0) {
-                    currentY = 0;
-                    currentDirection = 0;
+                currentY1 -= TILE_SPEED;
+                if (currentY1 < TOPBAR) { // Account for top bar offset
+                    currentY1 = TOPBAR; // Reset to the top bar offset
+                    currentDirection1 = 0; // Change direction to right
+                }
+                break;
+        }
+    
+        // Move the second yellow tile
+        switch (currentDirection2) {
+            case 0: // Move left
+                currentX2 -= TILE_SPEED;
+                if (currentX2 < 0) {
+                    currentX2 = 0;
+                    currentDirection2 = 1; // Change direction to up
+                }
+                break;
+            case 1: // Move up
+                currentY2 -= TILE_SPEED;
+                if (currentY2 < TOPBAR) { // Account for top bar offset
+                    currentY2 = TOPBAR; // Reset to the top bar offset
+                    currentDirection2 = 2; // Change direction to right
+                }
+                break;
+            case 2: // Move right
+                currentX2 += TILE_SPEED;
+                if (currentX2 >= (BOARD_WIDTH - 1) * CELLSIZE) {
+                    currentX2 = (BOARD_WIDTH - 1) * CELLSIZE;
+                    currentDirection2 = 3; // Change direction to down
+                }
+                break;
+            case 3: // Move down
+                currentY2 += TILE_SPEED;
+                if (currentY2 >= (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR) {
+                    currentY2 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR;
+                    currentDirection2 = 0; // Change direction to left
                 }
                 break;
         }
     }
-
-    private void displayYellowTiles() {
+    
+    void displayYellowTiles() {
         strokeWeight(0);
         fill(255, 255, 0);
-        rect(currentX, currentY, CELLSIZE, CELLHEIGHT);
+        rect(currentX1, currentY1, CELLSIZE, CELLHEIGHT); // Display the first tile
+        rect(currentX2, currentY2, CELLSIZE, CELLHEIGHT); // Display the second tile
     }
 
     public void updateTimer() {
@@ -137,6 +188,20 @@ public class App extends PApplet {
         text("Time Left: " + this.timer, WIDTH - 150, 30);
     }
 
+    public void displayTimeUp() {
+        fill(0);
+        textSize(16);
+        textAlign(CENTER);
+        text("=== TIME’S UP ===", WIDTH / 2, 50);
+    }
+
+    public void displayPause() {
+        fill(0);
+        textSize(16);
+        textAlign(CENTER);
+        text("*** PAUSED *** ", WIDTH / 2, 50);
+    }
+
     public void displaySpawnTimer() {
         fill(0);
         textSize(16);
@@ -147,24 +212,36 @@ public class App extends PApplet {
     public void draw() {
         background(255);
         if (!isPaused) {
+
             if (gameWon) {
                 displayGameOver();
                 level = 1;
             } else if (boardManager.checkIfFinished() && this.timer > 0) {
                 displayWin();
+                displayTimer();
+                displayScore();
+                boardManager.displayBoard();
+                ballManager.updateAndDisplayBalls();
             } else if (this.timer < 0) {
-                displayGameOver();
+                gameOver = false;
+                ballManager.freezeToggle(true);
+                displayTimeUp();
+                boardManager.displayBoard();
+                ballManager.updateAndDisplayBalls();
             } else {
                 updateAndDisplayGameElements();
             }
         } else {
-            displayPauseOverlay();
+
+            displayPause();
+            boardManager.displayBoard();
+            ballManager.updateAndDisplayBalls();
         }
         if (isMovingTiles) {
             moveYellowTile();
             displayYellowTiles();
             moveTimer++;
-            if (moveTimer > 30) {
+            if (moveTimer > 60) {
                 isMovingTiles = false;
                 levelWon = true;
                 handleLevelTransition();
@@ -173,15 +250,18 @@ public class App extends PApplet {
     }
 
     public void mousePressed() {
-        if (mouseButton == RIGHT || (keyPressed && keyCode == CONTROL)) {
-            removeLineAtMousePosition(mouseX, mouseY);
-        } else {
-            currentLinePoints.clear();
-            currentLinePoints.add(new PVector(mouseX, mouseY));
+        if (!gameOver) {
+            if (mouseButton == RIGHT || (keyPressed && keyCode == CONTROL)) {
+                removeLineAtMousePosition(mouseX, mouseY);
+            } else {
+                currentLinePoints.clear();
+                currentLinePoints.add(new PVector(mouseX, mouseY));
+            }
         }
+
     }
 
-    private void removeLineAtMousePosition(float mouseX, float mouseY) {
+    public void removeLineAtMousePosition(float mouseX, float mouseY) {
         Line closestLine = null;
         float closestDistance = Float.MAX_VALUE;
         for (Line line : lines) {
@@ -208,18 +288,7 @@ public class App extends PApplet {
         return PVector.dist(new PVector(x, y), projection);
     }
 
-    private void displayPauseOverlay() {
-        fill(0, 0, 0, 150);
-        rect(0, 0, width, height);
-        fill(255);
-        textSize(32);
-        textAlign(CENTER, CENTER);
-        text("PAUSED", width / 2, height / 2);
-    }
-
-
-
-    private void displayGameOver() {
+    void displayGameOver() {
         background(255);
         fill(0, 0, 0, 150);
         rect(0, 0, width, height);
@@ -231,7 +300,7 @@ public class App extends PApplet {
         text("Press 'R' to Restart", width / 2, height / 2 + 20);
     }
 
-    private void displayWin() {
+    public void displayWin() {
         isMovingTiles = true;
         if (this.timer > 0) {
             scoreIncrementTimer++;
@@ -243,22 +312,29 @@ public class App extends PApplet {
         levelWon = true;
     }
 
-    private void handleLevelTransition() {
+    void handleLevelTransition() {
         if (levelWon) {
             if (frameCount % 60 == 0) {
-                levelWon = false;
+
                 level++;
                 if (level <= levels.size()) {
+                    System.out.println(this.timer * 0.067);
+                    System.out.println("Before final score: " + BoardManager.score);
+                    BoardManager.score += (this.timer * 0.067);
+                    System.out.println("Final score: " + BoardManager.score);
+
                     this.spawnTimer = levels.get(level - 1).spawnInterval;
                     this.timer = levels.get(level - 1).time;
                     lines.clear();
+                    BoardManager.levelScore = BoardManager.score;
                     restartGame();
-                    loop();
+                    levelWon = false;
+               
                 } else {
                     level = levels.size();
                     gameWon = true;
                     System.out.println("No more levels available.");
-                    draw();
+
                 }
             }
         }
@@ -279,7 +355,8 @@ public class App extends PApplet {
 
     }
 
-    private void displayLines() {
+    void displayLines() {
+        strokeWeight(10);
         for (Line line : lines) {
             line.display(this);
         }
@@ -296,14 +373,23 @@ public class App extends PApplet {
     }
 
     public void mouseDragged() {
-        currentLinePoints.add(new PVector(mouseX, mouseY));
+        if (mouseButton == LEFT) {
+            strokeWeight(10);
+            if (!gameOver) {
+                currentLinePoints.add(new PVector(mouseX, mouseY));
+            }
+        }
+
     }
 
     public void mouseReleased() {
-        if (currentLinePoints.size() > 0) {
-            lines.add(new Line(new ArrayList<>(currentLinePoints)));
+        strokeWeight(10);
+        if (!gameOver) {
+            if (currentLinePoints.size() > 0) {
+                lines.add(new Line(new ArrayList<>(currentLinePoints)));
+            }
+            currentLinePoints.clear();
         }
-        currentLinePoints.clear();
     }
 
     @Override
@@ -312,18 +398,27 @@ public class App extends PApplet {
             restartGame();
         }
         if (event.getKey() == ' ') {
+
             isPaused = !isPaused;
+            this.freeze = !this.freeze;
+            ballManager.freezeToggle(this.freeze);
+
         }
     }
 
-    private void restartGame() {
+    public void restartGame() {
+
+        if (!this.levelWon) {
+            BoardManager.score = BoardManager.levelScore;
+        }
         this.gameWon = false;
         boardManager.reset();
         ballManager.reset();
         this.spawnTimer = spawnInterval;
-        this.timer = 120;
+        this.timer = thisLevel.time;
         boardManager.ballSpawned = false;
         lines.clear();
         loop();
     }
+
 }

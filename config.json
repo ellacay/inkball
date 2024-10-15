@@ -12,9 +12,20 @@
       "layout": "level2.txt",
       "time": 180,
       "spawn_interval": 6,
+      "score_increase_from_hole_capture": 1,
+      "score_decrease_from_wrong_hole": 1,
       "score_increase_from_hole_capture_modifier": 1.2,
       "score_decrease_from_wrong_hole_modifier": 1.1,
-      "balls": ["green", "grey", "grey", "blue", "yellow", "orange", "blue", "grey"]
+      "balls": [
+        "green",
+        "grey",
+        "grey",
+        "blue",
+        "yellow",
+        "orange",
+        "blue",
+        "grey"
+      ]
     },
     {
       "layout": "level3.txt",
@@ -40,4 +51,3 @@
     "yellow": 100
   }
 }
-
