@@ -20,7 +20,7 @@ public class App extends PApplet {
     public boolean gameOver;
     private boolean isMovingTiles = false;
     private static int moveTimer = 0;
-    private boolean levelWon = false;
+    public boolean levelWon = false;
     public static List<Line> lines = new ArrayList<>();
     public static List<PVector> currentLinePoints = new ArrayList<>();
     private int scoreIncrementTimer;

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.jogamp.newt.event.KeyEvent;
 
+import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.Arrays;
@@ -22,11 +23,12 @@ public class AppTest {
     public void setUp() {
         // Initialize the App object
         app = new App();
+        PApplet.runSketch(new String[] {"inkball.App"}, app);
 
-       
+ 
         app.setup(); 
         
-        // app.settings(); // Call the settings method to set up the PApplet
+         // Call the settings method to set up the PApplet
         // app.setup();    // Call setup to initialize game state
     }
 

@@ -85,6 +85,10 @@ public class Ball {
         return Character.toString(this.colour);
     }
 
+    public void setColour(char colour) {
+         this.colour = colour;
+    }
+
     public String getColourString() {
         switch ((this.colour)) {
             case '0':
