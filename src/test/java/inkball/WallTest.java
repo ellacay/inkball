@@ -1,4 +1,5 @@
 package inkball;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -6,24 +7,60 @@ import org.junit.jupiter.api.Test;
 import inkball.objects.Wall;
 import inkball.loaders.ImageLoader;
 import processing.core.PApplet;
+import processing.core.PImage;
 
 class WallTest {
 
     private Wall wall;
+    private int tintAlpha;
     private PApplet app;
     private ImageLoader imageLoader;
+    private boolean imageCalled = false; // Track if image method is called
+    private boolean noTintCalled = false; // Track if noTint method is called
+    private PImage expectedImage; // Track the expected image
 
     @BeforeEach
     void setUp() {
         app = new PApplet();
         PApplet.runSketch(new String[] {"inkball.App"}, app);
-        imageLoader = new ImageLoader(app);  // Assuming ImageLoader has a constructor that accepts PApplet
+        imageLoader = new ImageLoader(app);
+
+        // Initialize images (ensure these paths are correct)
+        imageLoader.wall0 = app.loadImage("path/to/wall0.png");
+        imageLoader.wall1 = app.loadImage("path/to/wall1.png");
+        imageLoader.wall2 = app.loadImage("path/to/wall2.png");
+        imageLoader.wall3 = app.loadImage("path/to/wall3.png");
+        imageLoader.wall4 = app.loadImage("path/to/wall4.png");
+        imageLoader.smashedWall0 = app.loadImage("path/to/smashedWall0.png");
+        imageLoader.smashedWall1 = app.loadImage("path/to/smashedWall1.png");
+        imageLoader.smashedWall2 = app.loadImage("path/to/smashedWall2.png");
+        imageLoader.smashedWall3 = app.loadImage("path/to/smashedWall3.png");
+        imageLoader.smashedWall4 = app.loadImage("path/to/smashedWall4.png");
+        
         wall = new Wall(app, 0, 0, 10, 10, '1', imageLoader);
+        wall.hitCount = 0; // Set initial hitCount
+        expectedImage = null; // Reset expected image
     }
- 
 
+    // Override PApplet methods for testing
+    public void tint(int r, int g, int b, int a) {
+        this.tintAlpha = a; // Capture the alpha value for assertions
+    }
 
-    
+    public void image(PImage img, float x, float y) {
+        this.imageCalled = true; // Mark that image was called
+        this.expectedImage = img; // Track the expected image
+    }
+
+    public void noTint() {
+        this.noTintCalled = true; // Mark that noTint was called
+    }
+
+    // Test methods...
+
+   
+
+  
    
     @Test
     void testHitIncrementsHitCount() {
@@ -61,9 +98,10 @@ class WallTest {
         wall.hit();
         assertTrue(wall.isRemoved(), "Wall should be removed after three hits.");
     }
+   
+    // Overriding PApplet methods for testing
 
-    
- 
+  
 
 
 

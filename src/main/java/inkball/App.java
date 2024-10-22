@@ -3,6 +3,9 @@ package inkball;
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
+
+
+
 import java.util.*;
 import inkball.loaders.ImageLoader;
 import inkball.loaders.ConfigLoader;
@@ -26,7 +29,7 @@ public class App extends PApplet {
     public int scoreIncrementTimer;
     private final int SCORE_INCREMENT_RATE = 67;
     private final int TILE_SPEED = 67;
-    private boolean isPaused = false;
+    public boolean isPaused = false;
     public int timer;
     public static Random random = new Random();
     public static final int WIDTH = 576;
@@ -422,5 +425,6 @@ public class App extends PApplet {
         lines.clear();
         loop();
     }
+
 
 }

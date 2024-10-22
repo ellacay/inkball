@@ -22,7 +22,7 @@ public class BallManager {
         app = appRef;
         imageLoader = imgLoader;
         initializeBallQueue();
-    }
+    } 
 
     public void initializeBallQueue() {
         ballQueue = new LinkedList<>(Arrays.asList("2", "1", "0", "3", "4"));

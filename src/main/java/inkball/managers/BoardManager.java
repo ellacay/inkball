@@ -124,15 +124,12 @@ public class BoardManager {
         System.out.println();
     }
 
+  
     public static void decreaseScore(Ball ball) {
-        System.out.println("Decrease");
-        System.out.println("Ball colour: " + ball.getColourString());
-        System.out.println("Ball score: " + App.decreaseScore.get(ball.getColourString()));
-        System.out.println("Multiplyer: " + App.decreaseScoreMultipler);
-        System.out.println("Before score: " + score);
-        score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
-        System.out.println("Current score: " + score);
-        System.out.println();
+        String colorKey = ball.getColourString();
+        if (App.decreaseScore.containsKey(colorKey)) {
+            score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
+        }
     }
 
     public void displayBoard() {

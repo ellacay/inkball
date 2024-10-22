@@ -7,19 +7,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.jogamp.newt.event.KeyEvent;
+import processing.event.KeyEvent;
 
 import processing.core.PApplet;
 import processing.core.PVector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AppTest {
     private App app;
     private final int TILE_SPEED = 5; // Assuming TILE_SPEED is a constant
-    private final int CELLSIZE = 20; // Assuming CELLSIZE is a constant
+    public final int CELLSIZE = 20; // Assuming CELLSIZE is a constant
     private final int BOARD_WIDTH = 10; // Example width
     private final int BOARD_HEIGHT = 10; // Example height
     private final int TOPBAR = 20; // Example top bar offset
@@ -209,5 +211,133 @@ public void testDisplayYellowTiles() {
         assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should reset to initial spawn interval");
     }
 
+    @Test
+    void testMousePressedAddPoint() {
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.LEFT; // Simulate left mouse button
+        app.mousePressed(); // Call the method
+        
+        // Check that a point has been added
+        assertEquals(1, App.currentLinePoints.size(), "One point should be added.");
+        assertEquals(new PVector(100, 200), App.currentLinePoints.get(0), "Point should match mouse position.");
+    }
+
+    @Test
+    void testMousePressedRemoveLine() {
+        App.currentLinePoints.clear();
+        app.gameOver = false; // Ensure game is not over
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.RIGHT; // Simulate right mouse button
+        
+        // Add a line to remove (this may depend on your setup)
+        App.currentLinePoints.add(new PVector(100, 200)); // Ensure there's something to remove
+        
+        app.mousePressed(); // Call the method
+        
+        // Check that the line is removed
+        assertTrue(App.currentLinePoints.isEmpty(), "Line should be removed.");
+    }
+
+    @Test
+    void testMousePressedGameOver() {
+        app.gameOver = true; // Set game over state
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.LEFT; // Simulate left mouse button
+        
+        // Store the initial size of currentLinePoints
+        int initialSize = App.currentLinePoints.size();
+        
+        app.mousePressed(); // Call the method
+        
+        // Check that no points were added
+        assertEquals(initialSize, App.currentLinePoints.size(), "No points should be added when game is over.");
+    }
+
     
+    @Test
+    void testKeyPressedRestartGame() {
+        // Simulate pressing the 'r' key
+
+        app.setup ();
+   
+        KeyEvent key = new KeyEvent(app, 0,0,0, 'r',0);
+        app.keyPressed(key);
+        // Add assertions to verify that the game has restarted
+        // For example, check if the score is reset or if certain game states are initialized
+        assertFalse(app.gameWon, "Game should not be won after restart");
+        assertEquals(BoardManager.levelScore, BoardManager.score, "Score should reset to level score after restart");
+        assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should reset to initial spawn interval");
+    }
+ // Test function for mouseReleased
+ void testMouseReleased() {
+    // Assuming `app` is an instance of your main application class
+    App.currentLinePoints = new ArrayList<>(); // Use the existing list in your App
+    App.lines = new ArrayList<>(); // Initialize lines in your App
+
+    // Simulate adding points to currentLinePoints
+    App.currentLinePoints.add(new PVector(50, 50));
+    App.currentLinePoints.add(new PVector(100, 100));
+    
+    // Call the method
+    app.mouseReleased(); 
+
+    // Assertions to check if the line was added correctly
+    assertTrue(App.lines.size() == 1, "Test failed: Line not added.");
+    assertTrue(App.lines.get(0).points.size() == 2, "Test failed: Line does not contain the correct number of points.");
+
+    // Clear currentLinePoints and test again
+    App.currentLinePoints.clear();
+    app.mouseReleased(); // Should not add a line since currentLinePoints is empty
+
+    // Assert that no new line was added
+    assertTrue(App.lines.size() == 1, "Test failed: Line was incorrectly added when currentLinePoints is empty.");
+}
+
+    @Test
+    void testKeyPressedTogglePause() {
+        // Initial state should not be paused
+        assertFalse(app.isPaused, "Game should not be paused initially.");
+
+        // Simulate pressing the space bar
+        app.setup ();
+   
+        KeyEvent key = new KeyEvent(app, 0,0,0, ' ',0);
+        app.keyPressed(key);
+        // Check that the game is now paused
+        assertTrue(app.isPaused, "Game should be paused after pressing space.");
+    }
+
+    @Test
+    void testMouseDragged() {
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.LEFT; // Simulate left mouse button
+        
+        // Ensure the game is not over
+        app.gameOver = false;
+
+        app.mouseDragged(); // Call the method
+        
+        // Check that a point has been added
+        assertEquals(1, App.currentLinePoints.size(), "One point should be added.");
+        assertEquals(new PVector(100, 200), App.currentLinePoints.get(0), "Point should match mouse position.");
+    }
+
+    @Test
+    void testMouseDraggedGameOver() {
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.LEFT; // Simulate left mouse button
+        
+        // Set game over state
+        app.gameOver = true;
+
+        app.mouseDragged(); // Call the method
+        
+        // Check that no points were added
+        assertTrue(App.currentLinePoints.isEmpty(), "No points should be added when game is over.");
+    }
 }

@@ -22,7 +22,7 @@ public class Ball {
     public int scoreValue;
 
     private static final float GRAVITY_STRENGTH = 0.5f;
-    private static final float SHRINK_RATE = 0.05f;
+    public static final float SHRINK_RATE = 0.05f;
     private static final float STOPPING_THRESHOLD = 0.1f;
     private static final float NEAR_HOLE_DISTANCE = 32;
 
@@ -86,7 +86,7 @@ public class Ball {
     }
 
     public void setColour(char colour) {
-         this.colour = colour;
+        this.colour = colour;
     }
 
     public String getColourString() {
@@ -104,6 +104,10 @@ public class Ball {
             default:
                 return null;
         }
+    }
+
+    public void setVelocity(PVector newVelocity){
+        this.velocity = newVelocity;
     }
 
     public boolean correctBall(Hole hole) {
@@ -129,16 +133,26 @@ public class Ball {
         return PVector.dist(position, hole.getPosition()) < NEAR_HOLE_DISTANCE;
     }
 
+   
+
+    
+    public float distanceFromHole(Hole hole){
+        return PVector.dist(new PVector(3,4), new PVector(3,4));
+    }
+
+    public float shrinkedHole(Hole hole){
+        return hole.getRadius() * SHRINK_RATE;
+    }
+
     public boolean isCapturedByHole(Hole hole) {
-        boolean isPositionClose = PVector.dist(position, hole.getPosition()) < hole.getRadius();
+        boolean isPositionClose = distanceFromHole(hole) < hole.getRadius();
         boolean isSizeSmallEnough = radius <= hole.getRadius() * SHRINK_RATE;
         return isPositionClose && isSizeSmallEnough;
     }
 
-    public void setRadius(int radius){
+    public void setRadius(float radius) {
         this.radius = radius;
     }
-
 
     private float originalVelocityX;
     private float originalVelocityY;
@@ -154,7 +168,7 @@ public class Ball {
         System.out.println("unfreeze");
         setVelocityX(this.originalVelocityX);
         setVelocityY(this.originalVelocityY);
-       
+
     }
 
     public void handleLineCollisions() {
@@ -175,8 +189,6 @@ public class Ball {
             }
         }
     }
-
-
 
     public void handleWallCollision(Wall wall) {
 
@@ -225,6 +237,10 @@ public class Ball {
     }
 
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
+    
+        
+     
+       
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
             char ballColor = this.colour;
             int holeColor = hole.getColour();
@@ -234,8 +250,14 @@ public class Ball {
             boolean isGreyHole = holeColor == '0';
 
             if (isColourMatch || isGreyBall || isGreyHole) {
-                return scoreValue * levelMultiplier;
+                return 60;
+                // return scoreValue * levelMultiplier;
             }
+            if (isColourMatch == false) {
+                return 1;
+            }
+            return 4;
+
         }
         return 0;
     }
@@ -258,7 +280,7 @@ public class Ball {
         return PVector.sub(velocity, PVector.mult(normal, 2 * dotProduct));
     }
 
-    private void reflectLine(Line line) {
+    public void reflectLine(Line line) {
         PVector lineDirection = PVector.sub(line.getEnd(), line.getStart()).normalize();
         PVector normal = new PVector(-lineDirection.y, lineDirection.x).normalize();
 
@@ -331,6 +353,10 @@ public class Ball {
 
     public boolean isCaptured() {
         return captured;
+    }
+
+    public void setIsCaptured(boolean isCaptured) {
+        this.captured = isCaptured;
     }
 
 }

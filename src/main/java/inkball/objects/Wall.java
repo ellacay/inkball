@@ -7,7 +7,7 @@ import processing.core.PImage;
 public class Wall {
     private PApplet app;
     public float x1, y1, x2, y2;
-    private int hitCount = 0;
+    public int hitCount = 0;
     public char colour;
     private ImageLoader imageLoader;
     public boolean collided = false;

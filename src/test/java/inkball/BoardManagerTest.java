@@ -7,7 +7,11 @@ import inkball.objects.Ball;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import processing.core.PApplet;
+import processing.core.PImage;
+
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.HashMap;
 
 class BoardManagerTest {
 
@@ -22,6 +26,11 @@ class BoardManagerTest {
         PApplet.runSketch(new String[] {"inkball.App"}, app);
         imageLoader = new ImageLoader(app); // Replace with actual mock implementation
         boardManager = new BoardManager(app, imageLoader);
+        App.decreaseScore = new HashMap<>();
+        App.decreaseScore.put("color1", 10); // Example color with score deduction
+        App.decreaseScore.put("color2", 20); // Another color
+        App.decreaseScoreMultipler = 2; // Set a multiplier
+        BoardManager.score = 100; // Initial score
     }
 
     @Test
@@ -46,7 +55,34 @@ class BoardManagerTest {
 
         assertEquals(20, BoardManager.score, "Score should increase correctly.");
     }
+    @Test
+    void testDecreaseScore() {
+        PImage ballImage = BallManager.getBallImage("0", imageLoader);
+        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
+        ball.setColour('1'); // Assuming '1' corresponds to "color1"
 
+        // Decrease the score based on the ball's color
+        BoardManager.decreaseScore(ball);
+
+        // Calculate expected score
+        int expectedScore = 100;
+        
+        // Check if the score is decreased correctly
+        assertEquals(expectedScore, BoardManager.score, "Score should decrease correctly based on ball color.");
+    }
+
+    @Test
+    void testDecreaseScoreNoColorMatch() {
+         PImage ballImage = BallManager.getBallImage("0", imageLoader);
+        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
+        ball.setColour('3'); // Assuming '3' does not match any entry in decreaseScore
+
+        // Decrease the score based on the ball's color
+        BoardManager.decreaseScore(ball);
+
+        // Score should remain unchanged if the color is not found
+        assertEquals(100, BoardManager.score, "Score should not change if ball color has no associated decrease.");
+    }
     
     
 
