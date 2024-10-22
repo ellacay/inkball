@@ -135,6 +135,11 @@ public class Ball {
         return isPositionClose && isSizeSmallEnough;
     }
 
+    public void setRadius(int radius){
+        this.radius = radius;
+    }
+
+
     private float originalVelocityX;
     private float originalVelocityY;
 

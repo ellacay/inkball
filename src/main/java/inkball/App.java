@@ -23,7 +23,7 @@ public class App extends PApplet {
     public boolean levelWon = false;
     public static List<Line> lines = new ArrayList<>();
     public static List<PVector> currentLinePoints = new ArrayList<>();
-    private int scoreIncrementTimer;
+    public int scoreIncrementTimer;
     private final int SCORE_INCREMENT_RATE = 67;
     private final int TILE_SPEED = 67;
     private boolean isPaused = false;
@@ -31,7 +31,7 @@ public class App extends PApplet {
     public static Random random = new Random();
     public static final int WIDTH = 576;
     public static final int HEIGHT = 640;
-    public static final int FPS = 30;
+    public static final int FPS = 15;
     public static final int CELLSIZE = 32; // 8;
     public static final int CELLHEIGHT = 32;
     public static final int CELLAVG = 32;
@@ -91,7 +91,9 @@ public class App extends PApplet {
         currentY1 = 0;
         currentX2 = WIDTH;
         currentY2 = HEIGHT;
-    }public void moveYellowTile() {
+    }
+
+    public void moveYellowTile() {
         // Move the first yellow tile
         switch (currentDirection1) {
             case 0: // Move right
@@ -123,7 +125,7 @@ public class App extends PApplet {
                 }
                 break;
         }
-    
+
         // Move the second yellow tile
         switch (currentDirection2) {
             case 0: // Move left
@@ -156,7 +158,7 @@ public class App extends PApplet {
                 break;
         }
     }
-    
+
     void displayYellowTiles() {
         strokeWeight(0);
         fill(255, 255, 0);
@@ -329,7 +331,7 @@ public class App extends PApplet {
                     BoardManager.levelScore = BoardManager.score;
                     restartGame();
                     levelWon = false;
-               
+
                 } else {
                     level = levels.size();
                     gameWon = true;

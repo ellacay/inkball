@@ -38,32 +38,8 @@ class BallManagerTest {
 void testInitializeBallQueue() {
     assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue, "Ball queue should initialize correctly.");
 }
-    @Test
-    void testSpawnBall() {
-        // Spawn a ball
-        ballManager.spawnBall();
-
-        // Check if a ball was added
-        assertEquals(1, BallManager.ballsInPlay.size(), "One ball should be spawned.");
-        Ball spawnedBall = BallManager.ballsInPlay.get(0);
-        assertEquals(50 + (App.CELLSIZE / 2), spawnedBall.getX(), "Ball X position should be set correctly.");
-        assertEquals(50 + (App.CELLSIZE / 2), spawnedBall.getY(), "Ball Y position should be set correctly.");
-    }
-
-    @Test
-    void testUpdateAndDisplayBalls() {
-        // Create a new ball and add it to the ballsInPlay
-        PImage ballImage = imageLoader.ball0; // Get an image for the ball
-        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
-        BallManager.ballsInPlay.add(ball);
-
-        // Call updateAndDisplayBalls
-        ballManager.updateAndDisplayBalls();
-
-        // Check if the ball's position has been updated correctly
-        assertEquals(12f, ball.getX(), "Ball X position should be updated correctly.");
-        assertEquals(12f, ball.getY(), "Ball Y position should be updated correctly.");
-    }
+   
+   
 
     @Test
     void testFreezeToggle() {

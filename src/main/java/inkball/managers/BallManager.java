@@ -77,7 +77,7 @@ public class BallManager {
         ; // Use y of the selected spawner
 
         char colour = ballColor.charAt(0);
-        float radius = 10;
+        float radius = 12;
         BoardManager boardManager = new BoardManager(app, imageLoader);
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager, colour);
         ballsInPlay.add(newBall);
