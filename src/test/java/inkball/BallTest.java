@@ -126,6 +126,18 @@ public class BallTest {
     }
 
     @Test
+    public void testGravitateTowardsHoleCaptures() {
+        Hole hole = new Hole(100, 100, 10, '0'); // Different color
+        BoardManager.holes.add(hole);
+
+        ball.position = new PVector(100, 100);
+        ball.gravitateTowardsHole();
+
+        assertTrue(ball.isCapturedByHole(hole), "Ball should not be captured by the hole of a different color.");
+        assertTrue(ball.isCaptured(), "Ball should not be marked as captured.");
+    }
+    
+    @Test
     public void testCorrectBall() {
         Hole hole = new Hole(100, 100, 20, '2'); // Different color
         assertFalse(ball.correctBall(hole), "Ball should not be correctly matched with the hole.");

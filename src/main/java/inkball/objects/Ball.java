@@ -50,7 +50,8 @@ public class Ball {
     }
 
     public void gravitateTowardsHole() {
-        for (Hole hole : BoardManager.holes) {
+        List<Hole> holesCopy = new ArrayList<>(BoardManager.holes);
+        for (Hole hole : holesCopy) {
             if (isNearHole(hole)) {
                 float distanceToHole = PVector.dist(position, hole.getPosition());
                 PVector direction = PVector.sub(hole.getPosition(), position).normalize();
@@ -262,7 +263,7 @@ public class Ball {
         return 0;
     }
 
-    private boolean isColliding(Line line) {
+    public boolean isColliding(Line line) {
         PVector lineVector = PVector.sub(line.getEnd(), line.getStart());
         PVector ballToLineStart = PVector.sub(position, line.getStart());
 

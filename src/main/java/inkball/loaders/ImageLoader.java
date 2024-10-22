@@ -58,7 +58,7 @@ public class ImageLoader {
         return img;
     }
 
-    private void checkImageLoad(PImage img, String imgName) {
+    public void checkImageLoad(PImage img, String imgName) {
         if (img == null) {
             System.err.println("Failed to load image: " + imgName);
         }

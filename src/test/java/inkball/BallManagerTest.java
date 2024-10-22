@@ -80,5 +80,21 @@ void testInitializeBallQueue() {
         assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue, "Ball queue should be reset to initial state.");
     }
 
+    @Test
+    void testAddToQueueAgain() {
+        // Arrange
+        PImage ballImage = imageLoader.ball0; // Use any valid image
+        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
+   int originalQueue = BallManager.ballQueue.size();
+            // Act
+            BallManager.addToQueueAgain(ball); // Call the method
+    
+            // Assert
+            assertEquals(originalQueue + 1, BallManager.ballQueue.size(), "Ball queue size should increase by 1.");
+            assertTrue(BallManager.ballQueue.contains("2"), "Ball color should be added to the queue.");
+            
+            // Check that the queue contains the correct ball color
+            assertEquals("2", BallManager.ballQueue.get(BallManager.ballQueue.size() - 1), "Last color in the queue should be '2'.");
+        }
     
 }

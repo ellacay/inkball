@@ -22,7 +22,7 @@ class WallTest {
     @BeforeEach
     void setUp() {
         app = new PApplet();
-        PApplet.runSketch(new String[] {"inkball.App"}, app);
+        PApplet.runSketch(new String[] { "inkball.App" }, app);
         imageLoader = new ImageLoader(app);
 
         // Initialize images (ensure these paths are correct)
@@ -36,7 +36,7 @@ class WallTest {
         imageLoader.smashedWall2 = app.loadImage("path/to/smashedWall2.png");
         imageLoader.smashedWall3 = app.loadImage("path/to/smashedWall3.png");
         imageLoader.smashedWall4 = app.loadImage("path/to/smashedWall4.png");
-        
+
         wall = new Wall(app, 0, 0, 10, 10, '1', imageLoader);
         wall.hitCount = 0; // Set initial hitCount
         expectedImage = null; // Reset expected image
@@ -58,20 +58,25 @@ class WallTest {
 
     // Test methods...
 
-   
+    @Test
+    void testDisplay_HitCountGreaterThanOrEqualTo3() {
+        wall.hitCount = 3; // Set hit count
 
-  
-   
+        wall.display(); // Call display method
+
+        assertTrue(wall.isRemoved, "Tile should be marked as removed.");
+    }
+
     @Test
     void testHitIncrementsHitCount() {
         wall.hit();
         wall.hit();
-        
+
         // Before 3 hits, the wall should not be removed
         assertFalse(wall.isRemoved(), "Wall should not be removed after two hits.");
 
         wall.hit();
-        
+
         // After 3 hits, the wall should be removed
         assertTrue(wall.isRemoved(), "Wall should be removed after three hits.");
     }
@@ -88,23 +93,17 @@ class WallTest {
     @Test
     void testIsRemovedAfterHits() {
         assertFalse(wall.isRemoved(), "Initially, wall should not be removed.");
-        
+
         wall.hit();
         assertFalse(wall.isRemoved(), "Wall should not be removed after one hit.");
-        
+
         wall.hit();
         assertFalse(wall.isRemoved(), "Wall should not be removed after two hits.");
-        
+
         wall.hit();
         assertTrue(wall.isRemoved(), "Wall should be removed after three hits.");
     }
-   
+
     // Overriding PApplet methods for testing
 
-  
-
-
-
-
-    
 }

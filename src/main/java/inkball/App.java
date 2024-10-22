@@ -317,9 +317,9 @@ public class App extends PApplet {
         levelWon = true;
     }
 
-    void handleLevelTransition() {
+    public void handleLevelTransition() {
         if (levelWon) {
-            if (frameCount % 60 == 0) {
+          
 
                 level++;
                 if (level <= levels.size()) {
@@ -342,7 +342,7 @@ public class App extends PApplet {
 
                 }
             }
-        }
+        
     }
 
     private void updateAndDisplayGameElements() {
