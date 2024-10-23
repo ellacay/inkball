@@ -103,13 +103,14 @@ public class ConfigLoader {
     }
 
     public static char[][] setBoardArray(int index) {
+       
         File file = new File("level" + index + ".txt");
 
         int rows = 0;
         int cols = 0;
 
         List<String> lines = new ArrayList<>();
-
+     
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();

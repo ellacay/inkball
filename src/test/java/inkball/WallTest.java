@@ -25,6 +25,7 @@ class WallTest {
         PApplet.runSketch(new String[] { "inkball.App" }, app);
         imageLoader = new ImageLoader(app);
 
+
         // Initialize images (ensure these paths are correct)
         imageLoader.wall0 = app.loadImage("path/to/wall0.png");
         imageLoader.wall1 = app.loadImage("path/to/wall1.png");
@@ -42,31 +43,54 @@ class WallTest {
         expectedImage = null; // Reset expected image
     }
 
-    // Override PApplet methods for testing
-    public void tint(int r, int g, int b, int a) {
-        this.tintAlpha = a; // Capture the alpha value for assertions
-    }
-
     public void image(PImage img, float x, float y) {
         this.imageCalled = true; // Mark that image was called
         this.expectedImage = img; // Track the expected image
     }
 
-    public void noTint() {
-        this.noTintCalled = true; // Mark that noTint was called
-    }
+   
 
-    // Test methods...
+  
 
     @Test
-    void testDisplay_HitCountGreaterThanOrEqualTo3() {
-        wall.hitCount = 3; // Set hit count
+    void testColoursWithHitDisplay() {
+        imageLoader.loadImages();
+        wall.hitCount = 1;
+        wall.setColour('1');
+        wall.display();
+        assertEquals(imageLoader.wall1, wall.newImage);
 
-        wall.display(); // Call display method
+        wall.setColour('2');
+        wall.display();
+        assertEquals(imageLoader.wall2, wall.newImage);
 
-        assertTrue(wall.isRemoved, "Tile should be marked as removed.");
+        wall.setColour('3');
+        wall.display();
+        assertEquals(imageLoader.wall3, wall.newImage);
+
+        wall.setColour('4');
+        wall.display();
+        assertEquals(imageLoader.wall4, wall.newImage);
+
+        wall.hitCount = 2;
+        wall.setColour('1');
+        wall.display();
+        assertEquals(imageLoader.smashedWall1, wall.newImage);
+
+        wall.setColour('2');
+        wall.display();
+        assertEquals(imageLoader.smashedWall2, wall.newImage);
+
+        wall.setColour('3');
+        wall.display();
+        assertEquals(imageLoader.smashedWall3, wall.newImage);
+
+        wall.setColour('4');
+        wall.display();
+        assertEquals(imageLoader.smashedWall4, wall.newImage);
     }
 
+   
     @Test
     void testHitIncrementsHitCount() {
         wall.hit();

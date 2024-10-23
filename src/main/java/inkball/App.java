@@ -14,15 +14,15 @@ import inkball.managers.BoardManager;
 import inkball.objects.Line;
 
 public class App extends PApplet {
-    public static int level = 1;
+    public static Integer level = 1;
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
     public int spawnInterval;
     public boolean gameWon;
     public boolean gameOver;
-    private boolean isMovingTiles = false;
-    private static int moveTimer = 0;
+    public boolean isMovingTiles = false;
+    public static int moveTimer = 0;
     public boolean levelWon = false;
     public static List<Line> lines = new ArrayList<>();
     public static List<PVector> currentLinePoints = new ArrayList<>();

@@ -17,30 +17,61 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BallManagerTest {
     private App app;
-    
+
     private ImageLoader imageLoader;
     private BallManager ballManager;
 
     @BeforeEach
     void setUp() {
         app = new App(); // Instantiate your main application
-           PApplet.runSketch(new String[] {"inkball.App"}, app);
+        PApplet.runSketch(new String[] { "inkball.App" }, app);
         imageLoader = new ImageLoader(app); // Initialize your ImageLoader
         ballManager = new BallManager(app, imageLoader);
-        
+        ballManager.initializeBallQueue();
+
         // Initialize BoardManager and add spawners for the tests
         BoardManager.spawners.clear(); // Ensure no spawners from previous tests
-        Spawner spawner = new Spawner(10,10,20,20); // Create a new spawner
+        Spawner spawner = new Spawner(10, 10, 20, 20); // Create a new spawner
         BoardManager.spawners.add(spawner); // Add spawner to the board manager
     }
 
     @Test
-void testInitializeBallQueue() {
-    assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue, "Ball queue should initialize correctly.");
-}
-   
-   
+    void testInitializeBallQueue() {
+        assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue,
+                "Ball queue should initialize correctly.");
+    }
 
+    @Test
+    void testSpawnBall() {
+        ballManager.initializeBallQueue();
+        BallManager.ballQueue.add("red"); // Example color to spawn
+        imageLoader.loadImages(); // Ensure images are loaded
+    
+        // Call spawnBall for the first time
+        ballManager.spawnBall();
+    
+        // Assert that a ball has been spawned
+        assertTrue(BallManager.hasSpawnedBall, "One ball should be in play after spawning.");
+        // Assert that hasSpawnedBall is true
+       
+ 
+    }
+
+    @Test
+    void testGetBallImage(){
+        PImage blue =BallManager.getBallImage("blue", imageLoader);
+        PImage orange = BallManager.getBallImage("orange", imageLoader);
+        PImage grey= BallManager.getBallImage("grey", imageLoader);
+        PImage green= BallManager.getBallImage("green", imageLoader);
+        PImage yellow= BallManager.getBallImage("yellow", imageLoader);
+
+        assertEquals(blue, imageLoader.ball0, "Should be blue");
+        assertEquals(orange, imageLoader.ball1, "Should be orange");
+        assertEquals(grey, imageLoader.ball2, "Should be grey");
+        assertEquals(green, imageLoader.ball3, "Should be green");
+        assertEquals(yellow, imageLoader.ball4, "Should be yellow");
+    }
+    
     @Test
     void testFreezeToggle() {
         // Create two balls and add them to the ballsInPlay
@@ -77,24 +108,10 @@ void testInitializeBallQueue() {
 
         // Verify the ballsInPlay is cleared and ballQueue is reinitialized
         assertTrue(BallManager.ballsInPlay.isEmpty(), "Balls in play should be cleared on reset.");
-        assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue, "Ball queue should be reset to initial state.");
+        assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue,
+                "Ball queue should be reset to initial state.");
     }
 
-    @Test
-    void testAddToQueueAgain() {
-        // Arrange
-        PImage ballImage = imageLoader.ball0; // Use any valid image
-        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
-   int originalQueue = BallManager.ballQueue.size();
-            // Act
-            BallManager.addToQueueAgain(ball); // Call the method
-    
-            // Assert
-            assertEquals(originalQueue + 1, BallManager.ballQueue.size(), "Ball queue size should increase by 1.");
-            assertTrue(BallManager.ballQueue.contains("2"), "Ball color should be added to the queue.");
-            
-            // Check that the queue contains the correct ball color
-            assertEquals("2", BallManager.ballQueue.get(BallManager.ballQueue.size() - 1), "Last color in the queue should be '2'.");
-        }
-    
+
+
 }

@@ -31,6 +31,7 @@ class BoardManagerTest {
         App.decreaseScore.put("color2", 20); // Another color
         App.decreaseScoreMultipler = 2; // Set a multiplier
         BoardManager.score = 100; // Initial score
+        
     }
 
     @Test
@@ -42,6 +43,7 @@ class BoardManagerTest {
         assertFalse(BoardManager.walls.isEmpty(), "Walls should be initialized.");
         assertFalse(BoardManager.holes.isEmpty(), "Holes should be initialized.");
     }
+   
 
 
     @Test
@@ -55,6 +57,22 @@ class BoardManagerTest {
 
         assertEquals(20, BoardManager.score, "Score should increase correctly.");
     }
+
+    @Test
+    void testSpawnBallAtPosition() {
+
+       
+    
+        // Call spawnBall for the first time
+        boardManager.spawnBallAtPosition(100,100,"0");
+    
+        // Assert that a ball has been spawned
+        assertTrue(boardManager.ballIsNull, "Should be null.");
+        // Assert that hasSpawnedBall is true
+       
+ 
+    }
+    
     @Test
     void testDecreaseScore() {
         PImage ballImage = BallManager.getBallImage("0", imageLoader);
@@ -83,7 +101,37 @@ class BoardManagerTest {
         // Score should remain unchanged if the color is not found
         assertEquals(100, BoardManager.score, "Score should not change if ball color has no associated decrease.");
     }
-    
+  
+
+    @Test
+    void testSetFinishedBallCount() {
+        // Set the count to a specific value
+        BoardManager.setFinishedBallCount(5);
+        assertEquals(5, BoardManager.getFinishedBallCount(), "Count should be set to 5.");
+    }
+
+    @Test
+    void testAddFinishedBall() {
+        // Add a finished ball
+        BoardManager.setFinishedBallCount(0);
+        boardManager.addFinishedBall();
+        assertEquals(1, BoardManager.getFinishedBallCount(), "Count should be 1 after adding one finished ball.");
+
+        // Add another finished ball
+        boardManager.addFinishedBall();
+        assertEquals(2, BoardManager.getFinishedBallCount(), "Count should be 2 after adding another finished ball.");
+    }
+
+    @Test
+    void testMultipleAdds() {
+        BoardManager.setFinishedBallCount(0);
+ 
+        for (int i = 0; i < 10; i++) {
+            boardManager.addFinishedBall();
+        }
+        assertEquals(10, BoardManager.getFinishedBallCount(), "Count should be 10 after adding 10 finished balls.");
+    }
+
     
 
     

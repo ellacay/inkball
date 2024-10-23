@@ -11,7 +11,9 @@ public class Wall {
     public char colour;
     private ImageLoader imageLoader;
     public boolean collided = false;
+    public boolean tintApplied = false;
     public boolean isRemoved = false;
+    public PImage newImage;
 
     public Wall(PApplet app, float x1, float y1, float x2, float y2, char colour, ImageLoader imageLoader) {
         this.app = app;
@@ -27,7 +29,10 @@ public class Wall {
         this.hitCount++;
     }
 
- 
+    public void setColour(char newColour) {
+        this.colour = newColour;
+    }
+
     public boolean canBeDamagedBy(char ballColour) {
         return this.colour == ballColour || this.colour == '0';
     }
@@ -46,8 +51,7 @@ public class Wall {
         }
         if (hitCount == 1) {
             app.tint(255, 255, 255, 128);
-        } else if (hitCount == 3) {
-            app.tint(255, 255, 255, 64);
+            tintApplied = true;
         } else {
             app.noTint();
         }
@@ -56,16 +60,20 @@ public class Wall {
                 app.image(hitCount < 2 ? imageLoader.wall0 : imageLoader.smashedWall0, this.x1, this.y1);
                 break;
             case '1':
-                app.image(hitCount < 2 ? imageLoader.wall1 : imageLoader.smashedWall1, this.x1, this.y1);
+                 newImage = (hitCount < 2) ? imageLoader.wall1 : imageLoader.smashedWall1;
+                app.image(newImage, this.x1, this.y1);
                 break;
             case '2':
-                app.image(hitCount < 2 ? imageLoader.wall2 : imageLoader.smashedWall2, this.x1, this.y1);
+            newImage= hitCount < 2 ? imageLoader.wall2 : imageLoader.smashedWall2;
+                app.image(newImage, this.x1, this.y1);
                 break;
             case '3':
-                app.image(hitCount < 2 ? imageLoader.wall3 : imageLoader.smashedWall3, this.x1, this.y1);
+             newImage = hitCount < 2 ? imageLoader.wall3 : imageLoader.smashedWall3;
+                app.image(newImage, this.x1, this.y1);
                 break;
             case '4':
-                app.image(hitCount < 2 ? imageLoader.wall4 : imageLoader.smashedWall4, this.x1, this.y1);
+            newImage = hitCount < 2 ? imageLoader.wall4 : imageLoader.smashedWall4;
+                app.image(newImage, this.x1, this.y1);
                 break;
         }
         app.noTint();

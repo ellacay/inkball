@@ -24,6 +24,7 @@ public class BoardManager {
     public static List<Ball> balls = new ArrayList<>();
     public static List<Spawner> spawners = new ArrayList<>();
     public boolean ballSpawned = false;
+    public boolean ballIsNull = false;
     private static int finishedBallCount;
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
@@ -124,7 +125,6 @@ public class BoardManager {
         System.out.println();
     }
 
-  
     public static void decreaseScore(Ball ball) {
         String colorKey = ball.getColourString();
         if (App.decreaseScore.containsKey(colorKey)) {
@@ -187,10 +187,11 @@ public class BoardManager {
         }
     }
 
-    private void spawnBallAtPosition(float x, float y, String ballColor) {
+    public void spawnBallAtPosition(float x, float y, String ballColor) {
         PImage ballImage = BallManager.getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
+            ballIsNull = true;
             return;
         }
 

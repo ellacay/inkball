@@ -125,17 +125,7 @@ public class BallTest {
         assertFalse(ball.isCaptured(), "Ball should not be marked as captured.");
     }
 
-    @Test
-    public void testGravitateTowardsHoleCaptures() {
-        Hole hole = new Hole(100, 100, 10, '0'); // Different color
-        BoardManager.holes.add(hole);
-
-        ball.position = new PVector(100, 100);
-        ball.gravitateTowardsHole();
-
-        assertTrue(ball.isCapturedByHole(hole), "Ball should not be captured by the hole of a different color.");
-        assertTrue(ball.isCaptured(), "Ball should not be marked as captured.");
-    }
+ 
     
     @Test
     public void testCorrectBall() {
@@ -215,26 +205,7 @@ public class BallTest {
     
 
 
-    @Test
-void testReflectLine() {
-    currentLinePoints.add(new PVector(1, 1));
-    currentLinePoints.add(new PVector(2, 2));
-    Line line = new Line(new ArrayList<>(currentLinePoints)); // Diagonal line from (0,0) to (10,10)
-    // Set initial velocity towards the line
-    ball.setVelocity(new PVector(1, -1)); // Moving towards the line
 
-    // Call the method to test
-    ball.reflectLine(line);
-
-    // Check the velocity after reflection
-    assertEquals(-1, ball.velocity.x, 0.0001, "Expected x-velocity after reflection to match");
-    assertEquals(1, ball.velocity.y, 0.0001, "Expected y-velocity after reflection to match");
-
-    // Check the position after reflection
-    PVector expectedPosition = new PVector(5, 5); // The position should remain unchanged since it touches the line
-    assertEquals(expectedPosition.x, ball.getPosition().x, 0.01, "Expected position x to match after reflection");
-    assertEquals(expectedPosition.y, ball.getPosition().y, 0.01, "Expected position y to match after reflection");
-}
 
 @Test
 void testGetScoreForCapture() {

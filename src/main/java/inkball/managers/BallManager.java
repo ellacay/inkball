@@ -17,6 +17,7 @@ public class BallManager {
     private static ImageLoader imageLoader;
     public static List<Ball> ballsInPlay = new ArrayList<>();
     public static List<String> ballQueue;
+    public static boolean hasSpawnedBall = false;
 
     public BallManager(App appRef, ImageLoader imgLoader) {
         app = appRef;
@@ -60,14 +61,20 @@ public class BallManager {
     }
 
     public void spawnBall() {
-        if (ballQueue.isEmpty())
+       
+        if (ballQueue.isEmpty()){
+           
             return;
+        }
         String ballColor = ballQueue.remove(0);
+
         PImage ballImage = getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
+           
             return;
         }
+       
 
         float velocityX = (App.random.nextBoolean() ? 2 : -2);
         float velocityY = (App.random.nextBoolean() ? 2 : -2);
@@ -81,9 +88,11 @@ public class BallManager {
         BoardManager boardManager = new BoardManager(app, imageLoader);
         Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, boardManager, colour);
         ballsInPlay.add(newBall);
+        hasSpawnedBall = true;
     }
 
     public static PImage getBallImage(String color, ImageLoader imageLoader) {
+       
         switch (color) {
             case "blue":
                 return imageLoader.ball0;
@@ -100,6 +109,8 @@ public class BallManager {
             case "1":
                 return imageLoader.ball1;
             case "2":
+                
+
                 return imageLoader.ball2;
             case "3":
                 return imageLoader.ball3;

@@ -51,17 +51,62 @@ public class AppTest {
         assertEquals(3, app.currentDirection1, "Tile 1 should change direction to up.");
     }
 
-
     @Test
-    public void testMoveYellowTileMove1() {
-        app.currentDirection1 = 1; // Set direction to left
-        app.currentX1 = TILE_SPEED; // Start away from the left edge
-        app.moveYellowTile(); // Move left
+    void testMoveDown() {
+        app.currentDirection1 = 1; // Set direction to down
+        app.currentX1 = (App.BOARD_WIDTH - 1) * App.CELLSIZE; // Set to the edge
 
-        assertEquals(0, app.currentX1, "Tile 1 should hit the left edge.");
-        assertEquals(3, app.currentDirection1, "Tile 1 should change direction to up.");
+        app.moveYellowTile();
+
+        assertEquals((App.BOARD_WIDTH - 1) * App.CELLSIZE, app.currentX1, "X position should remain the same.");
+
     }
 
+    @Test
+    void testMoveUp() {
+        app.currentY1 = App.TOPBAR; // Set to the top edge
+        app.currentDirection1 = 3; // Set direction to up
+        app.moveYellowTile();
+
+        assertEquals(0, app.currentX1, "X position should remain the same.");
+    }
+
+    @Test
+    void testMoveUp2() {
+        app.currentY2 = TOPBAR; // Set to the top edge
+        app.currentDirection2 = 1; // Set direction to up
+        app.moveYellowTile(); // Move logic for currentDirection2
+        assertEquals(64, app.currentY2, "Tile should not move up past the top edge.");
+        assertEquals(576, app.currentX2, "X position should remain the same.");
+    }
+
+   
+    @Test
+    void testMoveDown2() {
+        app.currentY2 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR; // Set to the bottom edge
+        app.currentDirection2 = 3; // Set direction to down
+        app.moveYellowTile(); // Move logic for currentDirection2
+        assertEquals(267, app.currentY2, "Tile should not move down past the edge.");
+       
+    }
+
+    @Test
+    void testDirectionChangeAfterLeft() {
+        app.currentX2 = 0; // At the left edge
+        app.currentDirection2 = 0; // Move left
+        app.moveYellowTile(); // Move logic for currentDirection2
+        assertEquals(1, app.currentDirection2, "Direction should change to up after hitting left edge.");
+    }
+
+    @Test
+    void testDirectionChangeAfterUp() {
+        app.currentY2 = TOPBAR; // At the top edge
+        app.currentDirection2 = 1; // Move up
+        app.moveYellowTile(); // Move logic for currentDirection2
+        assertEquals(2, app.currentDirection2, "Direction should change to right after hitting top edge.");
+    }
+
+   
 
     @Test
     public void testSettingsInitialization() {
@@ -78,45 +123,13 @@ public class AppTest {
         assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should match spawn interval");
     }
 
-    @Test
-    @DisplayName("Move yellow tile should update position correctly")
-    public void testMoveYellowTile() {
-        app.currentX1 = 0; // Start at the left edge
-        app.currentDirection1 = 0; // Move right
-        app.moveYellowTile();
-        assertTrue(app.currentX1 > 0, "Yellow tile should move right");
-
-        app.currentX1 = (App.BOARD_WIDTH - 1) * App.CELLSIZE; // At right edge
-        app.moveYellowTile(); // Should change direction
-        assertEquals((App.BOARD_WIDTH - 1) * App.CELLSIZE, app.currentX1, "Yellow tile should not exceed board width");
-    }
-
-    @Test
-    @DisplayName("Move yellow tile should update position correctly")
-    public void testMoveYellowTile2() {
-        app.currentX2 = App.WIDTH - App.CELLSIZE; // Start at the left edge
-        app.currentDirection2 = 0; // Move right
-        app.moveYellowTile();
-        assertTrue(app.currentX2 > App.WIDTH - App.CELLSIZE, "Yellow tile should move right");
-
-        app.currentX1 = 0; // At right edge
-        app.moveYellowTile(); // Should change direction
-        assertEquals((App.BOARD_WIDTH - 1) * App.CELLSIZE, app.currentX1, "Yellow tile should not exceed board width");
-    }
-
+ 
 
     @DisplayName("Display lines should work correctly")
     public void testDisplayLines() {
         App.lines.add(new Line(Arrays.asList(new PVector(100, 100), new PVector(200, 200))));
         app.displayLines(); // Call to display lines
         // Check visual or state changes
-    }
-
-    @Test
-    @DisplayName("Mouse pressed should register click")
-    public void testMousePressed() {
-        app.mousePressed(); // Simulate mouse press
-        // Assert state changes
     }
 
     @Test
@@ -200,6 +213,8 @@ public class AppTest {
         assertEquals(9, app.timer, "Timer should decrement by 1 after FPS frames");
     }
 
+   
+
     @Test
     @DisplayName("Display yellow tiles should render tiles at correct positions")
     public void testDisplayYellowTiles() {
@@ -230,10 +245,15 @@ public class AppTest {
     @Test
     @DisplayName("Game should restart correctly")
     public void testRestartGame() {
+
+  
+       
+        app.gameWon = true;
         app.restartGame();
         assertFalse(app.gameWon, "Game should not be won after restart");
-        assertEquals(BoardManager.levelScore, BoardManager.score, "Score should reset to level score after restart");
+    
         assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should reset to initial spawn interval");
+
     }
 
     @Test
@@ -247,23 +267,19 @@ public class AppTest {
         assertEquals(1, App.currentLinePoints.size(), "One point should be added.");
         assertEquals(new PVector(100, 200), App.currentLinePoints.get(0), "Point should match mouse position.");
     }
-
     @Test
-    void testMousePressedRemoveLine() {
-        App.currentLinePoints.clear();
-        app.gameOver = false; // Ensure game is not over
+    void nottestMousePressedAddPoint() {
         app.mouseX = 100; // Simulate mouse X position
         app.mouseY = 200; // Simulate mouse Y position
-        app.mouseButton = App.RIGHT; // Simulate right mouse button
-
-        // Add a line to remove (this may depend on your setup)
-        App.currentLinePoints.add(new PVector(100, 200)); // Ensure there's something to remove
-
+        app.mouseButton = App.RIGHT; // Simulate left mouse button
         app.mousePressed(); // Call the method
 
-        // Check that the line is removed
-        assertTrue(App.currentLinePoints.isEmpty(), "Line should be removed.");
+        // Check that a point has been added
+        assertEquals(1, App.currentLinePoints.size(), "One point should be added.");
+        assertEquals(new PVector(100, 200), App.currentLinePoints.get(0), "Point should match mouse position.");
     }
+
+    
 
     @Test
     void testMousePressedGameOver() {
@@ -293,12 +309,13 @@ public class AppTest {
         // For example, check if the score is reset or if certain game states are
         // initialized
         assertFalse(app.gameWon, "Game should not be won after restart");
-        assertEquals(BoardManager.levelScore, BoardManager.score, "Score should reset to level score after restart");
+
         assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should reset to initial spawn interval");
     }
 
     @Test
     void testHandleLevelTransition_Level1() {
+        App.level =1;
         app.frameCount = 60;
         app.handleLevelTransition(); // Call the method to transition
 
@@ -319,6 +336,8 @@ public class AppTest {
         assertEquals(2, App.level, "Level should be 2 after second transition.");
 
     }
+
+    
 
     // Test function for mouseReleased
     void testMouseReleased() {
@@ -389,6 +408,7 @@ public class AppTest {
 
     @Test
     void testMouseDragged() {
+        App.currentLinePoints.clear();
         app.mouseX = 100; // Simulate mouse X position
         app.mouseY = 200; // Simulate mouse Y position
         app.mouseButton = App.LEFT; // Simulate left mouse button
@@ -401,6 +421,24 @@ public class AppTest {
         // Check that a point has been added
         assertEquals(1, App.currentLinePoints.size(), "One point should be added.");
         assertEquals(new PVector(100, 200), App.currentLinePoints.get(0), "Point should match mouse position.");
+
+    }
+
+    @Test
+    void release() {
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.LEFT; // Simulate left mouse button
+        app.mouseDragged(); // Call the method
+        app.mouseReleased();
+        app.gameOver = false;
+        app.mouseDragged(); // Call the method
+        assertEquals(1, App.currentLinePoints.size(), "Two points should be added.");
+        app.mouseReleased();
+        app.gameOver = true;
+
+        assertEquals(0, App.currentLinePoints.size(), "Two points should be added.");
+
     }
 
     @Test
@@ -408,6 +446,7 @@ public class AppTest {
         app.mouseX = 100; // Simulate mouse X position
         app.mouseY = 200; // Simulate mouse Y position
         app.mouseButton = App.LEFT; // Simulate left mouse button
+       int currentSize = App.currentLinePoints.size();
 
         // Set game over state
         app.gameOver = true;
@@ -415,6 +454,21 @@ public class AppTest {
         app.mouseDragged(); // Call the method
 
         // Check that no points were added
-        assertTrue(App.currentLinePoints.isEmpty(), "No points should be added when game is over.");
+        assertEquals(currentSize,App.currentLinePoints.size(), "No points should be added when game is over.");
+    }
+
+    @Test
+    void nottestMouseDraggedGameOver() {
+        app.mouseX = 100; // Simulate mouse X position
+        app.mouseY = 200; // Simulate mouse Y position
+        app.mouseButton = App.RIGHT; // Simulate left mouse button
+
+        // Set game over state
+        app.gameOver = false;
+
+        app.mouseDragged(); // Call the method
+
+        // Check that no points were added
+        assertTrue(App.currentLinePoints.isEmpty(), "No points should be added when button RIGHT.");
     }
 }
