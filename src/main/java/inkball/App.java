@@ -59,7 +59,7 @@ public class App extends PApplet {
     public static double increaseScoreMultipler;
     public static Map<String, Integer> decreaseScore;
     public static double decreaseScoreMultipler;
-
+    public static String[] balls;
     public static void main(String[] args) {
         PApplet.main("inkball.App");
     }
@@ -81,6 +81,7 @@ public class App extends PApplet {
         thisLevel = levels.get(level - 1);
         System.out.println("this level" + (level - 1));
         this.timer = thisLevel.time;
+        balls = thisLevel.balls;
         this.spawnInterval = thisLevel.spawnInterval;
         this.spawnTimer = thisLevel.spawnInterval;
         increaseScore = thisLevel.scoreIncreaseMap;

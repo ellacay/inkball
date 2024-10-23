@@ -26,7 +26,40 @@ public class BallManager {
     } 
 
     public void initializeBallQueue() {
-        ballQueue = new LinkedList<>(Arrays.asList("2", "1", "0", "3", "4"));
+        ballQueue = new LinkedList<>();
+
+        // Add elements from the array to the LinkedList
+        if(App.balls !=null){
+            for (String ball : App.balls) {
+                String ballColour = "0";
+                
+                switch(ball){
+                    case("grey"):
+      
+                        ballColour = "0";
+                        ballQueue.add(ballColour);
+                    case("orange"):
+                  
+                        ballColour = "1";
+                        ballQueue.add(ballColour);
+                    case("blue"):
+                    
+                        ballColour = "2";
+                        ballQueue.add(ballColour);
+                    case("green"):
+                 
+                        ballColour = "3";
+                        ballQueue.add(ballColour);
+                    case("yellow"):
+        
+                        ballColour = "4";
+                        ballQueue.add(ballColour);
+                    
+                }
+                ballQueue.add(ballColour);
+            }
+        }
+       
     }
 
     public void updateAndDisplayBalls() {
