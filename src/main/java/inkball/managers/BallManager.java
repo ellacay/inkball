@@ -92,7 +92,7 @@ public class BallManager {
     }
 
     public static PImage getBallImage(String color, ImageLoader imageLoader) {
-       
+      
         switch (color) {
             case "blue":
                 return imageLoader.ball0;
@@ -109,8 +109,6 @@ public class BallManager {
             case "1":
                 return imageLoader.ball1;
             case "2":
-                
-
                 return imageLoader.ball2;
             case "3":
                 return imageLoader.ball3;

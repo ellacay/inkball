@@ -4,6 +4,8 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
 import inkball.loaders.ConfigLoader;
+import inkball.loaders.ImageLoader;
+
 import java.util.ArrayList;
 import java.util.List;
 import inkball.App;
@@ -35,6 +37,7 @@ public class Ball {
         this.velocity = new PVector(xSpeed, ySpeed);
         this.radius = radius;
         this.boardManager = boardManager;
+
     }
 
     public void display() {
@@ -107,7 +110,7 @@ public class Ball {
         }
     }
 
-    public void setVelocity(PVector newVelocity){
+    public void setVelocity(PVector newVelocity) {
         this.velocity = newVelocity;
     }
 
@@ -134,14 +137,11 @@ public class Ball {
         return PVector.dist(position, hole.getPosition()) < NEAR_HOLE_DISTANCE;
     }
 
-   
-
-    
-    public float distanceFromHole(Hole hole){
-        return PVector.dist(new PVector(3,4), new PVector(3,4));
+    public float distanceFromHole(Hole hole) {
+        return PVector.dist(new PVector(3, 4), new PVector(3, 4));
     }
 
-    public float shrinkedHole(Hole hole){
+    public float shrinkedHole(Hole hole) {
         return hole.getRadius() * SHRINK_RATE;
     }
 
@@ -201,6 +201,23 @@ public class Ball {
             }
 
         }
+
+        if (this.colour != wall.colour && this.colour != '0' && wall.colour != '0') {
+            // Change the ball's color to the wall's color
+            this.colour = wall.colour;
+    
+            // Load the new image based on the new color
+            ImageLoader imageLoader = new ImageLoader(app);
+            imageLoader.loadImages();
+            PImage newImage = BallManager.getBallImage(Character.toString(this.colour), imageLoader);
+    
+            if (newImage != null) {
+                System.out.println("Colour changed to: " + this.colour);
+                this.image = newImage;  // Update the ball's image
+            } else {
+                System.out.println("Image not found for color: " + this.colour);
+            }
+        }
         float leftEdge = wall.x1;
         float rightEdge = wall.x2;
         float topEdge = wall.y1;
@@ -238,10 +255,7 @@ public class Ball {
     }
 
     public int getScoreForCapture(Hole hole, Integer levelMultiplier) {
-    
-        
-     
-       
+
         if (hole != null && levelMultiplier != null && isCapturedByHole(hole)) {
             char ballColor = this.colour;
             int holeColor = hole.getColour();
