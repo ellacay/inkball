@@ -22,10 +22,12 @@ public class BoardManager {
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
     public static List<Ball> balls = new ArrayList<>();
+    public static List<Ball> startBalls = new ArrayList<>();
     public static List<Spawner> spawners = new ArrayList<>();
     public boolean ballSpawned = false;
     public boolean ballIsNull = false;
     private static int finishedBallCount;
+    boolean ballsSpawned = false;
 
     public BoardManager(PApplet app, ImageLoader imageLoader) {
         this.app = app;
@@ -39,9 +41,33 @@ public class BoardManager {
             app.exit();
         }
         initializeWalls();
+        initializeBalls();
         initializeHoles();
         spawners.clear();
+        System.out.println(startBalls);
 
+    }
+
+    private void initializeBalls() {
+        startBalls.clear(); // Clear previous balls
+        float cellSize = App.CELLSIZE;
+
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                char cell = board[y][x];
+                float xPos = x * cellSize;
+                float yPos = (y * cellSize) + App.TOPBAR;
+
+                if (cell == 'B') { // Check for 'B' cells
+                    char ballColour = '0'; // Default to grey
+                    if (x + 1 < board[y].length) {
+                        ballColour = board[y][x + 1]; // Get color from the next cell
+                    }
+                    startBalls.add(new Ball(app, BallManager.getBallImage(Character.toString(ballColour), imageLoader),
+                            xPos, yPos, 0, 0, cellSize / 2, this, ballColour));
+                }
+            }
+        }
     }
 
     private void initializeWalls() {
@@ -144,17 +170,7 @@ public class BoardManager {
                     float yPos = (y * cellSize) + yOffset;
 
                     switch (cell) {
-                        case 'B':
-                            app.image(imageLoader.tile, xPos, yPos);
-                            if (!ballSpawned && x + 1 < board[y].length) {
 
-                                char nextCell = board[y][x + 1];
-                                spawnBallAtPosition(xPos, yPos, Character.toString(nextCell));
-                                ballSpawned = true;
-
-                            }
-
-                            break;
                         case 'H':
                             handleHoleCell(x, y, xPos, yPos);
                             x++;
@@ -182,25 +198,35 @@ public class BoardManager {
                     wallsToRemove.add(wall);
                 }
             }
-            walls.removeAll(wallsToRemove); // Remove all marked walls after iteration
+
+           
+                for (Ball ball : startBalls) {
+                    System.out.println(ball.getCharColour());
+                    if (ball.spawnedAtStart == false) {
+                        spawnBallAtPosition(ball);
+                        ball.spawnedAtStart = true;
+                    }
+
+                }
+           
 
         }
     }
 
-    public void spawnBallAtPosition(float x, float y, String ballColor) {
-        PImage ballImage = BallManager.getBallImage(ballColor, imageLoader);
+    public void spawnBallAtPosition(Ball ball) {
+        PImage ballImage = BallManager.getBallImage(ball.getColour(), imageLoader);
         if (ballImage == null) {
-            System.out.println("Ball image for color " + ballColor + " is null.");
+            System.out.println("Ball image for color " + ball.getColour() + " is null.");
             ballIsNull = true;
             return;
         }
 
         float velocityX = App.random.nextBoolean() ? 2 : -2;
         float velocityY = App.random.nextBoolean() ? 2 : -2;
-        char colour = ballColor.charAt(0);
+        char colour = (ball.getColour()).charAt(0);
 
         float radius = 10;
-        Ball newBall = new Ball(app, ballImage, x, y, velocityX, velocityY, radius, this, colour);
+        Ball newBall = new Ball(app, ballImage, ball.getX(), ball.getY(), velocityX, velocityY, radius, this, colour);
         BallManager.ballsInPlay.add(newBall);
     }
 

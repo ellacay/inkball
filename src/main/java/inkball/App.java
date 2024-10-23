@@ -28,13 +28,13 @@ public class App extends PApplet {
     public static List<PVector> currentLinePoints = new ArrayList<>();
     public int scoreIncrementTimer;
     private final int SCORE_INCREMENT_RATE = 67;
-    private final int TILE_SPEED = 67;
+    private final int TILE_SPEED = 30;
     public boolean isPaused = false;
     public int timer;
     public static Random random = new Random();
     public static final int WIDTH = 576;
     public static final int HEIGHT = 640;
-    public static final int FPS = 15;
+    public static final int FPS = 30;
     public static final int CELLSIZE = 32; // 8;
     public static final int CELLHEIGHT = 32;
     public static final int CELLAVG = 32;

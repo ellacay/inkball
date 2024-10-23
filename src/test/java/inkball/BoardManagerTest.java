@@ -16,14 +16,14 @@ import java.util.HashMap;
 class BoardManagerTest {
 
     private App app;
-    
+
     private ImageLoader imageLoader;
     private BoardManager boardManager;
 
     @BeforeEach
     void setUp() {
         app = new App(); // Replace with actual mock implementation
-        PApplet.runSketch(new String[] {"inkball.App"}, app);
+        PApplet.runSketch(new String[] { "inkball.App" }, app);
         imageLoader = new ImageLoader(app); // Replace with actual mock implementation
         boardManager = new BoardManager(app, imageLoader);
         App.decreaseScore = new HashMap<>();
@@ -31,7 +31,7 @@ class BoardManagerTest {
         App.decreaseScore.put("color2", 20); // Another color
         App.decreaseScoreMultipler = 2; // Set a multiplier
         BoardManager.score = 100; // Initial score
-        
+
     }
 
     @Test
@@ -43,8 +43,6 @@ class BoardManagerTest {
         assertFalse(BoardManager.walls.isEmpty(), "Walls should be initialized.");
         assertFalse(BoardManager.holes.isEmpty(), "Holes should be initialized.");
     }
-   
-
 
     @Test
     void testIncreaseScore() {
@@ -61,18 +59,17 @@ class BoardManagerTest {
     @Test
     void testSpawnBallAtPosition() {
 
-       
-    
+        Ball mockBall = new Ball(app, imageLoader.tile, 0, 0, 0, 0, 10, boardManager, '3');
+
         // Call spawnBall for the first time
-        boardManager.spawnBallAtPosition(100,100,"0");
-    
+        boardManager.spawnBallAtPosition(mockBall);
+
         // Assert that a ball has been spawned
         assertTrue(boardManager.ballIsNull, "Should be null.");
         // Assert that hasSpawnedBall is true
-       
- 
+
     }
-    
+
     @Test
     void testDecreaseScore() {
         PImage ballImage = BallManager.getBallImage("0", imageLoader);
@@ -84,14 +81,14 @@ class BoardManagerTest {
 
         // Calculate expected score
         int expectedScore = 100;
-        
+
         // Check if the score is decreased correctly
         assertEquals(expectedScore, BoardManager.score, "Score should decrease correctly based on ball color.");
     }
 
     @Test
     void testDecreaseScoreNoColorMatch() {
-         PImage ballImage = BallManager.getBallImage("0", imageLoader);
+        PImage ballImage = BallManager.getBallImage("0", imageLoader);
         Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
         ball.setColour('3'); // Assuming '3' does not match any entry in decreaseScore
 
@@ -101,7 +98,6 @@ class BoardManagerTest {
         // Score should remain unchanged if the color is not found
         assertEquals(100, BoardManager.score, "Score should not change if ball color has no associated decrease.");
     }
-  
 
     @Test
     void testSetFinishedBallCount() {
@@ -125,14 +121,11 @@ class BoardManagerTest {
     @Test
     void testMultipleAdds() {
         BoardManager.setFinishedBallCount(0);
- 
+
         for (int i = 0; i < 10; i++) {
             boardManager.addFinishedBall();
         }
         assertEquals(10, BoardManager.getFinishedBallCount(), "Count should be 10 after adding 10 finished balls.");
     }
 
-    
-
-    
 }

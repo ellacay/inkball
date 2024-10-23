@@ -22,6 +22,7 @@ public class Ball {
     private boolean captured = false;
     private BoardManager boardManager;
     public int scoreValue;
+    public boolean spawnedAtStart = false;
 
     private static final float GRAVITY_STRENGTH = 0.5f;
     public static final float SHRINK_RATE = 0.05f;
@@ -37,6 +38,7 @@ public class Ball {
         this.velocity = new PVector(xSpeed, ySpeed);
         this.radius = radius;
         this.boardManager = boardManager;
+        
 
     }
 

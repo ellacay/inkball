@@ -104,7 +104,7 @@ public class ConfigLoader {
 
     public static char[][] setBoardArray(int index) {
        
-        File file = new File("level" + index + ".txt");
+        File file = new File("level" + 3 + ".txt");
 
         int rows = 0;
         int cols = 0;
