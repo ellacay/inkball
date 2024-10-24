@@ -64,7 +64,7 @@ public class BoardManager {
                     if (x + 1 < board[y].length) {
                         ballColour = board[y][x + 1]; // Get color from the next cell
                     }
-                    startBalls.add(new Ball(app, BallManager.getBallImage(Character.toString(ballColour), imageLoader),
+                    startBalls.add(new Ball(app, Ball.getBallImage(Character.toString(ballColour), imageLoader),
                             xPos, yPos, 0, 0, cellSize / 2, this, ballColour));
                 }
             }
@@ -214,7 +214,7 @@ public class BoardManager {
     }
 
     public void spawnBallAtPosition(Ball ball) {
-        PImage ballImage = BallManager.getBallImage(ball.getColour(), imageLoader);
+        PImage ballImage = Ball.getBallImage(ball.getColourAsString(), imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ball.getColour() + " is null.");
             ballIsNull = true;
@@ -223,7 +223,7 @@ public class BoardManager {
 
         float velocityX = App.random.nextBoolean() ? 2 : -2;
         float velocityY = App.random.nextBoolean() ? 2 : -2;
-        char colour = (ball.getColour()).charAt(0);
+        char colour = (ball.getColourAsString()).charAt(0);
 
         float radius = 12;
         Ball newBall = new Ball(app, ballImage, ball.getX(), ball.getY(), velocityX, velocityY, radius, this, colour);

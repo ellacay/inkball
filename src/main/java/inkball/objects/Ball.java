@@ -12,13 +12,10 @@ import inkball.App;
 import inkball.managers.BallManager;
 import inkball.managers.BoardManager;
 
-public class Ball {
+public class Ball extends Object {
     private PApplet app;
     private PImage image;
-    public PVector position;
     public PVector velocity;
-    private float radius;
-    private char colour;
     private boolean captured = false;
     private BoardManager boardManager;
     public int scoreValue;
@@ -28,14 +25,12 @@ public class Ball {
 
     public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius,
             BoardManager boardManager, char colour) {
+
+        super(x, y, colour, radius);
         this.app = app;
-        this.colour = colour;
         this.image = image;
-        this.position = new PVector(x, y);
         this.velocity = new PVector(xSpeed, ySpeed);
-        this.radius = radius;
         this.boardManager = boardManager;
-        
 
     }
 
@@ -44,7 +39,7 @@ public class Ball {
     }
 
     public void update() {
-     
+
         applyCollisionLogic();
         gravitateTowardsHole();
 
@@ -56,86 +51,54 @@ public class Ball {
         Hole closestHole = null;
         float closestDistance = 50;
         for (Hole hole : holesCopy) {
-                  
-                    PVector toHole = new PVector(hole.getPosition().x - (getX() + radius / 2), hole.getPosition().y - (getY() + radius / 2));
-                    float distanceToHole = toHole.mag(); // Get the distance to the center of the hole
-                    // Update if this hole is closer
-                    if (distanceToHole < closestDistance) {
-                        closestDistance = distanceToHole;
-                        closestHole = hole;
-                    }
-                }
 
-    
-         
-            // float distanceToHole = PVector.dist(position, hole.getPosition());
-    
-            if (closestHole!=null && closestDistance < 32 + getRadius()) {
-                
-                // Calculate attraction force and shrink amount
-                float attractionForce = 0.005f * closestDistance;
-                PVector direction = PVector.sub(closestHole.getPosition(), position).normalize();
-                velocity.add(PVector.mult(direction, attractionForce));
-    
-                radius = radius * (closestDistance / 32);
-                radius = Math.max(0, Math.min(12, radius));
-        
-                // Check if captured by the hole
-                if (isCapturedByHole(closestHole) && !captured) {
-                    if (!correctBall(closestHole)) {
-                        captured = true;
-                        BallManager.addToQueueAgain(this);
-                        BoardManager.decreaseScore(this);
-                     
-                    
-                    }
-                    else{
-                        captured = true;
-                        BoardManager.increaseScore(this);
-                        setFinished();
-                        boardManager.checkIfFinished();
-                    }
-            
-               
-                }
-            } else {
-                // If not captured, gradually restore the radius to the original size
-                
-                    
-                    // Calculate how much to increase based on the distance from the hole
-                 
-                        float increaseAmount = PApplet.map(closestDistance, 32 + getRadius(), 64, 0, 1);
-                        radius = PApplet.min(radius + increaseAmount, 12); // Ensure it doesn't exceed the original size
-                    
-                  
-                
+            PVector toHole = new PVector(hole.getPosition().x - (getX() + radius / 2),
+                    hole.getPosition().y - (getY() + radius / 2));
+            float distanceToHole = toHole.mag(); // Get the distance to the center of the hole
+            // Update if this hole is closer
+            if (distanceToHole < closestDistance) {
+                closestDistance = distanceToHole;
+                closestHole = hole;
             }
-        
-    }
-    
-    public String getColour() {
-        return Character.toString(this.colour);
-    }
-
-    public void setColour(char colour) {
-        this.colour = colour;
-    }
-
-    public String getColourString() {
-        switch ((this.colour)) {
-            case '0':
-                return "grey";
-            case '1':
-                return "orange";
-            case '2':
-                return "blue";
-            case '3':
-                return "green";
-            case '4':
-                return "yellow";
-            default:
-                return null;
         }
+
+        // float distanceToHole = PVector.dist(position, hole.getPosition());
+
+        if (closestHole != null && closestDistance < 32 + getRadius()) {
+
+            // Calculate attraction force and shrink amount
+            float attractionForce = 0.005f * closestDistance;
+            PVector direction = PVector.sub(closestHole.getPosition(), position).normalize();
+            velocity.add(PVector.mult(direction, attractionForce));
+
+            radius = radius * (closestDistance / 32);
+            radius = Math.max(0, Math.min(12, radius));
+
+            // Check if captured by the hole
+            if (isCapturedByHole(closestHole) && !captured) {
+                if (!correctBall(closestHole)) {
+                    captured = true;
+                    BallManager.addToQueueAgain(this);
+                    BoardManager.decreaseScore(this);
+
+                } else {
+                    captured = true;
+                    BoardManager.increaseScore(this);
+                    setFinished();
+                    boardManager.checkIfFinished();
+                }
+
+            }
+        } else {
+            // If not captured, gradually restore the radius to the original size
+
+            // Calculate how much to increase based on the distance from the hole
+
+            float increaseAmount = PApplet.map(closestDistance, 32 + getRadius(), 64, 0, 1);
+            radius = PApplet.min(radius + increaseAmount, 12); // Ensure it doesn't exceed the original size
+
+        }
+
     }
 
     public void setVelocity(PVector newVelocity) {
@@ -143,7 +106,6 @@ public class Ball {
     }
 
     public boolean correctBall(Hole hole) {
-       
 
         if (this.colour == hole.getColour()) {
             return true;
@@ -160,11 +122,11 @@ public class Ball {
 
     public void setFinished() {
         boardManager.addFinishedBall();
-  
+
     }
 
     public boolean isNearHole(Hole hole) {
-        return PVector.dist(position, hole.getPosition())-radius < NEAR_HOLE_DISTANCE;
+        return PVector.dist(position, hole.getPosition()) - radius < NEAR_HOLE_DISTANCE;
     }
 
     public float distanceFromHole(Hole hole) {
@@ -181,10 +143,6 @@ public class Ball {
         return isPositionClose && isSizeSmallEnough;
     }
 
-    public void setRadius(float radius) {
-        this.radius = radius;
-    }
-
     private float originalVelocityX;
     private float originalVelocityY;
 
@@ -196,7 +154,7 @@ public class Ball {
     }
 
     public void unfreeze() {
-        
+
         setVelocityX(this.originalVelocityX);
         setVelocityY(this.originalVelocityY);
 
@@ -235,15 +193,15 @@ public class Ball {
         if (this.colour != wall.colour && this.colour != '0' && wall.colour != '0') {
             // Change the ball's color to the wall's color
             this.colour = wall.colour;
-    
+
             // Load the new image based on the new color
             ImageLoader imageLoader = new ImageLoader(app);
             imageLoader.loadImages();
-            PImage newImage = BallManager.getBallImage(Character.toString(this.colour), imageLoader);
-    
+            PImage newImage = getBallImage(Character.toString(this.colour), imageLoader);
+
             if (newImage != null) {
                 System.out.println("Colour changed to: " + this.colour);
-                this.image = newImage;  // Update the ball's image
+                this.image = newImage; // Update the ball's image
             } else {
                 System.out.println("Image not found for color: " + this.colour);
             }
@@ -315,6 +273,7 @@ public class Ball {
         }
         return false; // No collision detected
     }
+
     public PVector reflect(PVector velocity, PVector normal) {
         float dotProduct = PVector.dot(velocity, normal);
         return PVector.sub(velocity, PVector.mult(normal, 2 * dotProduct));
@@ -347,10 +306,6 @@ public class Ball {
         return overlapX && overlapY;
     }
 
-    public PVector getPosition() {
-        return position.copy();
-    }
-
     public float getVelocityY() {
         return velocity.y;
     }
@@ -367,30 +322,6 @@ public class Ball {
         velocity.x = newVelocity;
     }
 
-    public float getY() {
-        return position.y;
-    }
-
-    public float getX() {
-        return position.x;
-    }
-
-    public void setY(float newY) {
-        position.y = newY;
-    }
-
-    public void setX(float newX) {
-        position.x = newX;
-    }
-
-    public float getRadius() {
-        return radius;
-    }
-
-    public char getCharColour() {
-        return colour;
-    }
-
     public boolean isCaptured() {
         return captured;
     }
@@ -399,4 +330,51 @@ public class Ball {
         this.captured = isCaptured;
     }
 
+    public void updateBallPosition(Ball ball) {
+        float nextX = getX() + getVelocityX();
+        float nextY = getY() + getVelocityY();
+
+        float leftBoundary = 0;
+        float rightBoundary = BoardManager.board[0].length * App.CELLSIZE;
+        float topBoundary = App.TOPBAR;
+        float bottomBoundary = BoardManager.board.length * App.CELLSIZE + App.TOPBAR;
+
+        if (nextX <= leftBoundary || nextX >= rightBoundary - getRadius()) {
+            setVelocityX(-getVelocityX());
+        }
+        if (nextY <= topBoundary || nextY >= bottomBoundary - getRadius()) {
+            setVelocityY(-getVelocityY());
+        }
+        setX(nextX);
+        setY(nextY);
+    }
+
+    public static PImage getBallImage(String color, ImageLoader imageLoader) {
+
+        switch (color) {
+            case "blue":
+                return imageLoader.ball0;
+           
+            case "orange":
+                return imageLoader.ball1;
+            case "grey":
+                return imageLoader.ball2;
+            case "green":
+                return imageLoader.ball3;
+            case "yellow":
+                return imageLoader.ball4;
+            case "0":
+                return imageLoader.ball0;
+            case "1":
+                return imageLoader.ball1;
+            case "2":
+                return imageLoader.ball2;
+            case "3":
+                return imageLoader.ball3;
+            case "4":
+                return imageLoader.ball4;
+            default:
+                return null;
+        }
+    }
 }

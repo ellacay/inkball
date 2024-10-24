@@ -92,7 +92,7 @@ public static void updateBallDisplay() {
     // Update ballPositions list to match the size of ballQueue
     while (ballPositions.size() < ballQueue.size()) {
         String ballColor = ballQueue.get(ballPositions.size());
-        PImage ballImage = getBallImage(ballColor, imageLoader);
+        PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
         if (ballImage != null) {
             // Initialize positions based on their width
             ballPositions.add(20 + ballPositions.size() * (float)ballImage.width);
@@ -102,9 +102,9 @@ public static void updateBallDisplay() {
     
 
     // Update the positions of the balls
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < Math.min(5, ballQueue.size()-1); i++) {
         String ballColor = ballQueue.get(i);
-        PImage ballImage = getBallImage(ballColor, imageLoader);
+        PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
         
         if (ballImage != null) {
             // Calculate target position
@@ -137,7 +137,7 @@ public static void updateBallDisplay() {
             
             // Update the ball before checking if it should be removed
             ball.update();
-            updateBallPosition(ball);
+            ball.updateBallPosition(ball);
             ball.display();
     
             // Check if the ball should be removed (e.g., if it's captured)
@@ -167,6 +167,8 @@ public static void updateBallDisplay() {
     }
     public void spawnBall() {
 
+        System.out.println(ballQueue.size());
+
         if (ballQueue.isEmpty()) {
 
             return;
@@ -175,7 +177,7 @@ public static void updateBallDisplay() {
         ballRemoved = true;
 
 
-        PImage ballImage = getBallImage(ballColor, imageLoader);
+        PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
 
@@ -197,37 +199,10 @@ public static void updateBallDisplay() {
         hasSpawnedBall = true;
     }
 
-    public static PImage getBallImage(String color, ImageLoader imageLoader) {
-
-        switch (color) {
-            case "blue":
-                return imageLoader.ball0;
-           
-            case "orange":
-                return imageLoader.ball1;
-            case "grey":
-                return imageLoader.ball2;
-            case "green":
-                return imageLoader.ball3;
-            case "yellow":
-                return imageLoader.ball4;
-            case "0":
-                return imageLoader.ball0;
-            case "1":
-                return imageLoader.ball1;
-            case "2":
-                return imageLoader.ball2;
-            case "3":
-                return imageLoader.ball3;
-            case "4":
-                return imageLoader.ball4;
-            default:
-                return null;
-        }
-    }
+  
 
     public static void addToQueueAgain(Ball ball) {
-        ballQueue.add(ball.getColour());
+        ballQueue.add(ball.getColourAsString());
         updateBallDisplay();
 
     }
@@ -240,23 +215,6 @@ public static void updateBallDisplay() {
         initializeBallQueue();
     }
 
-    public void updateBallPosition(Ball ball) {
-        float nextX = ball.getX() + ball.getVelocityX();
-        float nextY = ball.getY() + ball.getVelocityY();
-
-        float leftBoundary = 0;
-        float rightBoundary = BoardManager.board[0].length * App.CELLSIZE;
-        float topBoundary = App.TOPBAR;
-        float bottomBoundary = BoardManager.board.length * App.CELLSIZE + App.TOPBAR;
-
-        if (nextX <= leftBoundary || nextX >= rightBoundary - ball.getRadius()) {
-            ball.setVelocityX(-ball.getVelocityX());
-        }
-        if (nextY <= topBoundary || nextY >= bottomBoundary - ball.getRadius()) {
-            ball.setVelocityY(-ball.getVelocityY());
-        }
-        ball.setX(nextX);
-        ball.setY(nextY);
-    }
+    
 
 }
