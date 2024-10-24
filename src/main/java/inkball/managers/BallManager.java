@@ -84,48 +84,47 @@ public static boolean ballRemoved = false;
  // List to store x positions of balls
 private static List<Float> ballPositions = new ArrayList<>();
 private static final float MOVE_SPEED = 0.1f; // Speed of movement towards the gap
-
 public static void updateBallDisplay() {
     app.fill(0); // Set color to black
-            app.rect(20,20,140,25); // Draw rectangle below the ball
-            
-    // Update ballPositions list to match the size of ballQueue
+    app.rect(20, 20, 140, 25); // Draw rectangle below the ball
+
+    // Ensure ballPositions list matches the ballQueue size
     while (ballPositions.size() < ballQueue.size()) {
         String ballColor = ballQueue.get(ballPositions.size());
         PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
         if (ballImage != null) {
             // Initialize positions based on their width
-            ballPositions.add(20 + ballPositions.size() * (float)ballImage.width);
+            ballPositions.add(20 + ballPositions.size() * (float) ballImage.width);
         }
     }
-
-    
 
     // Update the positions of the balls
-    for (int i = 0; i < Math.min(5, ballQueue.size()-1); i++) {
-        String ballColor = ballQueue.get(i);
-        PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
-        
-        if (ballImage != null) {
-            // Calculate target position
-            float targetPosition = 20 + i * ballImage.width;
+    int displayCount = Math.min(5, ballPositions.size()); // Number of balls to display
+    for (int i = 0; i < displayCount; i++) {
+        // Check if ballQueue has enough elements
+        if (i < ballQueue.size()) {
+            String ballColor = ballQueue.get(i);
+            PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
+            
+            if (ballImage != null) {
+                // Calculate target position
+                float targetPosition = 20 + i * ballImage.width;
 
-            // Move the ball towards the target position
-            float currentPosition = ballPositions.get(i);
-            if(ballRemoved){
-                currentPosition+=20;
-                
-            }
-            if (currentPosition < targetPosition) {
+                // Move the ball towards the target position
+                float currentPosition = ballPositions.get(i);
+                if (ballRemoved) {
+                    currentPosition += 20; // Adjust position if a ball was removed
+                }
                 ballPositions.set(i, Math.min(currentPosition + MOVE_SPEED, targetPosition));
-            } else {
-                ballPositions.set(i, Math.max(currentPosition - MOVE_SPEED, targetPosition));
-            }
 
-            // Draw the ball at the updated position
-            app.image(ballImage, ballPositions.get(i), 20);
+                // Draw the ball at the updated position
+                app.image(ballImage, ballPositions.get(i), 20);
+            }
         }
     }
+
+
+
     ballRemoved = false;
 }
 
