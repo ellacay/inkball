@@ -37,6 +37,10 @@ public abstract class Object {
         position.y = newY;
     }
 
+    public void setPosition(PVector newPosition) {
+        position = newPosition;
+    }
+
     public void setX(float newX) {
         position.x = newX;
     }
