@@ -221,11 +221,11 @@ public class BoardManager {
             return;
         }
 
-        float velocityX = App.random.nextBoolean() ? 2 : -2;
-        float velocityY = App.random.nextBoolean() ? 2 : -2;
+        float velocityX = App.random.nextBoolean() ? 1 : -1;
+        float velocityY = App.random.nextBoolean() ? 1 : -1;
         char colour = (ball.getColour()).charAt(0);
 
-        float radius = 10;
+        float radius = 12;
         Ball newBall = new Ball(app, ballImage, ball.getX(), ball.getY(), velocityX, velocityY, radius, this, colour);
         BallManager.ballsInPlay.add(newBall);
     }

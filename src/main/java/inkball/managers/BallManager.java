@@ -109,8 +109,8 @@ public class BallManager {
         }
        
 
-        float velocityX = (App.random.nextBoolean() ? 2 : -2);
-        float velocityY = (App.random.nextBoolean() ? 2 : -2);
+        float velocityX = (App.random.nextBoolean() ? 1 : -1);
+        float velocityY = (App.random.nextBoolean() ? 1 : -1);
         Spawner selectedSpawner = BoardManager.spawners.get(App.random.nextInt(BoardManager.spawners.size()));
         float x = selectedSpawner.x2 + (App.CELLSIZE / 2); // Use x of the selected spawner
         float y = selectedSpawner.y2 + (App.CELLSIZE / 2);
