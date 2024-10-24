@@ -20,7 +20,7 @@ public class BallManager {
     public static List<String> ballQueue;
     public static boolean hasSpawnedBall = false;
     public static boolean initalised = false;
-
+public static boolean ballRemoved = false; 
     public BallManager(App appRef, ImageLoader imgLoader) {
         app = appRef;
         imageLoader = imgLoader;
@@ -81,25 +81,53 @@ public class BallManager {
             app.spawnTimer = app.spawnInterval;
         }
     }
-    public static void updateBallDisplay() {
-        List<PImage> upcomingBalls = new ArrayList<>();
+ // List to store x positions of balls
+private static List<Float> ballPositions = new ArrayList<>();
+private static final float MOVE_SPEED = 0.1f; // Speed of movement towards the gap
 
-        for (int i = 0; i < Math.min(5, ballQueue.size()); i++) {
-            String ballColor = ballQueue.get(i);
-
-            PImage ballImage = getBallImage(ballColor, imageLoader);
-            if (ballImage != null) {
-                upcomingBalls.add(ballImage);
-            }
-        }
-
-        int xOffset = 20;
-        for (PImage img : upcomingBalls) {
-
-            app.image(img, xOffset, 20);
-            xOffset += img.width;
+public static void updateBallDisplay() {
+    app.fill(0); // Set color to black
+            app.rect(20,20,140,25); // Draw rectangle below the ball
+            
+    // Update ballPositions list to match the size of ballQueue
+    while (ballPositions.size() < ballQueue.size()) {
+        String ballColor = ballQueue.get(ballPositions.size());
+        PImage ballImage = getBallImage(ballColor, imageLoader);
+        if (ballImage != null) {
+            // Initialize positions based on their width
+            ballPositions.add(20 + ballPositions.size() * (float)ballImage.width);
         }
     }
+
+    
+
+    // Update the positions of the balls
+    for (int i = 0; i < 5; i++) {
+        String ballColor = ballQueue.get(i);
+        PImage ballImage = getBallImage(ballColor, imageLoader);
+        
+        if (ballImage != null) {
+            // Calculate target position
+            float targetPosition = 20 + i * ballImage.width;
+
+            // Move the ball towards the target position
+            float currentPosition = ballPositions.get(i);
+            if(ballRemoved){
+                currentPosition+=20;
+                
+            }
+            if (currentPosition < targetPosition) {
+                ballPositions.set(i, Math.min(currentPosition + MOVE_SPEED, targetPosition));
+            } else {
+                ballPositions.set(i, Math.max(currentPosition - MOVE_SPEED, targetPosition));
+            }
+
+            // Draw the ball at the updated position
+            app.image(ballImage, ballPositions.get(i), 20);
+        }
+    }
+    ballRemoved = false;
+}
 
     public void updateAndDisplayBalls() {
         Iterator<Ball> iterator = ballsInPlay.iterator();
@@ -144,6 +172,8 @@ public class BallManager {
             return;
         }
         String ballColor = ballQueue.remove(0);
+        ballRemoved = true;
+
 
         PImage ballImage = getBallImage(ballColor, imageLoader);
         if (ballImage == null) {

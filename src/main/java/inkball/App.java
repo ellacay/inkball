@@ -78,8 +78,19 @@ public class App extends PApplet {
         imageLoader.loadImages();
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
-        thisLevel = levels.get(level - 1);
+        levelSetup();
+        boardManager.loadBoard();
+        ballManager.initializeBallQueue();
+        currentX1 = 0;
+        currentY1 = 64;
+        currentX2 = WIDTH;
+        currentY2 = HEIGHT;
+    }
 
+
+    public void levelSetup(){
+        
+        thisLevel = levels.get(level - 1);
         this.timer = thisLevel.time;
         initalBalls = thisLevel.balls;
         this.spawnInterval = thisLevel.spawnInterval;
@@ -89,12 +100,6 @@ public class App extends PApplet {
         decreaseScore = thisLevel.scoreDecreaseMap;
         decreaseScoreMultipler = thisLevel.scoreDecreaseMultipler;
         spawnTimer = thisLevel.spawnInterval;
-        boardManager.loadBoard();
-        ballManager.initializeBallQueue();
-        currentX1 = 0;
-        currentY1 = 64;
-        currentX2 = WIDTH;
-        currentY2 = HEIGHT;
     }
     public void moveYellowTile() {
         // Use the defined board height for maximum movement
@@ -335,6 +340,7 @@ public class App extends PApplet {
 
                     this.spawnTimer = levels.get(level - 1).spawnInterval;
                     this.timer = levels.get(level - 1).time;
+                    levelSetup();
                     lines.clear();
                     BoardManager.levelScore = BoardManager.score;
                     restartGame();

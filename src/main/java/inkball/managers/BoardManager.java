@@ -1,6 +1,7 @@
 package inkball.managers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import inkball.App;
 import inkball.loaders.ConfigLoader;
@@ -150,10 +151,10 @@ public class BoardManager {
     }
 
     public static void decreaseScore(Ball ball) {
-        String colorKey = ball.getColourString();
-        if (App.decreaseScore.containsKey(colorKey)) {
+        
+        
             score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
-        }
+        
     }
 
     public void displayBoard() {
@@ -189,11 +190,12 @@ public class BoardManager {
                 }
             }
 
-            List<Wall> wallsToRemove = new ArrayList<>();
-            for (Wall wall : walls) {
+            Iterator<Wall> iterator = walls.iterator();
+            while (iterator.hasNext()) {
+                Wall wall = iterator.next();
                 wall.display();
                 if (wall.isRemoved()) {
-                    wallsToRemove.add(wall);
+                    iterator.remove(); // Safe removal
                 }
             }
 

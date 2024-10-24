@@ -22,7 +22,7 @@ public class ImageLoader {
         ball1 = app.loadImage("src/main/resources/inkball/ball1.png");
         ball2 = app.loadImage("src/main/resources/inkball/ball2.png");
         ball3 = app.loadImage("src/main/resources/inkball/ball3.png");
-        ball4 = app.loadImage("src/main/resources/inkball/ball0.png");
+        ball4 = app.loadImage("src/main/resources/inkball/ball4.png");
         entryPoint = loadAndResizeImage("src/main/resources/inkball/entrypoint.png", newWidth, newHeight);
         hole0 = app.loadImage("src/main/resources/inkball/hole0.png");
         hole1 = app.loadImage("src/main/resources/inkball/hole1.png");

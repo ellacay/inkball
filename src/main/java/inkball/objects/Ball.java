@@ -20,14 +20,10 @@ public class Ball {
     private float radius;
     private char colour;
     private boolean captured = false;
-    private boolean shrink = false;
     private BoardManager boardManager;
     public int scoreValue;
     public boolean spawnedAtStart = false;
-
-    private static final float GRAVITY_STRENGTH = 0.005f;
     public static final float SHRINK_RATE = 0.05f;
-    private static final float STOPPING_THRESHOLD = 10f;
     private static final float NEAR_HOLE_DISTANCE = 32;
 
     public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius,
@@ -58,7 +54,7 @@ public class Ball {
     public void gravitateTowardsHole() {
         List<Hole> holesCopy = new ArrayList<>(BoardManager.holes);
         Hole closestHole = null;
-        float closestDistance = Float.MAX_VALUE;
+        float closestDistance = 50;
         for (Hole hole : holesCopy) {
                   
                     PVector toHole = new PVector(hole.getPosition().x - (getX() + radius / 2), hole.getPosition().y - (getY() + radius / 2));
@@ -83,18 +79,24 @@ public class Ball {
     
                 radius = radius * (closestDistance / 32);
                 radius = Math.max(0, Math.min(12, radius));
-                shrink = true;
+        
                 // Check if captured by the hole
                 if (isCapturedByHole(closestHole) && !captured) {
                     if (!correctBall(closestHole)) {
+                        captured = true;
                         BallManager.addToQueueAgain(this);
                         BoardManager.decreaseScore(this);
+                     
+                    
+                    }
+                    else{
+                        captured = true;
+                        BoardManager.increaseScore(this);
+                        setFinished();
+                        boardManager.checkIfFinished();
                     }
             
-                    captured = true;
-                    BoardManager.increaseScore(this);
-                    setFinished();
-                    boardManager.checkIfFinished();
+               
                 }
             } else {
                 // If not captured, gradually restore the radius to the original size
@@ -141,6 +143,7 @@ public class Ball {
     }
 
     public boolean correctBall(Hole hole) {
+       
 
         if (this.colour == hole.getColour()) {
             return true;
@@ -150,6 +153,7 @@ public class Ball {
         } else if (hole.getColour() == '0') {
             return true;
         }
+
         return false;
 
     }
@@ -201,7 +205,7 @@ public class Ball {
     public void handleLineCollisions() {
         List<Line> linesToRemove = new ArrayList<>();
         for (Line line : App.lines) {
-            if (isColliding(line)) {
+            if (isCollidingWithLinePoints(line)) {
                 reflectLine(line);
                 linesToRemove.add(line);
             }
@@ -222,7 +226,7 @@ public class Ball {
         if (ConfigLoader.extensionFeature) {
             if (this.colour == wall.colour) {
                 wall.hit();
-            } else if (wall.colour == 0) {
+            } else if (wall.colour == '0') {
                 wall.hit();
             }
 
@@ -303,19 +307,14 @@ public class Ball {
         return 0;
     }
 
-    public boolean isColliding(Line line) {
-        PVector lineVector = PVector.sub(line.getEnd(), line.getStart());
-        PVector ballToLineStart = PVector.sub(position, line.getStart());
-
-        float t = PVector.dot(ballToLineStart, lineVector) / lineVector.magSq();
-        t = PApplet.constrain(t, 0, 1);
-
-        PVector closestPoint = PVector.add(line.getStart(), PVector.mult(lineVector, t));
-        float distance = PVector.dist(position, closestPoint);
-
-        return distance <= radius;
+    public boolean isCollidingWithLinePoints(Line line) {
+        for (PVector point : line.points) {
+            if (PVector.dist(position, point) <= radius) {
+                return true; // Collision detected with a point on the line
+            }
+        }
+        return false; // No collision detected
     }
-
     public PVector reflect(PVector velocity, PVector normal) {
         float dotProduct = PVector.dot(velocity, normal);
         return PVector.sub(velocity, PVector.mult(normal, 2 * dotProduct));
