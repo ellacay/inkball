@@ -21,7 +21,7 @@ public class BoardManager {
     public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
-    public static List<Ball> balls = new ArrayList<>();
+    
     public static List<Ball> startBalls = new ArrayList<>();
     public static List<Spawner> spawners = new ArrayList<>();
     public boolean ballSpawned = false;
@@ -44,7 +44,7 @@ public class BoardManager {
         initializeBalls();
         initializeHoles();
         spawners.clear();
-        System.out.println(startBalls);
+    
 
     }
 
@@ -125,8 +125,11 @@ public class BoardManager {
 
     public boolean checkIfFinished() {
 
-        if (finishedBallCount >= BallManager.ballsInPlay.size() +
-                BallManager.ballQueue.size()) {
+
+
+        if (BallManager.ballsInPlay.size()==0 &&
+                BallManager.ballQueue.size()==0) {
+            System.out.println("finished");
             return true;
         }
         return false;
@@ -136,19 +139,14 @@ public class BoardManager {
         finishedBallCount = 0;
         walls.clear();
         holes.clear();
-        balls.clear();
+    
         loadBoard();
     }
 
     public static void increaseScore(Ball ball) {
-        System.out.println("Increase");
-        System.out.println("Ball colour: " + ball.getColourString());
-        System.out.println("Ball score: " + App.increaseScore.get(ball.getColourString()));
-        System.out.println("Multiplyer: " + App.increaseScoreMultipler);
-        System.out.println("Before score: " + score);
+   
         score += (App.increaseScore.get(ball.getColourString())) * App.increaseScoreMultipler;
-        System.out.println("Current score: " + score);
-        System.out.println();
+    
     }
 
     public static void decreaseScore(Ball ball) {
@@ -201,7 +199,7 @@ public class BoardManager {
 
            
                 for (Ball ball : startBalls) {
-                    System.out.println(ball.getCharColour());
+                   
                     if (ball.spawnedAtStart == false) {
                         spawnBallAtPosition(ball);
                         ball.spawnedAtStart = true;
@@ -221,8 +219,8 @@ public class BoardManager {
             return;
         }
 
-        float velocityX = App.random.nextBoolean() ? 1 : -1;
-        float velocityY = App.random.nextBoolean() ? 1 : -1;
+        float velocityX = App.random.nextBoolean() ? 2 : -2;
+        float velocityY = App.random.nextBoolean() ? 2 : -2;
         char colour = (ball.getColour()).charAt(0);
 
         float radius = 12;
@@ -230,9 +228,7 @@ public class BoardManager {
         BallManager.ballsInPlay.add(newBall);
     }
 
-    public void removeBall(Ball ball) {
-        balls.remove(ball);
-    }
+ 
 
     private void handleHoleCell(int x, int y, float xPos, float yPos) {
         if (x + 1 < board[y].length) {

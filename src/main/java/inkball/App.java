@@ -59,7 +59,7 @@ public class App extends PApplet {
     public static double increaseScoreMultipler;
     public static Map<String, Integer> decreaseScore;
     public static double decreaseScoreMultipler;
-    public static String[] balls;
+    public static String[] initalBalls;
     public static void main(String[] args) {
         PApplet.main("inkball.App");
     }
@@ -79,9 +79,9 @@ public class App extends PApplet {
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
         thisLevel = levels.get(level - 1);
-        System.out.println("this level" + (level - 1));
+
         this.timer = thisLevel.time;
-        balls = thisLevel.balls;
+        initalBalls = thisLevel.balls;
         this.spawnInterval = thisLevel.spawnInterval;
         this.spawnTimer = thisLevel.spawnInterval;
         increaseScore = thisLevel.scoreIncreaseMap;
@@ -92,12 +92,14 @@ public class App extends PApplet {
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
         currentX1 = 0;
-        currentY1 = 0;
+        currentY1 = 64;
         currentX2 = WIDTH;
         currentY2 = HEIGHT;
     }
-
     public void moveYellowTile() {
+        // Use the defined board height for maximum movement
+        int maxHeight = (BOARD_HEIGHT - 1) * CELLSIZE ; // Maximum Y boundary
+    
         // Move the first yellow tile
         switch (currentDirection1) {
             case 0: // Move right
@@ -109,8 +111,8 @@ public class App extends PApplet {
                 break;
             case 1: // Move down
                 currentY1 += TILE_SPEED;
-                if (currentY1 >= (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR) {
-                    currentY1 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR;
+                if (currentY1 >= maxHeight) { // Check against max height
+                    currentY1 = maxHeight; // Reset to max height
                     currentDirection1 = 2; // Change direction to left
                 }
                 break;
@@ -129,7 +131,7 @@ public class App extends PApplet {
                 }
                 break;
         }
-
+    
         // Move the second yellow tile
         switch (currentDirection2) {
             case 0: // Move left
@@ -141,7 +143,7 @@ public class App extends PApplet {
                 break;
             case 1: // Move up
                 currentY2 -= TILE_SPEED;
-                if (currentY2 < TOPBAR) { // Account for top bar offset
+                if (currentY2 < TOPBAR) { // Check against the top bar offset
                     currentY2 = TOPBAR; // Reset to the top bar offset
                     currentDirection2 = 2; // Change direction to right
                 }
@@ -155,14 +157,14 @@ public class App extends PApplet {
                 break;
             case 3: // Move down
                 currentY2 += TILE_SPEED;
-                if (currentY2 >= (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR) {
-                    currentY2 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR;
+                if (currentY2 >= maxHeight) { // Check against max height
+                    currentY2 = maxHeight; // Reset to max height
                     currentDirection2 = 0; // Change direction to left
                 }
                 break;
         }
     }
-
+    
     void displayYellowTiles() {
         strokeWeight(0);
         fill(255, 255, 0);
@@ -216,6 +218,7 @@ public class App extends PApplet {
 
     @Override
     public void draw() {
+
         background(255);
         if (!isPaused) {
 
@@ -244,6 +247,7 @@ public class App extends PApplet {
             ballManager.updateAndDisplayBalls();
         }
         if (isMovingTiles) {
+    
             moveYellowTile();
             displayYellowTiles();
             moveTimer++;
@@ -307,6 +311,7 @@ public class App extends PApplet {
     }
 
     public void displayWin() {
+
         isMovingTiles = true;
         if (this.timer > 0) {
             scoreIncrementTimer++;
@@ -324,10 +329,9 @@ public class App extends PApplet {
 
                 level++;
                 if (level <= levels.size()) {
-                    System.out.println(this.timer * 0.067);
-                    System.out.println("Before final score: " + BoardManager.score);
+                  
                     BoardManager.score += (this.timer * 0.067);
-                    System.out.println("Final score: " + BoardManager.score);
+  
 
                     this.spawnTimer = levels.get(level - 1).spawnInterval;
                     this.timer = levels.get(level - 1).time;
@@ -403,6 +407,9 @@ public class App extends PApplet {
         if (event.getKey() == 'r') {
             restartGame();
         }
+
+        
+   
         if (event.getKey() == ' ') {
 
             isPaused = !isPaused;
@@ -413,10 +420,16 @@ public class App extends PApplet {
     }
 
     public void restartGame() {
+        this.isPaused = false;
+       
 
         if (!this.levelWon) {
+          
             BoardManager.score = BoardManager.levelScore;
         }
+        this.levelWon = false;
+        this.isMovingTiles = false;
+        
         this.gameWon = false;
         boardManager.reset();
         ballManager.reset();

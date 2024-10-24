@@ -20,13 +20,14 @@ public class Ball {
     private float radius;
     private char colour;
     private boolean captured = false;
+    private boolean shrink = false;
     private BoardManager boardManager;
     public int scoreValue;
     public boolean spawnedAtStart = false;
 
-    private static final float GRAVITY_STRENGTH = 0.5f;
+    private static final float GRAVITY_STRENGTH = 0.005f;
     public static final float SHRINK_RATE = 0.05f;
-    private static final float STOPPING_THRESHOLD = 0.1f;
+    private static final float STOPPING_THRESHOLD = 10f;
     private static final float NEAR_HOLE_DISTANCE = 32;
 
     public Ball(PApplet app, PImage image, float x, float y, float xSpeed, float ySpeed, float radius,
@@ -47,7 +48,7 @@ public class Ball {
     }
 
     public void update() {
-        position.add(velocity);
+     
         applyCollisionLogic();
         gravitateTowardsHole();
 
@@ -56,37 +57,60 @@ public class Ball {
 
     public void gravitateTowardsHole() {
         List<Hole> holesCopy = new ArrayList<>(BoardManager.holes);
+        Hole closestHole = null;
+        float closestDistance = Float.MAX_VALUE;
         for (Hole hole : holesCopy) {
-            if (isNearHole(hole)) {
-                float distanceToHole = PVector.dist(position, hole.getPosition());
-                PVector direction = PVector.sub(hole.getPosition(), position).normalize();
-                velocity = direction.mult(GRAVITY_STRENGTH);
-
-                float shrinkAmount = PApplet.map(distanceToHole, 0, hole.getRadius(), SHRINK_RATE, 1);
-                radius = PApplet.max(radius - shrinkAmount, 0);
-
-                position.add(velocity);
-
-                if (distanceToHole < STOPPING_THRESHOLD) {
-                    position = hole.getPosition().copy();
-                    velocity.set(0, 0);
+                  
+                    PVector toHole = new PVector(hole.getPosition().x - (getX() + radius / 2), hole.getPosition().y - (getY() + radius / 2));
+                    float distanceToHole = toHole.mag(); // Get the distance to the center of the hole
+                    // Update if this hole is closer
+                    if (distanceToHole < closestDistance) {
+                        closestDistance = distanceToHole;
+                        closestHole = hole;
+                    }
                 }
 
-                if (isCapturedByHole(hole) && !captured) {
-
-                    if (!correctBall(hole)) {
+    
+         
+            // float distanceToHole = PVector.dist(position, hole.getPosition());
+    
+            if (closestHole!=null && closestDistance < 32 + getRadius()) {
+                
+                // Calculate attraction force and shrink amount
+                float attractionForce = 0.005f * closestDistance;
+                PVector direction = PVector.sub(closestHole.getPosition(), position).normalize();
+                velocity.add(PVector.mult(direction, attractionForce));
+    
+                radius = radius * (closestDistance / 32);
+                radius = Math.max(0, Math.min(12, radius));
+                shrink = true;
+                // Check if captured by the hole
+                if (isCapturedByHole(closestHole) && !captured) {
+                    if (!correctBall(closestHole)) {
                         BallManager.addToQueueAgain(this);
                         BoardManager.decreaseScore(this);
                     }
+            
                     captured = true;
                     BoardManager.increaseScore(this);
                     setFinished();
                     boardManager.checkIfFinished();
                 }
+            } else {
+                // If not captured, gradually restore the radius to the original size
+                
+                    
+                    // Calculate how much to increase based on the distance from the hole
+                 
+                        float increaseAmount = PApplet.map(closestDistance, 32 + getRadius(), 64, 0, 1);
+                        radius = PApplet.min(radius + increaseAmount, 12); // Ensure it doesn't exceed the original size
+                    
+                  
+                
             }
-        }
+        
     }
-
+    
     public String getColour() {
         return Character.toString(this.colour);
     }
@@ -132,11 +156,11 @@ public class Ball {
 
     public void setFinished() {
         boardManager.addFinishedBall();
-        boardManager.removeBall(this);
+  
     }
 
     public boolean isNearHole(Hole hole) {
-        return PVector.dist(position, hole.getPosition()) < NEAR_HOLE_DISTANCE;
+        return PVector.dist(position, hole.getPosition())-radius < NEAR_HOLE_DISTANCE;
     }
 
     public float distanceFromHole(Hole hole) {
@@ -148,7 +172,7 @@ public class Ball {
     }
 
     public boolean isCapturedByHole(Hole hole) {
-        boolean isPositionClose = distanceFromHole(hole) < hole.getRadius();
+        boolean isPositionClose = distanceFromHole(hole) < getRadius();
         boolean isSizeSmallEnough = radius <= hole.getRadius() * SHRINK_RATE;
         return isPositionClose && isSizeSmallEnough;
     }
@@ -168,7 +192,7 @@ public class Ball {
     }
 
     public void unfreeze() {
-        System.out.println("unfreeze");
+        
         setVelocityX(this.originalVelocityX);
         setVelocityY(this.originalVelocityY);
 

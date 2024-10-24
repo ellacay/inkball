@@ -9,6 +9,7 @@ import processing.core.PVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,19 +19,24 @@ public class BallManager {
     public static List<Ball> ballsInPlay = new ArrayList<>();
     public static List<String> ballQueue;
     public static boolean hasSpawnedBall = false;
+    public static boolean initalised = false;
 
     public BallManager(App appRef, ImageLoader imgLoader) {
         app = appRef;
         imageLoader = imgLoader;
-        initializeBallQueue();
-    } 
+
+    }
 
     public void initializeBallQueue() {
         ballQueue = new LinkedList<>();
 
         // Add elements from the array to the LinkedList
-        if(App.balls !=null){
-            for (String ball : App.balls) {
+        if(App.initalBalls !=null && initalised!=true){
+       
+          
+            for (String ball : App.initalBalls) {
+               
+               
                 String ballColour = "0";
                 
                 switch(ball){
@@ -38,38 +44,36 @@ public class BallManager {
       
                         ballColour = "0";
                         ballQueue.add(ballColour);
+                        break;
                     case("orange"):
                   
                         ballColour = "1";
                         ballQueue.add(ballColour);
+                        break;
                     case("blue"):
                     
                         ballColour = "2";
                         ballQueue.add(ballColour);
+                        break;
                     case("green"):
                  
                         ballColour = "3";
                         ballQueue.add(ballColour);
+                        break;
                     case("yellow"):
         
                         ballColour = "4";
                         ballQueue.add(ballColour);
+                        break;
                     
                 }
-                ballQueue.add(ballColour);
+              
             }
+            initalised = true;
         }
        
     }
 
-    public void updateAndDisplayBalls() {
-        for (Ball ball : ballsInPlay) {
-
-            ball.update();
-            updateBallPosition(ball);
-            ball.display();
-        }
-    }
 
     public void handleBallSpawning() {
         if (app.spawnTimer <= 0) {
@@ -77,7 +81,45 @@ public class BallManager {
             app.spawnTimer = app.spawnInterval;
         }
     }
+    public static void updateBallDisplay() {
+        List<PImage> upcomingBalls = new ArrayList<>();
 
+        for (int i = 0; i < Math.min(5, ballQueue.size()); i++) {
+            String ballColor = ballQueue.get(i);
+
+            PImage ballImage = getBallImage(ballColor, imageLoader);
+            if (ballImage != null) {
+                upcomingBalls.add(ballImage);
+            }
+        }
+
+        int xOffset = 20;
+        for (PImage img : upcomingBalls) {
+
+            app.image(img, xOffset, 20);
+            xOffset += img.width;
+        }
+    }
+
+    public void updateAndDisplayBalls() {
+        Iterator<Ball> iterator = ballsInPlay.iterator();
+
+        while (iterator.hasNext()) {
+            Ball ball = iterator.next();
+            
+            // Update the ball before checking if it should be removed
+            ball.update();
+            updateBallPosition(ball);
+            ball.display();
+    
+            // Check if the ball should be removed (e.g., if it's captured)
+            if (ball.isCaptured()) { // Replace with your actual condition
+                iterator.remove(); // Safe removal
+            }
+        }
+    }
+
+   
     public void freezeToggle(boolean toggle) {
 
         // Stop updating balls by setting their velocities to zero
@@ -92,11 +134,13 @@ public class BallManager {
         }
 
     }
-
+    public static void removeBall(Ball ball) {
+        ballsInPlay.remove(ball);
+    }
     public void spawnBall() {
-       
-        if (ballQueue.isEmpty()){
-           
+
+        if (ballQueue.isEmpty()) {
+
             return;
         }
         String ballColor = ballQueue.remove(0);
@@ -104,13 +148,12 @@ public class BallManager {
         PImage ballImage = getBallImage(ballColor, imageLoader);
         if (ballImage == null) {
             System.out.println("Ball image for color " + ballColor + " is null.");
-           
+
             return;
         }
-       
 
-        float velocityX = (App.random.nextBoolean() ? 1 : -1);
-        float velocityY = (App.random.nextBoolean() ? 1 : -1);
+        float velocityX = (App.random.nextBoolean() ? 2 : -2);
+        float velocityY = (App.random.nextBoolean() ? 2 : -2);
         Spawner selectedSpawner = BoardManager.spawners.get(App.random.nextInt(BoardManager.spawners.size()));
         float x = selectedSpawner.x2 + (App.CELLSIZE / 2); // Use x of the selected spawner
         float y = selectedSpawner.y2 + (App.CELLSIZE / 2);
@@ -125,10 +168,11 @@ public class BallManager {
     }
 
     public static PImage getBallImage(String color, ImageLoader imageLoader) {
-      
+
         switch (color) {
             case "blue":
                 return imageLoader.ball0;
+           
             case "orange":
                 return imageLoader.ball1;
             case "grey":
@@ -158,27 +202,10 @@ public class BallManager {
 
     }
 
-    public static void updateBallDisplay() {
-        List<PImage> upcomingBalls = new ArrayList<>();
-
-        for (int i = 0; i < Math.min(5, ballQueue.size()); i++) {
-            String ballColor = ballQueue.get(i);
-
-            PImage ballImage = getBallImage(ballColor, imageLoader);
-            if (ballImage != null) {
-                upcomingBalls.add(ballImage);
-            }
-        }
-
-        int xOffset = 20;
-        for (PImage img : upcomingBalls) {
-
-            app.image(img, xOffset, 20);
-            xOffset += img.width;
-        }
-    }
+   
 
     public void reset() {
+        initalised = false;
         ballsInPlay.clear();
         initializeBallQueue();
     }
