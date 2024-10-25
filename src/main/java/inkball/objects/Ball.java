@@ -253,13 +253,10 @@ public class Ball extends Object {
             boolean isGreyHole = holeColor == '0';
 
             if (isColourMatch || isGreyBall || isGreyHole) {
-                return 60;
-                // return scoreValue * levelMultiplier;
+       
+                return scoreValue * levelMultiplier;
             }
-            if (isColourMatch == false) {
-                return 1;
-            }
-            return 4;
+           
 
         }
         return 0;
@@ -280,6 +277,8 @@ public class Ball extends Object {
     }
 
     public void reflectLine(Line line) {
+
+
         PVector lineDirection = PVector.sub(line.getEnd(), line.getStart()).normalize();
         PVector normal = new PVector(-lineDirection.y, lineDirection.x).normalize();
 

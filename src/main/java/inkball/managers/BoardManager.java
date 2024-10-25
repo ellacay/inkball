@@ -14,7 +14,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class BoardManager {
-    private PApplet app;
+    private App app;
     public ImageLoader imageLoader;
     public static int score;
     public static int levelScore;
@@ -22,7 +22,7 @@ public class BoardManager {
     public static Spawner spawner;
     public static List<Wall> walls = new ArrayList<>();
     public static List<Hole> holes = new ArrayList<>();
-    
+
     public static List<Ball> startBalls = new ArrayList<>();
     public static List<Spawner> spawners = new ArrayList<>();
     public boolean ballSpawned = false;
@@ -30,13 +30,14 @@ public class BoardManager {
     private static int finishedBallCount;
     boolean ballsSpawned = false;
 
-    public BoardManager(PApplet app, ImageLoader imageLoader) {
+    public BoardManager(App app, ImageLoader imageLoader) {
         this.app = app;
         this.imageLoader = imageLoader;
     }
 
     public void loadBoard() {
-        board = ConfigLoader.setBoardArray(App.level);
+      
+        board = ConfigLoader.setBoardArray(app.level);
         if (board == null) {
             System.err.println("Failed to load board configuration.");
             app.exit();
@@ -45,7 +46,6 @@ public class BoardManager {
         initializeBalls();
         initializeHoles();
         spawners.clear();
-    
 
     }
 
@@ -72,6 +72,7 @@ public class BoardManager {
     }
 
     private void initializeWalls() {
+
         walls.clear();
         float cellSize = App.CELLSIZE;
         boolean[][] wallAdded = new boolean[board.length][board[0].length];
@@ -126,10 +127,8 @@ public class BoardManager {
 
     public boolean checkIfFinished() {
 
-
-
-        if (BallManager.ballsInPlay.size()==0 &&
-                BallManager.ballQueue.size()==0) {
+        if (BallManager.ballsInPlay.size() == 0 &&
+                BallManager.ballQueue.size() == 0) {
             System.out.println("finished");
             return true;
         }
@@ -140,21 +139,20 @@ public class BoardManager {
         finishedBallCount = 0;
         walls.clear();
         holes.clear();
-    
+
         loadBoard();
     }
 
     public static void increaseScore(Ball ball) {
-   
+
         score += (App.increaseScore.get(ball.getColourString())) * App.increaseScoreMultipler;
-    
+
     }
 
     public static void decreaseScore(Ball ball) {
-        
-        
-            score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
-        
+
+        score -= (App.decreaseScore.get(ball.getColourString())) * App.decreaseScoreMultipler;
+
     }
 
     public void displayBoard() {
@@ -199,16 +197,14 @@ public class BoardManager {
                 }
             }
 
-           
-                for (Ball ball : startBalls) {
-                   
-                    if (ball.spawnedAtStart == false) {
-                        spawnBallAtPosition(ball);
-                        ball.spawnedAtStart = true;
-                    }
+            for (Ball ball : startBalls) {
 
+                if (ball.spawnedAtStart == false) {
+                    spawnBallAtPosition(ball);
+                    ball.spawnedAtStart = true;
                 }
-           
+
+            }
 
         }
     }
@@ -229,8 +225,6 @@ public class BoardManager {
         Ball newBall = new Ball(app, ballImage, ball.getX(), ball.getY(), velocityX, velocityY, radius, this, colour);
         BallManager.ballsInPlay.add(newBall);
     }
-
- 
 
     private void handleHoleCell(int x, int y, float xPos, float yPos) {
         if (x + 1 < board[y].length) {

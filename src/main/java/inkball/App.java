@@ -14,7 +14,7 @@ import inkball.managers.BoardManager;
 import inkball.objects.Line;
 
 public class App extends PApplet {
-    public static Integer level = 1;
+    public  Integer level;
     private ImageLoader imageLoader;
     private BallManager ballManager;
     private BoardManager boardManager;
@@ -78,6 +78,7 @@ public class App extends PApplet {
         imageLoader.loadImages();
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
+        level = 1;
         levelSetup();
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
@@ -291,7 +292,7 @@ public class App extends PApplet {
         }
     }
 
-    private float distanceToLine(float x, float y, Line line) {
+    public float distanceToLine(float x, float y, Line line) {
         PVector start = line.getStart();
         PVector end = line.getEnd();
         float lineLength = PVector.dist(start, end);

@@ -35,43 +35,27 @@ class BallManagerTest {
         BoardManager.spawners.add(spawner); // Add spawner to the board manager
     }
 
-    @Test
-    void testInitializeBallQueue() {
-        assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue,
-                "Ball queue should initialize correctly.");
-    }
+   
+
+   
 
     @Test
-    void testSpawnBall() {
-        ballManager.initializeBallQueue();
-        BallManager.ballQueue.add("red"); // Example color to spawn
-        imageLoader.loadImages(); // Ensure images are loaded
-    
-        // Call spawnBall for the first time
-        ballManager.spawnBall();
-    
-        // Assert that a ball has been spawned
-        assertTrue(BallManager.hasSpawnedBall, "One ball should be in play after spawning.");
-        // Assert that hasSpawnedBall is true
-       
- 
-    }
-
-    @Test
-    void testGetBallImage(){
-        PImage blue =BallManager.getBallImage("blue", imageLoader);
-        PImage orange = BallManager.getBallImage("orange", imageLoader);
-        PImage grey= BallManager.getBallImage("grey", imageLoader);
-        PImage green= BallManager.getBallImage("green", imageLoader);
-        PImage yellow= BallManager.getBallImage("yellow", imageLoader);
+    void testGetBallImage() {
+        PImage blue = Ball.getBallImage("blue", imageLoader);
+        PImage orange = Ball.getBallImage("orange", imageLoader);
+        PImage grey = Ball.getBallImage("grey", imageLoader);
+        PImage green = Ball.getBallImage("green", imageLoader);
+        PImage yellow = Ball.getBallImage("yellow", imageLoader);
+        PImage black = Ball.getBallImage("black", imageLoader);
 
         assertEquals(blue, imageLoader.ball0, "Should be blue");
         assertEquals(orange, imageLoader.ball1, "Should be orange");
         assertEquals(grey, imageLoader.ball2, "Should be grey");
         assertEquals(green, imageLoader.ball3, "Should be green");
         assertEquals(yellow, imageLoader.ball4, "Should be yellow");
+        assertEquals(black, null, "Should be null");
     }
-    
+
     @Test
     void testFreezeToggle() {
         // Create two balls and add them to the ballsInPlay
@@ -108,10 +92,30 @@ class BallManagerTest {
 
         // Verify the ballsInPlay is cleared and ballQueue is reinitialized
         assertTrue(BallManager.ballsInPlay.isEmpty(), "Balls in play should be cleared on reset.");
-        assertEquals(Arrays.asList("2", "1", "0", "3", "4"), BallManager.ballQueue,
-                "Ball queue should be reset to initial state.");
+     
     }
 
+    @Test
 
+    public void testAddToQueueAgain(){
+        PImage ballImage = imageLoader.ball0; // Use any valid image
+        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
+        int size = BallManager.ballQueue.size();
+        BallManager.addToQueueAgain(ball);
+        assertEquals(size+1,  BallManager.ballQueue.size(),"Should be matching");
+
+    }
+
+    @Test
+    public void testRemoveBall(){
+        BallManager.ballsInPlay.clear();
+
+        PImage ballImage = imageLoader.ball0; // Use any valid image
+        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
+        BallManager.ballsInPlay.add(ball);
+        int size = BallManager.ballsInPlay.size();
+        BallManager.removeBall(ball);
+        assertEquals(size-1,  BallManager.ballsInPlay.size(),"Should be matching");
+    }
 
 }

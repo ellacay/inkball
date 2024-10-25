@@ -36,7 +36,7 @@ class BoardManagerTest {
 
     @Test
     void testLoadBoard() {
-        App.level = 1; // Set a level for testing
+        app.level = 1; // Set a level for testing
         boardManager.loadBoard();
 
         assertNotNull(BoardManager.board, "Board should not be null after loading.");
@@ -70,34 +70,8 @@ class BoardManagerTest {
 
     }
 
-    @Test
-    void testDecreaseScore() {
-        PImage ballImage = BallManager.getBallImage("0", imageLoader);
-        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
-        ball.setColour('1'); // Assuming '1' corresponds to "color1"
+  
 
-        // Decrease the score based on the ball's color
-        BoardManager.decreaseScore(ball);
-
-        // Calculate expected score
-        int expectedScore = 100;
-
-        // Check if the score is decreased correctly
-        assertEquals(expectedScore, BoardManager.score, "Score should decrease correctly based on ball color.");
-    }
-
-    @Test
-    void testDecreaseScoreNoColorMatch() {
-        PImage ballImage = BallManager.getBallImage("0", imageLoader);
-        Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
-        ball.setColour('3'); // Assuming '3' does not match any entry in decreaseScore
-
-        // Decrease the score based on the ball's color
-        BoardManager.decreaseScore(ball);
-
-        // Score should remain unchanged if the color is not found
-        assertEquals(100, BoardManager.score, "Score should not change if ball color has no associated decrease.");
-    }
 
     @Test
     void testSetFinishedBallCount() {

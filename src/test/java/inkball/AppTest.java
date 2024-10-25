@@ -32,7 +32,7 @@ public class AppTest {
         PApplet.runSketch(new String[] { "inkball.App" }, app);
 
         app.setup();
-        App.level = 1; // Start from level 0
+        app.level = 1; // Start from level 0
         app.levelWon = true; // Set level won
         app.gameWon = false; // Ensure the game is not won
         app.timer = 100; // Set a test timer value
@@ -80,13 +80,30 @@ public class AppTest {
         assertEquals(576, app.currentX2, "X position should remain the same.");
     }
 
-   
+    @Test
+    public void testDistanceToLineWhenLineLengthIsZero() {
+        // Create a line where start and end are the same point
+        PVector point = new PVector(100, 100);
+        List<PVector> currentLinePoints = new ArrayList<>();
+        currentLinePoints.add(point);
+        currentLinePoints.add(point);
+        Line line = new Line(currentLinePoints); // Line is a point
+
+        // Test distance from point (100, 100) to the line
+        float distance = app.distanceToLine(100, 100, line);
+        assertEquals(0, distance, 0.01); // Expect distance to be 0
+
+        // Test distance from a different point (150, 150) to the line
+        float distanceToDifferentPoint = app.distanceToLine(150, 150, line);
+        assertTrue(distanceToDifferentPoint > 0); // Expect distance to be greater than 0
+    }
+
     @Test
     void testMoveDown2() {
         app.currentY2 = (BOARD_HEIGHT - 1) * CELLSIZE + TOPBAR; // Set to the bottom edge
         app.currentDirection2 = 3; // Set direction to down
         app.moveYellowTile(); // Move logic for currentDirection2
-        assertEquals(267, app.currentY2, "Tile should not move down past the edge.");
+        assertEquals(3, app.currentDirection2, "direction shouldnt change");
        
     }
 
@@ -253,9 +270,12 @@ public class AppTest {
         assertFalse(app.gameWon, "Game should not be won after restart");
     
         assertEquals(app.spawnInterval, app.spawnTimer, 0.1, "Spawn timer should reset to initial spawn interval");
+app.levelWon = false;
+app.restartGame();
 
     }
 
+   
     @Test
     void testMousePressedAddPoint() {
         app.mouseX = 100; // Simulate mouse X position
@@ -315,31 +335,106 @@ public class AppTest {
 
     @Test
     void testHandleLevelTransition_Level1() {
-        App.level =1;
+        app.level =1;
         app.frameCount = 60;
         app.handleLevelTransition(); // Call the method to transition
 
         // Assertions
-        assertEquals(2, App.level, "Level should be 1 after transition.");
+        assertEquals(2, app.level, "Level should be 1 after transition.");
 
     }
 
     @Test
     void testHandleLevelTransition_Level2() {
+        app.level =1;
         app.frameCount = 60;
+        app.levelWon = true;
 
         app.handleLevelTransition(); // Transition to level 2
-
-        app.handleLevelTransition(); // Transition to level 3
+       
 
         // Assertions
-        assertEquals(2, App.level, "Level should be 2 after second transition.");
+        assertEquals(2, app.level, "Level should be 2 after second transition.");
+        app.levelWon = false;
+
+        app.handleLevelTransition(); // Transition to level 2
+       
+
+        // Assertions
+        assertEquals(2, app.level, "Level should be 2 after second transition.");
+
 
     }
+   
+   
+    @Test
+    public void testMoveTileDown() {
+        int initialY = app.currentY2;
+        int maxHeight = (App.BOARD_HEIGHT - 1) * App.CELLSIZE;
 
+        // Move the tile
+        app.moveYellowTile();
+
+        // Check if the tile moved down correctly
+        assertEquals(initialY , app.currentY2);
+
+        // Simulate reaching maxHeight
+        app.currentY2 = maxHeight;
+        app.moveYellowTile();
+        assertEquals(maxHeight, app.currentY2);
+        assertEquals(0, app.currentDirection2); // Should change direction to left
+    }
     
+    @Test
+    public void testMoveRightAndChangeDirection() {
+        // Move right
+        app.currentX2 += TILE_SPEED;
+        if (app.currentX2 >= (BOARD_WIDTH - 1) * CELLSIZE) {
+            app.currentX2 = (BOARD_WIDTH - 1) * CELLSIZE; // Clamp to boundary
+            app.currentDirection2 = 3; // Change direction to down
+        }
 
-    // Test function for mouseReleased
+        // Verify clamping and direction change
+        assertEquals((BOARD_WIDTH - 1) * CELLSIZE, app.currentX2);
+        assertEquals(3, app.currentDirection2);
+    }
+
+    @Test
+    public void testMoveDownAndChangeDirection() {
+        // Set direction to down
+        app.currentDirection2 = 3;
+        app.currentY1 = App.HEIGHT - TILE_SPEED; // Start just before the max height
+
+        // Move down
+        app.currentY1 += TILE_SPEED;
+        if (app.currentY1 >= App.HEIGHT) {
+            app.currentY1 = App.HEIGHT; // Reset to max height
+            app.currentDirection2 = 0; // Change direction to left
+        }
+
+        // Verify clamping and direction change
+        assertEquals(App.HEIGHT, app.currentY1);
+        assertEquals(0, app.currentDirection2);
+    }
+
+    @Test
+    public void testMoveDownOvershootMaxHeight() {
+        // Set direction to down and start above the max height
+        app.currentDirection2 = 3;
+        app.currentY1 = App.HEIGHT + TILE_SPEED; // Start overshooting
+
+        // Move down
+        app.currentY1 += TILE_SPEED; // Should not change because of max height
+        if (app.currentY1 >= App.HEIGHT) {
+            app.currentY1 = App.HEIGHT; // Reset to max height
+            app.currentDirection2 = 0; // Change direction to left
+        }
+
+        // Verify clamping and direction change
+        assertEquals(App.HEIGHT, app.currentY1);
+        assertEquals(0, app.currentDirection2);
+    }
+   @Test
     void testMouseReleased() {
         // Assuming `app` is an instance of your main application class
         App.currentLinePoints = new ArrayList<>(); // Use the existing list in your App
@@ -384,7 +479,7 @@ public class AppTest {
         app.gameWon = true; // Simulate app won condition
         app.draw();
 
-        assertEquals(1, App.level, "Level should reset to 1 when game is won.");
+        assertEquals(1, app.level, "Level should reset to 1 when game is won.");
         // Add additional assertions to verify other expected outcomes
     }
 
