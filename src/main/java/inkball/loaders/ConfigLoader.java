@@ -86,8 +86,13 @@ public class ConfigLoader {
             levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncreaseMap, scoreDecreaseMap,
                     scoreIncreaseMultipler, scoreDecreaseMultipler, balls));
         }
+        try{
+            extensionFeature = gameConfig.getBoolean("extensionEnabled");
+        } 
+        catch(Exception e){
+            System.out.println("Extension not enabled");
     }
-
+    }
     public static String readFileAsString(String fileName) {
         String content = "";
         try {
@@ -103,14 +108,14 @@ public class ConfigLoader {
     }
 
     public static char[][] setBoardArray(int index) {
-       
+
         File file = new File("level" + index + ".txt");
 
         int rows = 0;
         int cols = 0;
 
         List<String> lines = new ArrayList<>();
-     
+
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
