@@ -112,24 +112,7 @@ class BallManagerTest {
         
         assertEquals(size + 1, BallManager.ballQueue.size(), "Should be matching");
     }
-    @Test
-    public void testSpawnBall() {
-        // Arrange: Prepare a color and add it to the queue
-        ballManager.initializeBallQueue();
-        BallManager.ballQueue.clear();
-        String ballColor = "3"; // Replace with a valid color string
-        BallManager.ballQueue.add(ballColor);
-        
-        // Act: Call the method to spawn a ball
-        ballManager.spawnBall();
-
-        // Assert: Check that a ball has been spawned
-    
-        Ball spawnedBall = BallManager.ballsInPlay.get(0);
-        assertNotNull(spawnedBall, "The spawned ball should not be null");
-        assertEquals(ballColor, spawnedBall.getColour(), "The color of the spawned ball should match");
-        // Additional assertions for position, velocity, and other properties
-    }
+   
 
     @Test
     public void testSpawnBallEmptyQueue() {

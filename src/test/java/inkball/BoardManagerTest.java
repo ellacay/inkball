@@ -31,7 +31,14 @@ class BoardManagerTest {
         App.decreaseScore.put("color2", 20); // Another color
         App.decreaseScoreMultipler = 2; // Set a multiplier
         BoardManager.score = 100; // Initial score
-
+        
+        BoardManager.board = new char[][] {
+            {' ', ' ', 'H', '0', ' '},
+            {' ', ' ', 'H', '1', ' '},
+            {' ', ' ', 'H', '2', ' '},
+            {' ', ' ', 'H', '3', ' '},
+            {' ', ' ', 'H', '4', ' '}
+        };
     }
 
     @Test

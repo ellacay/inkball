@@ -186,7 +186,42 @@ public class BallTest {
         assertEquals(expectedVelocity.y, ball.velocity.y, 0.001, "velocity y should match");
         assertEquals(expectedPosition.x, ball.getX(), 0.001, "position x should match");
         assertEquals(expectedPosition.y, ball.getY(), 0.001,"position yshould match");
+
+       
     }
+
+    @Test
+public void testReflectLine_WithReflection3() {
+    // Set up the ball with initial position and velocity
+    ball.setX(5);
+    ball.setY(5);
+    ball.setVelocity(new PVector(1, 1)); // Moving diagonally
+    ball.setRadius(1f);
+
+    // Define a line (horizontal for simplicity)
+    PVector startPoint = new PVector(0, 10); // Start point of the line
+    PVector endPoint = new PVector(100, 10); // End point of the line
+    List<PVector> currentLinePoints = new ArrayList<>(); // Correctly named list
+    currentLinePoints.add(startPoint);
+    currentLinePoints.add(endPoint);
+
+    // Create a line using the list of points
+    Line line = new Line(currentLinePoints); // Ensure Line class can accept this list
+
+    // Reflect the ball off the line
+    ball.reflectLine(line);
+
+    // Calculate expected position and velocity after reflection
+    PVector expectedVelocity = new PVector(1, -1); // Reflecting off a horizontal line
+    PVector expectedPosition = new PVector(5, 5); // Adjusting position for penetration depth
+
+    // Assertions
+    assertEquals(expectedVelocity.x, ball.getVelocityX(), 0.001, "Velocity x should match");
+    assertEquals(expectedVelocity.y, ball.getVelocityY(), 0.001, "Velocity y should match");
+    assertEquals(expectedPosition.x, ball.getX(), 0.001, "Position x should match");
+    assertEquals(expectedPosition.y, ball.getY(), 0.001, "Position y should match");
+}
+
   
 
     @Test
