@@ -14,10 +14,18 @@ import java.util.Set;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
+/**
+ * Responsible for loading and parsing game configuration data from JSON and text files.
+ * This class manages the settings for different game levels, including scoring rules and layout information.
+ */
 public class ConfigLoader {
 
+    /** Flag indicating if extension features are enabled. */
     public static boolean extensionFeature = true;
 
+    /**
+     * Represents the configuration for a specific level in the game.
+     */
     public static class LevelConfig {
         public int level;
         public String layout;
@@ -29,9 +37,21 @@ public class ConfigLoader {
         public double scoreDecreaseMultipler;
         public String[] balls;
 
+        /**
+         * Constructs a LevelConfig object with the specified parameters.
+         *
+         * @param layout                 The layout of the level.
+         * @param time                   The time limit for the level.
+         * @param spawnInterval          The interval for spawning balls.
+         * @param scoreIncrease          A map of score increases from ball captures.
+         * @param scoreDecrease          A map of score decreases from wrong captures.
+         * @param scoreIncreaseMultipler  The multiplier for score increases.
+         * @param scoreDecreaseMultipler  The multiplier for score decreases.
+         * @param balls                  An array of balls available in the level.
+         */
         public LevelConfig(String layout, int time, int spawnInterval, Map<String, Integer> scoreIncrease,
-                Map<String, Integer> scoreDecrease, double scoreIncreaseMultipler, double scoreDecreaseMultipler,
-                String[] balls) {
+                           Map<String, Integer> scoreDecrease, double scoreIncreaseMultipler, 
+                           double scoreDecreaseMultipler, String[] balls) {
             this.layout = layout;
             this.time = time;
             this.spawnInterval = spawnInterval;
@@ -45,6 +65,10 @@ public class ConfigLoader {
 
     private static List<LevelConfig> levelsConfig = new ArrayList<>();
 
+    /**
+     * Reads the configuration from the JSON file and initializes the game settings.
+     * It loads the level configurations and the scoring rules from the specified JSON file.
+     */
     public static void readConfig() {
         String jsonContent = readFileAsString("config.json");
         JSONObject gameConfig = JSONObject.parse(jsonContent);
@@ -54,6 +78,7 @@ public class ConfigLoader {
         // Read score increase map from the JSON
         Map<String, Integer> scoreIncreaseMap = new HashMap<>();
         JSONObject scoreIncreaseJson = gameConfig.getJSONObject("score_increase_from_hole_capture");
+        @SuppressWarnings("unchecked")
         Set<String> increaseKeys = scoreIncreaseJson.keys(); // Get keys
         for (String key : increaseKeys) {
             scoreIncreaseMap.put(key, scoreIncreaseJson.getInt(key));
@@ -62,6 +87,7 @@ public class ConfigLoader {
         // Read score decrease map from the JSON
         Map<String, Integer> scoreDecreaseMap = new HashMap<>();
         JSONObject scoreDecreaseJson = gameConfig.getJSONObject("score_decrease_from_wrong_hole");
+        @SuppressWarnings("unchecked")
         Set<String> decreaseKeys = scoreDecreaseJson.keys(); // Get keys
         for (String key : decreaseKeys) {
             scoreDecreaseMap.put(key, scoreDecreaseJson.getInt(key)); // Fixed here
@@ -86,13 +112,19 @@ public class ConfigLoader {
             levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncreaseMap, scoreDecreaseMap,
                     scoreIncreaseMultipler, scoreDecreaseMultipler, balls));
         }
-        try{
+        try {
             extensionFeature = gameConfig.getBoolean("extensionEnabled");
-        } 
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Extension not enabled");
+        }
     }
-    }
+
+    /**
+     * Reads the contents of a file and returns it as a String.
+     *
+     * @param fileName The name of the file to read.
+     * @return The content of the file as a String, or an empty string if an error occurs.
+     */
     public static String readFileAsString(String fileName) {
         String content = "";
         try {
@@ -103,12 +135,22 @@ public class ConfigLoader {
         return content;
     }
 
+    /**
+     * Retrieves the list of level configurations loaded from the configuration file.
+     *
+     * @return A list of LevelConfig objects representing the game levels.
+     */
     public static List<LevelConfig> getLevelsConfig() {
         return levelsConfig;
     }
 
+    /**
+     * Sets up the board array for a specified level based on the contents of a text file.
+     *
+     * @param index The index of the level to load (corresponding to a levelN.txt file).
+     * @return A 2D char array representing the layout of the level.
+     */
     public static char[][] setBoardArray(int index) {
-
         File file = new File("level" + index + ".txt");
 
         int rows = 0;
@@ -140,6 +182,11 @@ public class ConfigLoader {
         return board;
     }
 
+    /**
+     * The main method to initiate the configuration loading process.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
         readConfig();
     }
