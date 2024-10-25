@@ -97,13 +97,50 @@ class BallManagerTest {
 
     @Test
 
-    public void testAddToQueueAgain(){
-        PImage ballImage = imageLoader.ball0; // Use any valid image
+    public void testAddToQueueAgain() {
+        imageLoader.loadImages();
+        // Ensure app and imageLoader are properly initialized
+        assertNotNull(app, "app shouldnt be null");
+        assertNotNull(imageLoader,"image loader shoulnt be null");
+        assertNotNull(imageLoader.ball0, "ball shouldnt be null");
+    
+        PImage ballImage = imageLoader.ball0;
         Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
         int size = BallManager.ballQueue.size();
+        
         BallManager.addToQueueAgain(ball);
-        assertEquals(size+1,  BallManager.ballQueue.size(),"Should be matching");
+        
+        assertEquals(size + 1, BallManager.ballQueue.size(), "Should be matching");
+    }
+    @Test
+    public void testSpawnBall() {
+        // Arrange: Prepare a color and add it to the queue
+        ballManager.initializeBallQueue();
+        BallManager.ballQueue.clear();
+        String ballColor = "3"; // Replace with a valid color string
+        BallManager.ballQueue.add(ballColor);
+        
+        // Act: Call the method to spawn a ball
+        ballManager.spawnBall();
 
+        // Assert: Check that a ball has been spawned
+    
+        Ball spawnedBall = BallManager.ballsInPlay.get(0);
+        assertNotNull(spawnedBall, "The spawned ball should not be null");
+        assertEquals(ballColor, spawnedBall.getColour(), "The color of the spawned ball should match");
+        // Additional assertions for position, velocity, and other properties
+    }
+
+    @Test
+    public void testSpawnBallEmptyQueue() {
+
+        BallManager.ballQueue.clear();
+        
+        // Act: Call the method when the queue is empty
+        ballManager.spawnBall();
+
+        // Assert: Check that no balls have been spawned
+        assertEquals(0,  BallManager.ballQueue.size(), "No balls should be spawned when the queue is empty");
     }
 
     @Test
