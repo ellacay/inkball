@@ -9,8 +9,6 @@ public class Hole extends Object {
 
     }
 
-    public void display() {
-        return;
-    }
+   
 
 }

@@ -148,9 +148,5 @@ public abstract class Object {
         }
     }
 
-    /**
-     * Displays the object. This method must be implemented by 
-     * subclasses to provide specific rendering logic.
-     */
-    public abstract void display();
+    
 }
