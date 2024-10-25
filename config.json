@@ -49,7 +49,5 @@
     "blue": 25,
     "green": 25,
     "yellow": 100
-  },
-
-  "extensionEnabled":false
+  }
 }

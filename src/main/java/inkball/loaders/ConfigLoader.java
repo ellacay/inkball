@@ -16,7 +16,7 @@ import processing.data.JSONObject;
 
 public class ConfigLoader {
 
-    public static boolean extensionFeature = false;
+    public static boolean extensionFeature = true;
 
     public static class LevelConfig {
         public int level;
@@ -54,7 +54,6 @@ public class ConfigLoader {
         // Read score increase map from the JSON
         Map<String, Integer> scoreIncreaseMap = new HashMap<>();
         JSONObject scoreIncreaseJson = gameConfig.getJSONObject("score_increase_from_hole_capture");
-        @SuppressWarnings("unchecked")
         Set<String> increaseKeys = scoreIncreaseJson.keys(); // Get keys
         for (String key : increaseKeys) {
             scoreIncreaseMap.put(key, scoreIncreaseJson.getInt(key));
@@ -63,7 +62,6 @@ public class ConfigLoader {
         // Read score decrease map from the JSON
         Map<String, Integer> scoreDecreaseMap = new HashMap<>();
         JSONObject scoreDecreaseJson = gameConfig.getJSONObject("score_decrease_from_wrong_hole");
-        @SuppressWarnings("unchecked")
         Set<String> decreaseKeys = scoreDecreaseJson.keys(); // Get keys
         for (String key : decreaseKeys) {
             scoreDecreaseMap.put(key, scoreDecreaseJson.getInt(key)); // Fixed here
@@ -88,14 +86,6 @@ public class ConfigLoader {
             levelsConfig.add(new LevelConfig(layout, time, spawnInterval, scoreIncreaseMap, scoreDecreaseMap,
                     scoreIncreaseMultipler, scoreDecreaseMultipler, balls));
         }
-        try{
-            extensionFeature = gameConfig.getBoolean("extensionEnabled");
-        } 
-        catch(Exception e){
-            System.out.println("Extension not enabled");
-
-        }
-
     }
 
     public static String readFileAsString(String fileName) {

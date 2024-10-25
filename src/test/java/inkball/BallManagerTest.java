@@ -59,11 +59,11 @@ class BallManagerTest {
 
     @Test
     void testGetBallImage(){
-        PImage blue =Ball.getBallImage("blue", imageLoader);
-        PImage orange = Ball.getBallImage("orange", imageLoader);
-        PImage grey= Ball.getBallImage("grey", imageLoader);
-        PImage green= Ball.getBallImage("green", imageLoader);
-        PImage yellow= Ball.getBallImage("yellow", imageLoader);
+        PImage blue =BallManager.getBallImage("blue", imageLoader);
+        PImage orange = BallManager.getBallImage("orange", imageLoader);
+        PImage grey= BallManager.getBallImage("grey", imageLoader);
+        PImage green= BallManager.getBallImage("green", imageLoader);
+        PImage yellow= BallManager.getBallImage("yellow", imageLoader);
 
         assertEquals(blue, imageLoader.ball0, "Should be blue");
         assertEquals(orange, imageLoader.ball1, "Should be orange");

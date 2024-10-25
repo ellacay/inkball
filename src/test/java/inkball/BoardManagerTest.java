@@ -72,7 +72,7 @@ class BoardManagerTest {
 
     @Test
     void testDecreaseScore() {
-        PImage ballImage = Ball.getBallImage("0", imageLoader);
+        PImage ballImage = BallManager.getBallImage("0", imageLoader);
         Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
         ball.setColour('1'); // Assuming '1' corresponds to "color1"
 
@@ -88,7 +88,7 @@ class BoardManagerTest {
 
     @Test
     void testDecreaseScoreNoColorMatch() {
-        PImage ballImage = Ball.getBallImage("0", imageLoader);
+        PImage ballImage = BallManager.getBallImage("0", imageLoader);
         Ball ball = new Ball(app, ballImage, 10, 10, 2, 2, 10, new BoardManager(app, imageLoader), '0');
         ball.setColour('3'); // Assuming '3' does not match any entry in decreaseScore
 

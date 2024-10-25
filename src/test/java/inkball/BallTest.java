@@ -118,7 +118,7 @@ public class BallTest {
         Hole hole = new Hole(100, 100, 10, '2'); // Different color
         BoardManager.holes.add(hole);
 
-        ball.setPosition(new PVector(100, 100));
+        ball.position = new PVector(100, 100);
         ball.gravitateTowardsHole();
 
         assertFalse(ball.isCapturedByHole(hole), "Ball should not be captured by the hole of a different color.");
@@ -141,7 +141,7 @@ public class BallTest {
         Hole hole = new Hole(150, 150, 20, '2'); // Create a hole
         BoardManager.holes.add(hole); // Add hole to the BoardManager
 
-        ball.setPosition(new PVector(140, 140)); // Position the ball near the hole
+        ball.position = new PVector(140, 140); // Position the ball near the hole
         ball.update(); // Update ball's position
         assertFalse(ball.isCaptured(), "Ball should not be captured by the hole.");
     }
@@ -178,7 +178,7 @@ public class BallTest {
     @Test
     public void testHandleWallCollision() {
         Wall wall = new Wall(app, 90, 100, 90, 110, '1', imageLoader);
-        ball.setPosition(new PVector(85, 100)); // Position the ball near the wall
+        ball.position = new PVector(85, 100); // Position the ball near the wall
         ball.velocity = new PVector(-10, 0); // Moving towards the wall
 
         ball.handleWallCollision(wall);
@@ -211,7 +211,7 @@ public class BallTest {
 void testGetScoreForCapture() {
     int cellSize = App.CELLSIZE;
     levelMultiplier = 1;
-    PImage ballImage = Ball.getBallImage("0", imageLoader);
+    PImage ballImage = BallManager.getBallImage("0", imageLoader);
 
     Ball ball = new Ball(app, ballImage, 19, 20, 2, 2, 12, boardManager, '0');
     PVector position = ball.getPosition();
