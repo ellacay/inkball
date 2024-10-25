@@ -86,7 +86,7 @@ public class App extends PApplet {
         imageLoader.loadImages();
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
-        level = 1;
+        level = 3;
         levelSetup();
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
@@ -255,7 +255,7 @@ public class App extends PApplet {
     public void displaySpawnTimer() {
         fill(0);
         textSize(16);
-        text("Spawn Interval: " + String.format("%.1f", this.spawnTimer), WIDTH - 350, 40);
+        text("Spawn Interval: " + String.format("%.1f", this.spawnTimer), WIDTH - 330, 40);
     }
 
     @Override
@@ -487,13 +487,19 @@ public class App extends PApplet {
     public void restartGame() {
         this.isPaused = false;
 
-        if (!this.levelWon) {
-            BoardManager.score = BoardManager.levelScore;
+        if (this.gameWon) {
+            level = 1; // Reset level to 1
+            levelSetup();
+            BoardManager.score = 0; // Reset score
+            gameWon = false; // Reset game won status
+        } else {
+            if (!this.levelWon) {
+                BoardManager.score = BoardManager.levelScore; // Maintain current level score
+            }
         }
+
         this.levelWon = false;
         this.isMovingTiles = false;
-
-        this.gameWon = false;
         boardManager.reset();
         ballManager.reset();
         this.spawnTimer = spawnInterval;

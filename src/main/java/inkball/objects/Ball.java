@@ -284,7 +284,8 @@ public class Ball extends Object {
 
         }
 
-        if (this.colour != wall.colour && this.colour != '0' && wall.colour != '0') {
+
+        if (this.colour != wall.colour && wall.colour != '0') {
             // Change the ball's color to the wall's color
             this.colour = wall.colour;
 
