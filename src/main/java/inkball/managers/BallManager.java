@@ -12,7 +12,8 @@ import java.util.List;
 
 /**
  * Manages the spawning, updating, and rendering of balls in the game.
- * This class handles ball creation, maintains their states, and manages their display.
+ * This class handles ball creation, maintains their states, and manages their
+ * display.
  */
 public class BallManager {
     private static App app;
@@ -28,7 +29,7 @@ public class BallManager {
     /**
      * Constructs a BallManager with references to the application and image loader.
      *
-     * @param appRef   The application instance.
+     * @param appRef    The application instance.
      * @param imgLoader The image loader used to fetch ball images.
      */
     public BallManager(App appRef, ImageLoader imgLoader) {
@@ -37,8 +38,10 @@ public class BallManager {
     }
 
     /**
-     * Initializes the queue of balls to be spawned based on the initial ball colors defined in the application.
-     * This method converts color names to their corresponding identifiers and populates the ball queue.
+     * Initializes the queue of balls to be spawned based on the initial ball colors
+     * defined in the application.
+     * This method converts color names to their corresponding identifiers and
+     * populates the ball queue.
      */
     public void initializeBallQueue() {
         ballQueue = new LinkedList<>();
@@ -82,45 +85,58 @@ public class BallManager {
 
     /**
      * Updates the display of balls in the queue.
-     * This method handles the rendering of the queued balls, including their movement and positioning.
+     * This method handles the rendering of the queued balls, including their
+     * movement and positioning.
      */
-    public static void updateBallDisplay() {
-        app.fill(0);
-        app.rect(20, 20, 140, 25);
+    // List to store x positions of balls
 
+    public static void updateBallDisplay() {
+        app.fill(0); // Set color to black
+        app.rect(20, 20, 140, 25); // Draw rectangle below the ball
+
+        // Update ballPositions list to match the size of ballQueue
         while (ballPositions.size() < ballQueue.size()) {
             String ballColor = ballQueue.get(ballPositions.size());
             PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
             if (ballImage != null) {
+                // Initialize positions based on their width
                 ballPositions.add(20 + ballPositions.size() * (float) ballImage.width);
             }
         }
 
-        int displayCount = Math.min(5, ballPositions.size());
-        for (int i = 0; i < displayCount; i++) {
-            if (i < ballQueue.size()) {
+        // Update the positions of the balls
+        for (int i = 0; i < Math.min(5, ballPositions.size() - 1); i++) {
+            if (i < ballQueue.size()) { // Check if index is valid
                 String ballColor = ballQueue.get(i);
                 PImage ballImage = Ball.getBallImage(ballColor, imageLoader);
-
+    
                 if (ballImage != null) {
+                    // Calculate target position
                     float targetPosition = 20 + i * ballImage.width;
+    
+                    // Move the ball towards the target position
                     float currentPosition = ballPositions.get(i);
                     if (ballRemoved) {
                         currentPosition += 20;
                     }
-                    ballPositions.set(i, Math.min(currentPosition + MOVE_SPEED, targetPosition));
-
+                    if (currentPosition < targetPosition) {
+                        ballPositions.set(i, Math.min(currentPosition + MOVE_SPEED, targetPosition));
+                    } else {
+                        ballPositions.set(i, Math.max(currentPosition - MOVE_SPEED, targetPosition));
+                    }
+    
+                    // Draw the ball at the updated position
                     app.image(ballImage, ballPositions.get(i), 20);
                 }
             }
         }
-
         ballRemoved = false;
     }
 
     /**
      * Updates and displays all balls currently in play.
-     * This method handles the updating of each ball's state and rendering them on the screen.
+     * This method handles the updating of each ball's state and rendering them on
+     * the screen.
      */
     public void updateAndDisplayBalls() {
         Iterator<Ball> iterator = ballsInPlay.iterator();
@@ -162,8 +178,10 @@ public class BallManager {
     }
 
     /**
-     * Spawns a new ball from the ball queue and adds it to the list of balls in play.
-     * The new ball's properties, such as position and velocity, are initialized randomly.
+     * Spawns a new ball from the ball queue and adds it to the list of balls in
+     * play.
+     * The new ball's properties, such as position and velocity, are initialized
+     * randomly.
      */
     public void spawnBall() {
         if (ballQueue.isEmpty()) {
@@ -203,7 +221,8 @@ public class BallManager {
     }
 
     /**
-     * Resets the ball manager by clearing the list of balls in play and reinitializing the ball queue.
+     * Resets the ball manager by clearing the list of balls in play and
+     * reinitializing the ball queue.
      */
     public void reset() {
         initalised = false;
