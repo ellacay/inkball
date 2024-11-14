@@ -86,7 +86,7 @@ public class App extends PApplet {
         imageLoader.loadImages();
         boardManager = new BoardManager(this, imageLoader);
         ballManager = new BallManager(this, imageLoader);
-        level = 3;
+        level = 1;
         levelSetup();
         boardManager.loadBoard();
         ballManager.initializeBallQueue();
